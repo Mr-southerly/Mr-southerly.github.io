@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="数组类型 非组合型（unpacked）  * 对于Verilog，数组经常会被用来做数据存储，        例如 reg [15：0] RAM [0：4095]； &#x2F;&#x2F;memory array 4096*16-bit          * SV将Verilog这种声明数组的方式称之为非组合型声明，即其中的成员之间存储数据都是互相独立的。          * Verilog也不会指定软件去如何存">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SV系统验证（5）——数组">
+<meta property="og:url" content="https://github.nanfeng.ink/2021/04/09/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%885%EF%BC%89%E2%80%94%E2%80%94%E6%95%B0%E7%BB%84/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="数组类型 非组合型（unpacked）  * 对于Verilog，数组经常会被用来做数据存储，        例如 reg [15：0] RAM [0：4095]； &#x2F;&#x2F;memory array 4096*16-bit          * SV将Verilog这种声明数组的方式称之为非组合型声明，即其中的成员之间存储数据都是互相独立的。          * Verilog也不会指定软件去如何存">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617880207229-9b8a1da9-b145-4095-9f77-5f86c710e54a.png#align=left&display=inline&height=181&id=UKuiF&margin=%5Bobject%20Object%5D&name=image.png&originHeight=181&originWidth=432&size=73462&status=done&style=none&width=432">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617880640629-b7143ebe-44c4-4a34-af4b-ce697ff95e09.png#align=left&display=inline&height=62&id=Bi2HW&margin=%5Bobject%20Object%5D&name=image.png&originHeight=62&originWidth=496&size=24955&status=done&style=none&width=496">
+<meta property="article:published_time" content="2021-04-09T11:58:58.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="SystemVerilog">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617880207229-9b8a1da9-b145-4095-9f77-5f86c710e54a.png#align=left&display=inline&height=181&id=UKuiF&margin=%5Bobject%20Object%5D&name=image.png&originHeight=181&originWidth=432&size=73462&status=done&style=none&width=432">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2021/04/09/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%885%EF%BC%89%E2%80%94%E2%80%94%E6%95%B0%E7%BB%84/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SV系统验证（5）——数组 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2021/04/09/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%885%EF%BC%89%E2%80%94%E2%80%94%E6%95%B0%E7%BB%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SV系统验证（5）——数组
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-04-09 19:58:58" itemprop="dateCreated datePublished" datetime="2021-04-09T19:58:58+08:00">2021-04-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">笔记篇</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/%E6%95%B0%E5%AD%97%E9%AA%8C%E8%AF%81/" itemprop="url" rel="index"><span itemprop="name">数字验证</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="数组类型"><a href="#数组类型" class="headerlink" title="数组类型"></a>数组类型</h2><h3 id="非组合型（unpacked）"><a href="#非组合型（unpacked）" class="headerlink" title="非组合型（unpacked）"></a>非组合型（unpacked）</h3><ul>
+<li><p>对于Verilog，数组经常会被用来做数据存储，</p>
+<blockquote>
+<p>例如 reg  [15：0]  RAM  [0：4095]；   //memory array  4096*16-bit</p>
+</blockquote>
+</li>
+<li><p>SV将Verilog这种声明数组的方式称之为<strong>非组合型声明</strong>，即其中的成员之间存储<strong>数据都是互相独立</strong>的。</p>
+</li>
+<li><p>Verilog也不会指定软件去如何存储数组中的成员。</p>
+<blockquote>
+<p>wire  [7:0]  table  [3:0]；//   4*8-bit</p>
+</blockquote>
+</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617880207229-9b8a1da9-b145-4095-9f77-5f86c710e54a.png#align=left&display=inline&height=181&id=UKuiF&margin=%5Bobject%20Object%5D&name=image.png&originHeight=181&originWidth=432&size=73462&status=done&style=none&width=432" alt="image.png"></p>
+<ul>
+<li><p>SV保留了非组合型的数组声明方式，并且扩展了允许的类型，</p>
+<blockquote>
+<p>包括<strong>event，logic，bit，byte，int，longint，shortreal和real</strong>类型。</p>
+</blockquote>
+</li>
+<li><p>SV也保留了Verilog索引非组合型数组或者数组片段的能力，这种方式为数组以及数组片段的拷贝带来了方便。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> a1 [<span class="number">7</span>:<span class="number">0</span>][<span class="number">1023</span>:<span class="number">0</span>];  <span class="comment">//unpacked array   //8*1024-bit</span></span><br><span class="line"><span class="keyword">int</span> a2 [<span class="number">1</span>:<span class="number">8</span>][<span class="number">1</span>:<span class="number">1024</span>];  <span class="comment">//unpacked array   索引的时候高维在左边，低维在右边</span></span><br><span class="line">a2 = a1;               <span class="comment">//copy an entire array </span></span><br><span class="line">a2[<span class="number">3</span>] = a1[<span class="number">0</span>];         <span class="comment">//copy a slice of an array</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//声明数组（非组合型）的方式，以下两种皆可 (单位元素 数组名 数组大小)</span></span><br><span class="line"><span class="keyword">logic</span> [<span class="number">31</span>:<span class="number">0</span>] data [<span class="number">1024</span>];   <span class="comment">//1024*8-bit</span></span><br><span class="line"><span class="keyword">logic</span> [<span class="number">31</span>:<span class="number">0</span>] data [<span class="number">0</span>:<span class="number">1023</span>]; <span class="comment">//1024*8-bit</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="组合型（packed）"><a href="#组合型（packed）" class="headerlink" title="组合型（packed）"></a>组合型（packed）</h3><ul>
+<li><p> SV将Verilog的<strong>向量</strong>作为组合型数组声明方式</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] select;  <span class="comment">//4-bit&quot;packed array&quot;</span></span><br><span class="line"><span class="keyword">reg</span> [<span class="number">63</span>:<span class="number">0</span>] data;    <span class="comment">//64-bit&quot;packed array</span></span><br></pre></td></tr></table></figure></li>
+<li><p>SV也进一步允许多维组合型数组的声明</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">logic</span> [<span class="number">3</span>:<span class="number">0</span>][<span class="number">7</span>:<span class="number">0</span>] data;  <span class="comment">//2-D packed array     4*8-bit  (单位元素 数组大小 数组名)</span></span><br><span class="line"><span class="keyword">bit</span> [<span class="number">3</span>:<span class="number">0</span>][<span class="number">7</span>:<span class="number">0</span>] data;    <span class="comment">//2-D packed array       </span></span><br></pre></td></tr></table></figure></li>
+<li><p>组合型数组会进一步规范数据的存储方式，而<strong>不需要关心编译器或者操作系统的区别</strong>。</p>
+</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617880640629-b7143ebe-44c4-4a34-af4b-ce697ff95e09.png#align=left&display=inline&height=62&id=Bi2HW&margin=%5Bobject%20Object%5D&name=image.png&originHeight=62&originWidth=496&size=24955&status=done&style=none&width=496" alt="image.png"></p>
+<blockquote>
+<p>1个word 大小32-bit   对于二值逻辑来说，32位用一个word存放、对于四值逻辑来说要用两个word存放</p>
+</blockquote>
+<ul>
+<li><p>组合型（packed）除了可以运用的数组声明，也可以用来定义结构体的存储方式（<strong>连续存放</strong>）</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="keyword">packed</span>&#123;</span><br><span class="line">  <span class="keyword">logic</span> [<span class="number">7</span>:<span class="number">0</span>] crc;</span><br><span class="line">  <span class="keyword">logic</span> [<span class="number">63</span>:<span class="number">0</span>] data;</span><br><span class="line">&#125;data word;</span><br><span class="line">data word [<span class="number">7</span>:<span class="number">0</span>] darray;<span class="comment">//1-D packed array of</span></span><br><span class="line">                       <span class="comment">//packed structures</span></span><br><span class="line"><span class="comment">//连续存放，节省空间、易读取</span></span><br></pre></td></tr></table></figure></li>
+<li><p>组合型数组和其数组片段也可以灵活选择，用来拷贝和赋值等</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">logic</span> [<span class="number">3</span>:<span class="number">0</span>][<span class="number">7</span>:<span class="number">0</span>] data;            <span class="comment">//2-D packed array </span></span><br><span class="line"><span class="keyword">wire</span> [<span class="number">31</span>:<span class="number">0</span>] out = data;           <span class="comment">//whole array </span></span><br><span class="line"><span class="keyword">wire</span> sign = data[<span class="number">3</span>][<span class="number">7</span>];           <span class="comment">//bit-select </span></span><br><span class="line"><span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] nib = data [<span class="number">0</span>][<span class="number">3</span>:<span class="number">0</span>];   <span class="comment">//part-select </span></span><br><span class="line"><span class="keyword">byte</span> high_byte;</span><br><span class="line"><span class="keyword">assign</span> high_byte = data[<span class="number">3</span>];       <span class="comment">//8-bit slice </span></span><br><span class="line"><span class="keyword">logic</span> [<span class="number">15</span>:<span class="number">0</span>] word;</span><br><span class="line"><span class="keyword">assign</span> word = data[<span class="number">1</span>:<span class="number">0</span>];          <span class="comment">//2 slices</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> [<span class="number">1</span>:<span class="number">0</span>][<span class="number">2</span>:<span class="number">0</span>] arr [<span class="number">3</span>:<span class="number">0</span>][<span class="number">4</span>:<span class="number">0</span>];    <span class="comment">// 四维数组 4*5*2*3  (混合型数组)</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="数组初始化"><a href="#数组初始化" class="headerlink" title="数组初始化"></a>数组初始化</h2><ul>
+<li><p>组合型（packed）数组初始化时，同向量初始化一致</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">logic</span> [<span class="number">3</span>:<span class="number">0</span>][<span class="number">7</span>:<span class="number">0</span>] a = <span class="number">32&#x27;h0</span>;           <span class="comment">//vector assignment </span></span><br><span class="line"><span class="keyword">logic</span> [<span class="number">3</span>:<span class="number">0</span>][<span class="number">7</span>:<span class="number">0</span>] b = &#123;<span class="number">16&#x27;hz</span>, <span class="number">16&#x27;h0</span>&#125;;  <span class="comment">//concatenate operator </span></span><br><span class="line"><span class="keyword">logic</span> [<span class="number">3</span>:<span class="number">0</span>][<span class="number">7</span>:<span class="number">0</span>] c = &#123;<span class="number">16</span>&#123;<span class="number">2&#x27;b01</span>&#125;&#125;;    <span class="comment">//eplicate operator</span></span><br></pre></td></tr></table></figure></li>
+<li><p>非组合型（unpacked）数组初始化时，则需要通过 <strong>‘{}</strong> 来对数组的每一个维度进行赋值。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> d[<span class="number">0</span>:<span class="number">1</span>][<span class="number">0</span>:<span class="number">3</span>]=&#x27;&#123;&#x27;&#123;<span class="number">7</span>,<span class="number">3</span>,<span class="number">0</span>,<span class="number">5</span>&#125;,&#x27;&#123;<span class="number">2</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">6</span>&#125;&#125;;</span><br><span class="line"><span class="comment">//d[0][0]=7</span></span><br><span class="line"><span class="comment">//d[0][1]=3</span></span><br><span class="line"><span class="comment">//d[0][2]=0</span></span><br><span class="line"><span class="comment">//d[0][3]=5</span></span><br><span class="line"><span class="comment">//d[1][0]=2</span></span><br><span class="line"><span class="comment">//d[1][1]=0</span></span><br><span class="line"><span class="comment">//d[1][2]=1</span></span><br><span class="line"><span class="comment">//d[1][3]=6</span></span><br></pre></td></tr></table></figure></li>
+<li><p>非组合型数组在初始化时，也可以类似结构体初始化，通过 ‘{} 和default关键词即可以完成</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> a1 [<span class="number">0</span>:<span class="number">7</span>][<span class="number">0</span>:<span class="number">1023</span>] = &#x27;&#123;<span class="keyword">default</span>:<span class="number">8&#x27;h55</span>&#125;;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="数组赋值"><a href="#数组赋值" class="headerlink" title="数组赋值"></a>数组赋值</h2><ul>
+<li><p>以下是组合型数组的赋值方法</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">logic</span> [<span class="number">1</span>:<span class="number">0</span>][<span class="number">1</span>:<span class="number">0</span>][<span class="number">7</span>:<span class="number">0</span>] a; <span class="comment">//3-D packed array  2*2*8-bit</span></span><br><span class="line">a[<span class="number">1</span>][<span class="number">1</span>][<span class="number">0</span>]=<span class="number">1&#x27;b0</span>;         <span class="comment">//assign to one bit </span></span><br><span class="line">a=<span class="number">32&#x27;hF1A3C5E7</span>;          <span class="comment">//assign to full array </span></span><br><span class="line">a[<span class="number">1</span>][<span class="number">0</span>][<span class="number">3</span>:<span class="number">0</span>]=<span class="number">4&#x27;hF</span>;       <span class="comment">//assign to a part select </span></span><br><span class="line">a[<span class="number">0</span>]=<span class="number">16&#x27;hFACE</span>;           <span class="comment">//assign to a slice </span></span><br><span class="line">a=&#123;<span class="number">16&#x27;bz</span>,<span class="number">16&#x27;b0</span>&#125;;         <span class="comment">//assign concatenation</span></span><br></pre></td></tr></table></figure></li>
+<li><p>非组合型数组的数据成员或者数组本身均可以为其赋值</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">byte</span> a [<span class="number">0</span>:<span class="number">3</span>][<span class="number">0</span>:<span class="number">3</span>];</span><br><span class="line">a[<span class="number">1</span>][<span class="number">0</span>]=<span class="number">8&#x27;h5</span>;                 <span class="comment">//assign to one element </span></span><br><span class="line">a[<span class="number">3</span>]=&#x27;&#123;<span class="number">&#x27;hF</span>, <span class="number">&#x27;hA</span>, <span class="number">&#x27;hC</span>, <span class="number">&#x27;hE</span>&#125;;   <span class="comment">//assign list of values to slice of the array</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="数组拷贝"><a href="#数组拷贝" class="headerlink" title="数组拷贝"></a>数组拷贝</h2><ul>
+<li><p>对于组合型数组，由于数组会被视为向量，因此当赋值左右两侧操作数的大小和维度不相同时，也可以做赋值。</p>
+</li>
+<li><p>如果当尺寸不相同时，则会通过<strong>截取或者扩展右侧操作数</strong>的方式来对左侧操作数赋值。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bit</span> [<span class="number">1</span>:<span class="number">0</span>][<span class="number">15</span>:<span class="number">0</span>] a;   <span class="comment">//32 bit 2-state vector </span></span><br><span class="line"><span class="keyword">logic</span> [<span class="number">3</span>:<span class="number">0</span>][<span class="number">7</span>:<span class="number">0</span>] b;  <span class="comment">//32 bit 4-state vector </span></span><br><span class="line"><span class="keyword">logic</span> [<span class="number">15</span>:<span class="number">0</span>] c;      <span class="comment">//16 bit 4-state vector</span></span><br><span class="line"><span class="keyword">logic</span> [<span class="number">39</span>:<span class="number">0</span>] d;      <span class="comment">//40 bit 4-state vector </span></span><br><span class="line">b = a;               <span class="comment">//assign 32-bit array to 32-bit array </span></span><br><span class="line">c = a;               <span class="comment">//upper 16 bits will be truncated </span></span><br><span class="line">d = a;               <span class="comment">//upper 8 bits will be zero filled</span></span><br></pre></td></tr></table></figure></li>
+<li><p>对于非组合型数组，在发生数组间拷贝时，则要求做左右两侧操作数的维度和大小必须严格一致。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">logic</span> [<span class="number">31</span>:<span class="number">0</span>] a [<span class="number">2</span>:<span class="number">0</span>][<span class="number">9</span>:<span class="number">0</span>];    <span class="comment">//3*10*32-bit</span></span><br><span class="line"><span class="keyword">logic</span> [<span class="number">0</span>:<span class="number">31</span>] b [<span class="number">1</span>:<span class="number">3</span>][<span class="number">1</span>:<span class="number">10</span>];   <span class="comment">//3*10*32-bit</span></span><br><span class="line">a=b;    <span class="comment">//Iassign unpacked array to unpacked array 维度相同</span></span><br></pre></td></tr></table></figure></li>
+<li><p>非组合型数组<strong>无法直接赋值</strong>给组合型数组，同样地，组合型数组也<strong>无法直接赋值</strong>给非组合型数组。</p>
+</li>
+</ul>
+<h2 id="foreach循环结构"><a href="#foreach循环结构" class="headerlink" title="foreach循环结构"></a>foreach循环结构</h2><ul>
+<li><p>SV添加foreach循环来对一维或者多维数组进行循环索引，而<strong>不需要指定该数组的维度大小</strong>。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> sum [<span class="number">1</span>:<span class="number">8</span>][<span class="number">1</span>:<span class="number">3</span>];</span><br><span class="line"><span class="keyword">foreach</span> (sum[i,j])</span><br><span class="line">  sum[i][j] = i+j;      <span class="comment">//initialize array</span></span><br></pre></td></tr></table></figure></li>
+<li><p>foreach循环结构中的<strong>变量无需声明</strong>。</p>
+</li>
+<li><p>foreach循环结构中的变量是只读的（可以引用不能修改），其作用域<strong>只在此循环结构</strong>中。</p>
+</li>
+</ul>
+<h2 id="系统函数"><a href="#系统函数" class="headerlink" title="系统函数"></a>系统函数</h2><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">$dimensions</span>(array_name)     <span class="comment">//用来返回数组的维度。</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">$left</span>(array_name,dimension) <span class="comment">//返回指定维度的最左索引值（msb）。</span></span><br><span class="line"><span class="keyword">logic</span> [<span class="number">1</span>:<span class="number">2</span>][<span class="number">7</span>:<span class="number">0</span>] word [<span class="number">0</span>:<span class="number">3</span>][<span class="number">4</span>:<span class="number">1</span>];</span><br><span class="line"><span class="built_in">$left</span>(word,<span class="number">1</span>) <span class="comment">//will return 0</span></span><br><span class="line"><span class="built_in">$left</span>(word,<span class="number">2</span>) <span class="comment">//will return 4</span></span><br><span class="line"><span class="built_in">$left</span>(word,<span class="number">3</span>) <span class="comment">//will return 1</span></span><br><span class="line"><span class="built_in">$left</span>(word,<span class="number">4</span>) <span class="comment">//will return 7</span></span><br><span class="line"><span class="comment">//与left()类似的，还有&#123;right，low，high&#125;(array_name，dimension)。</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">$size</span>(array_name, dimension)      <span class="comment">//可以返回指定维度的尺寸大小。</span></span><br><span class="line"><span class="built_in">$increment</span>(array_name, dimension) <span class="comment">//如果指定维度的最左索引值大于或等于最右索引值，那么返回1，否则返回-1。</span></span><br><span class="line"><span class="built_in">$bits</span>(expression)                 <span class="comment">//可以用来返回数组存储的比特数目。</span></span><br><span class="line"><span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>][<span class="number">7</span>:<span class="number">0</span>] a [<span class="number">0</span>:<span class="number">15</span>];         <span class="comment">//$bits(a)返回512   16*3*7</span></span><br><span class="line"><span class="keyword">struct</span> <span class="keyword">packed</span> &#123;<span class="keyword">byte</span> tag;</span><br><span class="line">               <span class="keyword">logic</span> [<span class="number">31</span>:<span class="number">0</span>] addr&#125; b;</span><br><span class="line"><span class="built_in">$bits</span>(b);           <span class="comment">//返回40</span></span><br></pre></td></tr></table></figure>
+<h2 id="动态数组"><a href="#动态数组" class="headerlink" title="动态数组"></a>动态数组</h2><ul>
+<li><p>与之前的定长数组相比，SV还提供了可以重新确定大小的动态数组。</p>
+</li>
+<li><p>动态数组在声明时需要使用[ ]，这表示不会在编译时为其制定尺寸，而是在仿真运行时来确定。</p>
+</li>
+<li><p>动态数组<strong>一开始为空</strong>，而需要使用<strong>new[]来为其分配空间</strong>。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> dyn[], d2[];  <span class="comment">//peclare dynamic arraye </span></span><br><span class="line"><span class="keyword">initial</span> <span class="keyword">begin</span> </span><br><span class="line">  dyn = <span class="keyword">new</span>[<span class="number">5</span>];                <span class="comment">//A:Allocate 5 elements  默认5个0</span></span><br><span class="line">  <span class="keyword">foreach</span> (dyn[j]) </span><br><span class="line">    dyn[j] = j;               <span class="comment">//B:Initialize the elements </span></span><br><span class="line">    d2 = dyn;                 <span class="comment">//C:Copy a dynamic array </span></span><br><span class="line">  d2[<span class="number">0</span>] = <span class="number">5</span>;                  <span class="comment">//D:Modify the copy</span></span><br><span class="line">  <span class="built_in">$display</span>(dyn[<span class="number">0</span>],d2[<span class="number">0</span>]);     <span class="comment">//E:See both values(0 &amp; 5)</span></span><br><span class="line"></span><br><span class="line">  dyn = <span class="keyword">new</span>[<span class="number">20</span>](dyn);         <span class="comment">//F:Allocate 20 ints&amp;copy </span></span><br><span class="line">  dyn = <span class="keyword">new</span>[<span class="number">100</span>];              <span class="comment">//G:Allocate 100 new ints</span></span><br><span class="line">                               <span class="comment">//old values are lost </span></span><br><span class="line">  <span class="keyword">logic</span> [<span class="number">31</span>:<span class="number">0</span>] vec1, vec2, vec3;</span><br><span class="line">  vec1 = <span class="number">&#x27;h11223344</span>;                      <span class="comment">//11223344</span></span><br><span class="line">  vec2 = &#123;<span class="number">&#x27;h11</span>, <span class="number">&#x27;h22</span>, <span class="number">&#x27;h33</span>, <span class="number">&#x27;h44</span>&#125;;        <span class="comment">//00000044</span></span><br><span class="line">  vec2 = &#123;<span class="number">8&#x27;h11</span>, <span class="number">8&#x27;h22</span>, <span class="number">8&#x27;h33</span>, <span class="number">8&#x27;h44</span>&#125;;    <span class="comment">//11223344</span></span><br><span class="line">  </span><br><span class="line">  dyn<span class="variable">.delete</span>();  <span class="comment">//数组清空操作 </span></span><br><span class="line">  `&#123;&#125;或者<span class="keyword">new</span>[<span class="number">0</span>]  <span class="comment">//数组清空操作</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure></li>
+<li><p>内建方法size()可以返回动态数组的大小。</p>
+</li>
+<li><p>内建方法delete()可以清空动态数组，使其尺寸变为0。</p>
+</li>
+<li><p>动态数组在声明时也可以完成其初始化</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bit</span> [<span class="number">7</span>：<span class="number">0</span>] mask[]=&#x27;&#123;<span class="number">8&#x27;b00000000</span>,</span><br><span class="line">                 <span class="number">8&#x27;b00000001</span>,</span><br><span class="line">                 <span class="number">8&#x27;b00000011</span>,</span><br><span class="line">                 <span class="number">8&#x27;b00000111</span>,</span><br><span class="line">                 <span class="number">8&#x27;b00001111</span>,</span><br><span class="line">                 <span class="number">8&#x27;b00011111</span>,</span><br><span class="line">                 <span class="number">8&#x27;b00111111</span>,</span><br><span class="line">                 <span class="number">8&#x27;b01111111</span>,</span><br><span class="line">                 <span class="number">8&#x27;b11111111</span>&#125;;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h2><ul>
+<li>可以在队列的<strong>任何位置</strong>添加或者删除数据成员。</li>
+<li>可以通过索引来访问队列的<strong>任何</strong>一个成员。</li>
+<li>通过[$]来声明队列，队列的索引值从0到$（**最后一个元素为$**）。</li>
+<li>可以通过内建方法<strong>push_back（val）、push_front（val）、pop_back（）和pop_front（）</strong>来顺序添加或者移除并且获得数成员。</li>
+<li>可以通过insert（pos，val）来在指定位置插入数据成员。</li>
+<li>可以通过delete（）来删除所有数据成员。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> j=<span class="number">1</span>,</span><br><span class="line">q2[$] = &#123;<span class="number">3</span>,<span class="number">4</span>&#125;,    <span class="comment">//Queue literals do not use()</span></span><br><span class="line">q[$] = &#123;<span class="number">0</span>,<span class="number">2</span>,<span class="number">3</span>&#125;;   <span class="comment">//&#123;0,2,3&#125;</span></span><br><span class="line"><span class="keyword">initial</span> <span class="keyword">begin</span> </span><br><span class="line">  q. insert(<span class="number">1</span>,j);    <span class="comment">//&#123;0,1,2,3&#125; Insertj before ele #1</span></span><br><span class="line">  q. delete(<span class="number">1</span>);      <span class="comment">//&#123;0,2,3&#125; Delete element #1</span></span><br><span class="line">                     <span class="comment">//These operations are fast </span></span><br><span class="line">  g<span class="variable">.push_front</span>(<span class="number">6</span>);   <span class="comment">//&#123;6,0,2,3&#125; Insert at front </span></span><br><span class="line">  j=g<span class="variable">.pop_back</span>();    <span class="comment">//&#123;6,0,2&#125;   j=3</span></span><br><span class="line">  q<span class="variable">.push_back</span>(<span class="number">8</span>);    <span class="comment">//&#123;6,0,2,8&#125; Insert at back </span></span><br><span class="line">  j=q<span class="variable">.pop_front</span>;     <span class="comment">//&#123;0,2,8&#125;   j=6</span></span><br><span class="line"><span class="keyword">foreach</span> (q[i])</span><br><span class="line">  <span class="built_in">$display</span>(q[i]);    <span class="comment">//print entire queue </span></span><br><span class="line">  q<span class="variable">.delete</span>();        <span class="comment">// &#123;&#125; Delete queue end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> j=<span class="number">1</span>, </span><br><span class="line">  q2[$] = &#123;<span class="number">3</span>,<span class="number">4</span>&#125;,     <span class="comment">//Queue literals do not use </span></span><br><span class="line">  q[$] = &#123;<span class="number">0</span>,<span class="number">2</span>,<span class="number">5</span>&#125;;    <span class="comment">//&#123;0,2,5&#125; initial begin //Result </span></span><br><span class="line">  q = &#123;q[<span class="number">0</span>],j,q[<span class="number">1</span>:$]&#125;;        <span class="comment">//&#123;0,1,2,5&#125; Insert 1 before 2</span></span><br><span class="line">  q = &#123;q[<span class="number">0</span>:<span class="number">2</span>], q2, q[<span class="number">3</span>:$]&#125;;   <span class="comment">//&#123;0,1,2,3,4,5&#125; Insert queue in q 字符拼接可以，无法用insert插入队列</span></span><br><span class="line">  q = &#123;q[<span class="number">0</span>],q[<span class="number">2</span>:$<span class="number">1</span>&#125;;          <span class="comment">//&#123;0,2,3,4,5&#125; Delete elem.#1</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//These operations are fast </span></span><br><span class="line">   q = &#123;<span class="number">6</span>,g&#125;;        <span class="comment">//&#123;6,0,2,3,4,5&#125; Insert at front </span></span><br><span class="line">   j = q[$];         <span class="comment">//j=5 pop back g=q[0:$-11;//&#123;6,0,2,3,4&#125; equivalent g=&#123;q,8&#125;;//&#123;6,0,2,3,4,8&#125; Insert at back </span></span><br><span class="line">   j = q[<span class="number">0</span>];         <span class="comment">//j=6 pop_front g=g[1:$];//&#123;0,2,3,4,8&#125; equivalent </span></span><br><span class="line">   q = &#123;&#125;;           <span class="comment">//&#123;&#125; pelete contents </span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="关联数组"><a href="#关联数组" class="headerlink" title="关联数组"></a>关联数组</h2><blockquote>
+<p>由于处理器在访问存储时的访问的随机或者散乱的，这意味个测试中，处理器也许只会访问几百个存储地址，而剩下大的地址都将被初始化为0并且浪费了仿真时的存储空间。</p>
+</blockquote>
+<ul>
+<li>关联数组可以用来存放散列的数据成员。索引类型可以为<strong>任何类型</strong>，而散列存储的数员也可以为<strong>任意类型</strong>。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">initial</span> <span class="keyword">begin</span> </span><br><span class="line">  <span class="keyword">bit</span> [<span class="number">31</span>:<span class="number">0</span>] mem [<span class="keyword">int</span> <span class="keyword">unsigned</span>]; </span><br><span class="line">  <span class="keyword">int</span> <span class="keyword">unsigned</span> data,addr; </span><br><span class="line">  <span class="keyword">repeat</span>(<span class="number">5</span>)<span class="keyword">begin</span> </span><br><span class="line">    std::randomize(addr,data)<span class="keyword">with</span> &#123;addr[<span class="number">31</span>:<span class="number">8</span>]==<span class="number">0</span>; addr[<span class="number">1</span>:<span class="number">0</span>]== <span class="number">0</span>; data <span class="keyword">inside</span> &#123;[<span class="number">1</span>:<span class="number">10</span>]&#125;;&#125;; <span class="comment">//随机生成数据 </span></span><br><span class="line">    <span class="built_in">$display</span>(<span class="string">&quot;address:&#x27;h80x,data:&#x27;h80x&quot;</span>,addr,data); </span><br><span class="line">    mem[addr]=data; </span><br><span class="line">    <span class="keyword">foreach</span>(mem[idx])</span><br><span class="line">      <span class="built_in">$display</span>(<span class="string">&quot;mem address:&#x27;ha0x,data:&#x27;h80x&quot;</span>, idx, mem[idx]);</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="缩减方法"><a href="#缩减方法" class="headerlink" title="缩减方法"></a>缩减方法</h2><ul>
+<li>基本的数组缩减方法是把一个数组缩减成一个值。</li>
+<li>最常用的缩减方法是sum，它对数组中的所有元素求和<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">byte</span> b[$]=&#123;<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;;</span><br><span class="line"><span class="keyword">int</span> w;</span><br><span class="line">w=b<span class="variable">.sum</span>();      <span class="comment">//14=2+3+4+5</span></span><br><span class="line">w=b<span class="variable">.product</span>();  <span class="comment">//120=2*3*4*5</span></span><br><span class="line">w=b<span class="variable">.and</span>();      <span class="comment">//00000000=2&amp;3&amp;4&amp;5其它的数组缩减方法还有product（积）,and（与）,or xor（异或）</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="定位方法"><a href="#定位方法" class="headerlink" title="定位方法"></a>定位方法</h2><ul>
+<li><p>对于非合并数组，可以使用数组定位方法，其返回值将是<strong>一列</strong>而非一个数据成员。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> f[<span class="number">6</span>]=&#123;<span class="number">1</span>, <span class="number">6</span>, <span class="number">2</span>, <span class="number">6</span>, <span class="number">8</span>, <span class="number">6</span>&#125;;  <span class="comment">//Fixed-size array </span></span><br><span class="line"><span class="keyword">int</span> d[]=&#123;<span class="number">2</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">8</span>, <span class="number">10</span>&#125;;     <span class="comment">//Dynamic array </span></span><br><span class="line"><span class="keyword">int</span> g[$]=&#123;<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>&#125;;        <span class="comment">//Queue </span></span><br><span class="line">tq[$];                       <span class="comment">//Temporary queue for res </span></span><br><span class="line">tq=g<span class="variable">.min</span>();                  <span class="comment">//&#123;1&#125;</span></span><br><span class="line">tg=d<span class="variable">.max</span>();                  <span class="comment">//&#123;10&#125;</span></span><br><span class="line">tq=f<span class="variable">.unique</span>();               <span class="comment">//&#123;1，6，2，8&#125;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>使用foreach也可以实现数组的搜索，不过使用find…with查找满足条件的数据成员时，更为方便。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> d[]=&#123;<span class="number">9</span>, <span class="number">1</span>, <span class="number">8</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">4</span>&#125;;</span><br><span class="line">tq[$];</span><br><span class="line"><span class="comment">//Find all elements greater than 3</span></span><br><span class="line">tq=d<span class="variable">.find</span> <span class="keyword">with</span>(item&gt;<span class="number">3</span>);       <span class="comment">//&#123;9，8，4，4&#125;</span></span><br><span class="line"></span><br><span class="line">tq<span class="variable">.delete</span>();                <span class="comment">//等价于</span></span><br><span class="line"><span class="keyword">foreach</span>(d[i])</span><br><span class="line">  <span class="keyword">if</span>(d[i]&gt;<span class="number">3</span>）</span><br><span class="line">     tq<span class="variable">.push_back</span>(d[i]);</span><br><span class="line"></span><br><span class="line">     tg=d<span class="variable">.find_index</span> <span class="keyword">with</span> (item&gt;<span class="number">3</span>);        <span class="comment">//&#123;0,2,4,5&#125;</span></span><br><span class="line">     tg=d<span class="variable">.find_first</span> <span class="keyword">with</span> (item&gt;<span class="number">99</span>);       <span class="comment">//&#123;-none found </span></span><br><span class="line">     tg=d<span class="variable">.find_first_index</span> <span class="keyword">with</span> (item==<span class="number">8</span>); <span class="comment">//&#123;2&#125;d[2]=8</span></span><br><span class="line">     tg=d<span class="variable">.find_last</span> <span class="keyword">with</span> (item==<span class="number">4</span>);        <span class="comment">//&#123;4&#125;</span></span><br><span class="line">     tq=d<span class="variable">.find_last_index</span> <span class="keyword">with</span> (item==<span class="number">4</span>);  <span class="comment">//&#123;5&#125;d[5]=4</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="排序方法"><a href="#排序方法" class="headerlink" title="排序方法"></a>排序方法</h2><ul>
+<li>可以通过排序方法改变数组中元素的顺序，可以对它们进行逆向或者乱序的排列。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> d[]=&#123;<span class="number">9</span>,<span class="number">1</span>,<span class="number">8</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">4</span>&#125;; </span><br><span class="line">d<span class="variable">.reverse</span>();           <span class="comment">//&#123;4,4,3,8,1,9&#125;</span></span><br><span class="line">d<span class="variable">.sort</span>();              <span class="comment">//&#123;1,3,4,4,8,9&#125;</span></span><br><span class="line">d<span class="variable">.rsort</span>();             <span class="comment">//&#123;9,8,4,4,3,1&#125;</span></span><br><span class="line">d<span class="variable">.shuffle</span>();           <span class="comment">//&#123;9,4,3,8,1,4&#125;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="思考问题"><a href="#思考问题" class="headerlink" title="思考问题"></a>思考问题</h2><ul>
+<li>链表和SV中的哪些数组类型（定长数组、动态数组、队列、关联数组）相似，相似的特性有哪些？<ul>
+<li>从存放方式来看，定长数组、动态数组、队列都是连续存放，关联数组和链表是非连续存放</li>
+<li>从查找数据上来看，链表和关联数组依靠指针来维系顺序，查找低效，但增、删、改方便</li>
+<li>队列借鉴了链表的数据结构特点，依靠更多的指针维系元素前后关系</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>如何使用动态数组来实现队列的几个方法（1）function void push_back（T val），（2）function T pop_front），（3）function void insert（int POS，T val）。可以在module中，通过声明一个动态数组 int array[]，并且实现以上三个方法，再通过在initial begin.…end过程块中测试、打印以上方法的结果来完成代码实现和测试。需要提交代码截图和测试的打印结果。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2021/04/09/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%885%EF%BC%89%E2%80%94%E2%80%94%E6%95%B0%E7%BB%84/" title="SV系统验证（5）——数组">https://github.nanfeng.ink/2021/04/09/SV系统验证（5）——数组/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SystemVerilog/" rel="tag"><i class="fa fa-tag"></i> SystemVerilog</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/30/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%884%EF%BC%89%E2%80%94%E2%80%94%E9%AA%8C%E8%AF%81%E7%8E%AF%E5%A2%83%E7%BB%93%E6%9E%84%E5%92%8C%E7%BB%84%E4%BB%B6/" rel="prev" title="SV系统验证（4）——验证环境结构和组件">
+      <i class="fa fa-chevron-left"></i> SV系统验证（4）——验证环境结构和组件
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/04/10/%E6%B8%85%E6%98%8E%E8%B8%8F%E9%9D%92%E8%AE%B0%E2%80%94%E2%80%94%E5%A4%A9%E6%B4%A5/" rel="next" title="清明踏青记——天津">
+      清明踏青记——天津 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E7%BB%84%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">数组类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%9E%E7%BB%84%E5%90%88%E5%9E%8B%EF%BC%88unpacked%EF%BC%89"><span class="nav-number">1.1.</span> <span class="nav-text">非组合型（unpacked）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%84%E5%90%88%E5%9E%8B%EF%BC%88packed%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">组合型（packed）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E7%BB%84%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">2.</span> <span class="nav-text">数组初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E7%BB%84%E8%B5%8B%E5%80%BC"><span class="nav-number">3.</span> <span class="nav-text">数组赋值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E7%BB%84%E6%8B%B7%E8%B4%9D"><span class="nav-number">4.</span> <span class="nav-text">数组拷贝</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#foreach%E5%BE%AA%E7%8E%AF%E7%BB%93%E6%9E%84"><span class="nav-number">5.</span> <span class="nav-text">foreach循环结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E5%87%BD%E6%95%B0"><span class="nav-number">6.</span> <span class="nav-text">系统函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E6%95%B0%E7%BB%84"><span class="nav-number">7.</span> <span class="nav-text">动态数组</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%9F%E5%88%97"><span class="nav-number">8.</span> <span class="nav-text">队列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E8%81%94%E6%95%B0%E7%BB%84"><span class="nav-number">9.</span> <span class="nav-text">关联数组</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%A9%E5%87%8F%E6%96%B9%E6%B3%95"><span class="nav-number">10.</span> <span class="nav-text">缩减方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E4%BD%8D%E6%96%B9%E6%B3%95"><span class="nav-number">11.</span> <span class="nav-text">定位方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%92%E5%BA%8F%E6%96%B9%E6%B3%95"><span class="nav-number">12.</span> <span class="nav-text">排序方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%9D%E8%80%83%E9%97%AE%E9%A2%98"><span class="nav-number">13.</span> <span class="nav-text">思考问题</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

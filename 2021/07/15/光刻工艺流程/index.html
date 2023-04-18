@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言 本文转载自知乎上Litho wiki的光刻工艺流程（精简版），仅作为资料备份供个人学习使用，著作权归原作者所有。  光刻概念 光刻（光学曝光），是指利用特定波长的光进行辐照，将掩膜板上的图形转移到光刻胶上的过程。 光学曝光是一个复杂的物理化学过程，具有大面积、重复性好、易操作以及成本低等特点，是半导体器件与大规模集成电路制造的核心步骤。  光刻工艺流程：   衬底预处理（Substrate">
+<meta property="og:type" content="article">
+<meta property="og:title" content="光刻工艺流程">
+<meta property="og:url" content="https://github.nanfeng.ink/2021/07/15/%E5%85%89%E5%88%BB%E5%B7%A5%E8%89%BA%E6%B5%81%E7%A8%8B/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="前言 本文转载自知乎上Litho wiki的光刻工艺流程（精简版），仅作为资料备份供个人学习使用，著作权归原作者所有。  光刻概念 光刻（光学曝光），是指利用特定波长的光进行辐照，将掩膜板上的图形转移到光刻胶上的过程。 光学曝光是一个复杂的物理化学过程，具有大面积、重复性好、易操作以及成本低等特点，是半导体器件与大规模集成电路制造的核心步骤。  光刻工艺流程：   衬底预处理（Substrate">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/jpeg/12924220/1628817953846-915dc3dc-ed68-460a-b2b7-fb8bb4cbfc1c.jpeg#align=left&display=inline&height=314&margin=%5Bobject%20Object%5D&originHeight=314&originWidth=720&size=0&status=done&style=none&width=720">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/jpg/12924220/1628818061036-e173a265-9f6a-40ae-96b5-47721515ca26.jpg#align=left&display=inline&height=174&margin=%5Bobject%20Object%5D&originHeight=174&originWidth=701&size=0&status=done&style=none&width=701">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/jpg/12924220/1628819922609-c1bbd8df-d7e8-49ad-a8b7-8c9810935fc2.jpg#align=left&display=inline&height=389&margin=%5Bobject%20Object%5D&originHeight=389&originWidth=1414&size=0&status=done&style=none&width=1414">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/jpg/12924220/1628820333394-b0199327-6817-49de-8a6f-f16187bbf6c2.jpg#align=left&display=inline&height=159&margin=%5Bobject%20Object%5D&originHeight=159&originWidth=264&size=0&status=done&style=none&width=264">
+<meta property="article:published_time" content="2021-07-15T14:40:58.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="工艺">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/jpeg/12924220/1628817953846-915dc3dc-ed68-460a-b2b7-fb8bb4cbfc1c.jpeg#align=left&display=inline&height=314&margin=%5Bobject%20Object%5D&originHeight=314&originWidth=720&size=0&status=done&style=none&width=720">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2021/07/15/%E5%85%89%E5%88%BB%E5%B7%A5%E8%89%BA%E6%B5%81%E7%A8%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>光刻工艺流程 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2021/07/15/%E5%85%89%E5%88%BB%E5%B7%A5%E8%89%BA%E6%B5%81%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          光刻工艺流程
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-15 22:40:58" itemprop="dateCreated datePublished" datetime="2021-07-15T22:40:58+08:00">2021-07-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">笔记篇</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/%E5%B7%A5%E8%89%BA/" itemprop="url" rel="index"><span itemprop="name">工艺</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文转载自知乎上Litho wiki的<a target="_blank" rel="noopener" href="https://www.zhihu.com/collection/681643459">光刻工艺流程（精简版）</a>，仅作为资料备份供个人学习使用，著作权归原作者所有。</p>
+<h2 id="光刻概念"><a href="#光刻概念" class="headerlink" title="光刻概念"></a>光刻概念</h2><p>光刻（光学曝光），是指利用特定波长的光进行辐照，将掩膜板上的图形转移到光刻胶上的过程。 光学曝光是一个复杂的物理化学过程，具有大面积、重复性好、易操作以及成本低等特点，是半导体器件与大规模集成电路制造的核心步骤。</p>
+<h2 id="光刻工艺流程："><a href="#光刻工艺流程：" class="headerlink" title="光刻工艺流程："></a>光刻工艺流程：</h2><p><img src="https://cdn.nlark.com/yuque/0/2021/jpeg/12924220/1628817953846-915dc3dc-ed68-460a-b2b7-fb8bb4cbfc1c.jpeg#align=left&display=inline&height=314&margin=%5Bobject%20Object%5D&originHeight=314&originWidth=720&size=0&status=done&style=none&width=720"></p>
+<h2 id="衬底预处理（Substrate-Pre-treatment）"><a href="#衬底预处理（Substrate-Pre-treatment）" class="headerlink" title="衬底预处理（Substrate Pre-treatment）"></a>衬底预处理（Substrate Pre-treatment）</h2><ul>
+<li><a href="https://link.zhihu.com/?target=https://www.prlib.cn/knowledge-base/%25e5%2585%2589%25e5%2588%25bb%25e5%2589%258d%25e8%25a1%25ac%25e5%25ba%2595%25e5%25a6%2582%25e4%25bd%2595%25e6%25b8%2585%25e6%25b4%2597">去除表面污染物</a>（颗粒、有机物、工艺残余、可动离子）以及水蒸气；</li>
+<li>预烘烤至 100~200℃可有助于增强光刻胶与衬底的黏附性；</li>
+<li>对于亲水性衬底（如，SiO2、玻璃、贵金属膜、GaAs 等），使用增附剂（如，AR 300-80 或 HMDS）增加衬底与光刻胶的黏附性， 称为<a href="https://link.zhihu.com/?target=https://www.prlib.cn/knowledge-base/%25e5%258c%2580%25e8%2583%25b6%25e5%2589%258d%25e8%25a1%25ac%25e5%25ba%2595%25e5%25a2%259e%25e9%2599%2584%25e5%25a4%2584%25e7%2590%2586">增附或者助黏</a>。</li>
+</ul>
+<blockquote>
+<p>AR 300-80 new 的增附原理：<br>在衬底（如 SiO2 或 SiN）上旋涂 AR 300-80 new（4000rpm）并在 60℃（热板 2min；烘箱 25min）条件下前烘，可获得 15nm 厚的二苯基二羟基硅烷（Diphenylsilanediol）薄膜。衬底上原来的官能团（SiO2 的 -OH 或 SiN 的 -N）将会被很薄的一 层二苯基二羟基硅烷（Diphenylsilanediol）链接层取代。当旋涂光刻胶时，这层很薄的二苯基二羟基硅烷（Diphenylsilanediol） 将迅速溶解于光刻胶的溶剂中，溶解于光刻胶中的二苯基二羟基硅烷（Diphenylsilanediol）对后续的曝光和显影过程不会产生 影响。当然也可使用有机溶剂（如，丙酮、乙醇、苯甲醚……）将其去除，但其疏水性官能团依然保留在衬底表面。<br><img src="https://cdn.nlark.com/yuque/0/2021/jpg/12924220/1628818061036-e173a265-9f6a-40ae-96b5-47721515ca26.jpg#align=left&display=inline&height=174&margin=%5Bobject%20Object%5D&originHeight=174&originWidth=701&size=0&status=done&style=none&width=701"></p>
+<p>如果需要恢复衬底的亲水性特性，可以使用强碱或者让等离子体刻蚀工艺来实现。</p>
+</blockquote>
+<h2 id="涂胶（Coating）"><a href="#涂胶（Coating）" class="headerlink" title="涂胶（Coating）"></a>涂胶（Coating）</h2><h3 id="涂胶方式"><a href="#涂胶方式" class="headerlink" title="涂胶方式"></a>涂胶方式</h3><p><a href="https://link.zhihu.com/?target=https://www.prlib.cn/knowledge-base/%25e5%2585%2589%25e5%2588%25bb%25e8%2583%25b6%25e6%2597%258b%25e6%25b6%2582%25e6%259b%25b2%25e7%25ba%25bf">旋转涂胶（Spin coating）</a>和<a href="https://link.zhihu.com/?target=https://www.prlib.cn/knowledge-base/%25e5%2596%25b7%25e6%25b6%2582%25e5%25b7%25a5%25e8%2589%25ba-spray-coating">喷涂（Spray coating）</a>等方法；</p>
+<ul>
+<li>涂胶前衬底需要冷却至室温，光刻胶也需在室温下开盖使用（冰箱中刚取出 的过冷光刻胶会冷凝空气中的水汽）；</li>
+<li>光刻胶中的气泡需通过静置的方式使气泡逸出后使用，用滴管等取光刻胶时 动作要轻缓，避免带入气泡；</li>
+<li>随着光刻胶的频繁开盖，溶剂挥发，光刻胶的厚度会相应的增加；</li>
+<li>多次旋涂可以获得较厚的膜层，但涂新胶层前需要对已涂好的光刻胶层进行 烘烤并冷却，多次旋涂的均匀性会变差。</li>
+</ul>
+<blockquote>
+<p><strong><em>涂胶均匀性影响因素</em></strong></p>
+<ul>
+<li>衬底的洁净程度和粗糙度以及疏水性质；</li>
+<li>旋涂过程中由低速到高速阶段的加速度；</li>
+<li>高速阶段前光刻胶的覆盖情况；</li>
+<li>旋涂时间，一般厚胶需要较长的时间，薄胶旋涂时间过长反而对均匀性不利；</li>
+</ul>
+</blockquote>
+<h2 id="前烘（Soft-bake）"><a href="#前烘（Soft-bake）" class="headerlink" title="前烘（Soft bake）"></a>前烘（Soft bake）</h2><h3 id="前烘目的"><a href="#前烘目的" class="headerlink" title="前烘目的"></a><a href="https://link.zhihu.com/?target=https://www.prlib.cn/knowledge-base/%25e5%2589%258d%25e7%2583%2598%25ef%25bc%2588%25e8%25bd%25af%25e7%2583%2598%25ef%25bc%2589-softbake">前烘</a>目的</h3><p>去除光刻胶中的溶剂、增强黏附性、释放光刻胶膜内应力以及防止光刻胶污染设备；</p>
+<h3 id="常见的烘烤方式"><a href="#常见的烘烤方式" class="headerlink" title="常见的烘烤方式"></a>常见的烘烤方式</h3><p>热板，烘烤时间短，但易受外界环境影响；<br>烘箱，烘烤时间长，不适合厚胶的烘烤；</p>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
+<li>欠烘，易导致残余溶剂影响曝光及显影过程；</li>
+<li>过烘，会减小光刻胶中感光成分的活性；</li>
+<li>对于衬底对温度敏感的应用中，前烘温度可在较低温度（＜ 60℃）下进行，但需要适当延长烘烤时间；</li>
+<li>烘烤后需要冷却至室温再进行后续工艺，特别是厚胶，曝光前需要等待一段时间来实现再吸水过程，保证显影速度和高对比度。</li>
+</ul>
+<h2 id="曝光（exposure）"><a href="#曝光（exposure）" class="headerlink" title="曝光（exposure）"></a><a href="https://link.zhihu.com/?target=https://www.prlib.cn/knowledge-base/%25e7%25b4%25ab%25e5%25a4%2596%25e6%259b%259d%25e5%2585%2589-%25e6%259b%259d%25e5%2585%2589%25e6%258a%2580%25e6%259c%25af">曝光（exposure）</a></h2><ul>
+<li>掩膜对准式曝光：需要掩膜版获得图形，掩膜版图形和光刻胶图形为1:1关系，接触式和接近式，光源通常为UV光源；</li>
+<li>步进投影式曝光：需要掩膜版获得图形，掩膜版与光刻胶之间有投影系统，按一定比例将图形曝光在光刻胶上；</li>
+<li>激光直写：利用激光束按照预先设定的路径扫描来获得图形，通常使用DMD技术来实现激光光斑控制获得图形，无需掩膜版。</li>
+<li>电子束直写：利用电子束作为光源对光刻胶进行曝光，曝光过程采用失量或者栅线扫描获得图形，无需掩膜版，通常分为高斯束和变形束。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/jpg/12924220/1628819922609-c1bbd8df-d7e8-49ad-a8b7-8c9810935fc2.jpg#align=left&display=inline&height=389&margin=%5Bobject%20Object%5D&originHeight=389&originWidth=1414&size=0&status=done&style=none&width=1414"></p>
+<blockquote>
+<p>曝光过程我们需要控制的是曝光剂量，按照光刻胶的种类以及技术资料获得相应的参考剂量。并通过实验获得最佳曝光剂量，注意加速电压也会影响曝光剂量。<br>对于导电性不良的衬底材料进行电子束曝光的时候，需要通过引入导电聚合物或者导电膜等手段改善导电性能，来避免荷电效应带来的缺陷。</p>
+</blockquote>
+<h2 id="后烘（post-exposure-bake-PEB）"><a href="#后烘（post-exposure-bake-PEB）" class="headerlink" title="后烘（post exposure bake-PEB）"></a>后烘（post exposure bake-PEB）</h2><p><a href="https://link.zhihu.com/?target=https://www.prlib.cn/knowledge-base/%25e5%2590%258e%25e7%2583%2598-peb">后烘</a>是指在曝光之后的光刻胶膜的烘烤过程。由于光刻胶膜还未显影，也就是说还未闭合，PEB也可以在高于光刻胶软化温度的情况下进行。这个工艺步骤不是必要步骤，在以下情况下需要进行：</p>
+<ul>
+<li>化学放大胶：光反应在曝光期间开始并在后烘环节中完成。“化学放大”的过程发生在，曝光后反应产物的催化下，并在烘烤中完成。这使得较厚的光刻胶可以使用较低的曝光剂量进行曝光，且显影速度快；</li>
+<li>图形反转胶和交联型负胶：图形反转胶在反转工艺下需要在曝光后进行后烘工艺，来实现图形的反转，从而使曝光区域在显影后流下来。交联型负胶也需要在后烘环节来进行交联反应；</li>
+<li>高反射率衬底上的单色光源曝光应用中，由于界面的反射，会在光刻胶内部形成干涉，这种干涉会导致显影时在光刻胶侧壁形成波浪条纹结构，即驻波效应。曝光后的后烘有助于光反应产物的扩散，因此随后显影过程中的光刻胶结构具有更陡峭和更光滑的侧壁。</li>
+</ul>
+<h2 id="显影（development）"><a href="#显影（development）" class="headerlink" title="显影（development）"></a>显影（development）</h2><p><a href="https://link.zhihu.com/?target=https://www.prlib.cn/knowledge-base/%25e6%2598%25be%25e5%25bd%25b1-development">显影（development）</a>过程中正胶薄膜结构的形成是通过溶解曝光区域，而负胶显影去除的是未曝光的区域，对于可重复的结果，温度范围在21-23℃误差±0.5°保持。</p>
+<h3 id="常见的显影方式"><a href="#常见的显影方式" class="headerlink" title="常见的显影方式"></a>常见的显影方式</h3><p>浸没式（immersion）、喷淋式（spray）和搅拌式（puddle）三种。</p>
+<h3 id="显影液种类"><a href="#显影液种类" class="headerlink" title="显影液种类"></a>显影液种类</h3><p>紫外光刻胶常见的显影液是碱性水溶液，分为含金属离子碱性显影液和不含金属离子基于TMAH的两种类别。<br>电子束胶的显影液有以有机溶剂和TMAH基的显影液量大类别。通常显影液的选择需要根据自己的光刻胶种类（一般会有推荐显影液）、样品（如衬底材料）、工艺（后续工艺对金属离子控制要求）等来进行选择。</p>
+<h3 id="显影的影响因素"><a href="#显影的影响因素" class="headerlink" title="显影的影响因素"></a>显影的影响因素</h3><p>主要有显影液、显影方式以及温度等，同种光刻胶显影液稀释后显影速度降低，对比度提高、显影方式决定了光刻胶与新鲜显影液的接触是否充分，温度高，显影速度快。</p>
+<h2 id="定影（stopping）"><a href="#定影（stopping）" class="headerlink" title="定影（stopping）"></a>定影（stopping）</h2><p>定影，终止显影过程，紫外光刻胶由于常用的是水溶性碱作为显影液，故常用水冲洗即可；电子束胶常用有机溶剂作为显影液，所以需要专门的定影液来进行定影。<br>需要注意的是，电子束曝光获得的深宽比很高的光刻胶结构，由于自身强度较弱，在表面张力作用下容易坍塌。<br>在lift-off工艺中，显影后底胶的处理，也需要特别注意。</p>
+<h2 id="坚膜（hard-bake）"><a href="#坚膜（hard-bake）" class="headerlink" title="坚膜（hard bake）"></a>坚膜（hard bake）</h2><p>坚膜就是通过加温烘烤使胶膜更加牢固的粘附在晶圆表面，并可以增加胶层的抗刻蚀能力，坚膜并不是一道必需工艺。</p>
+<ul>
+<li>后续工艺为刻蚀工艺，建议进行坚膜，来提高光刻胶的稳定性。</li>
+<li>后续工艺为lift-off工艺，一般不建议进行坚膜工艺，因为坚膜后光刻胶稳定性提高，反而不利于剥离的进行。</li>
+<li>另外，一定要注意坚膜的温度，过高的温度会光刻胶结构变形、融化甚至图形消失。</li>
+<li>当然我们也可以利用这种高温处理来获得一些特殊的应用，这种工艺叫热回流（reflow）。</li>
+</ul>
+<h2 id="图形转移（pattern-transfer）"><a href="#图形转移（pattern-transfer）" class="headerlink" title="图形转移（pattern transfer）"></a>图形转移（pattern transfer）</h2><ul>
+<li><a href="https://link.zhihu.com/?target=https://www.prlib.cn/knowledge-base/%25e5%2588%25a9%25e7%2594%25a8lift-off%25e5%25b7%25a5%25e8%2589%25ba%25e5%2588%25b6%25e4%25bd%259c%25e9%2587%2591%25e5%25b1%259e%25e7%2594%25b5%25e6%259e%2581">金属剥离（lift-off）</a>：需要注意光刻胶的厚度与金属厚度的关系，尽可能获得undercut结构，必要时可以使用双层胶工艺，注意显影后的底胶可能会对器件造成影响，镀膜方式需要选择蒸发镀膜，注意较厚的金属镀膜的热效应；</li>
+<li>刻蚀工艺：干法刻蚀需要选择光刻胶抗刻蚀性较好的胶（相对），计算好所需的光刻胶的厚度，注意刻蚀过程中的温度，刻蚀后由于光刻胶变性，湿法无法完成去胶，建议采用去胶机。湿法刻蚀需要选择粘附性好的胶，还需要做增附处理；</li>
+<li>LIGA：与湿法腐蚀类似，需要选择与衬底粘附性好的胶，防止在液体中发生漂胶现象；</li>
+<li>离子注入：需要选择一定厚度的耐温性和机械稳定性好的胶，高剂量离子注入后会导致光刻变性，需要使用去胶机进行去除。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/jpg/12924220/1628820333394-b0199327-6817-49de-8a6f-f16187bbf6c2.jpg#align=left&display=inline&height=159&margin=%5Bobject%20Object%5D&originHeight=159&originWidth=264&size=0&status=done&style=none&width=264"></p>
+<h2 id="去胶（remove）"><a href="#去胶（remove）" class="headerlink" title="去胶（remove）"></a>去胶（remove）</h2><p>图形转移后，光刻胶就不再需要了，因此需要将其去除干净。</p>
+<h3 id="去胶方式"><a href="#去胶方式" class="headerlink" title="去胶方式"></a>去胶方式</h3><p>去胶的方法通常有湿法和干法两种。</p>
+<ul>
+<li>湿法就是利用有机溶剂或者对光刻胶有腐蚀作用的溶液将光刻胶溶解或者腐蚀掉，从而达到去胶的目的，这里，去胶液的选择需要遵循与衬底反应或者不损伤衬底为前提条件。</li>
+<li>干法去胶是利用氧等离子体将光刻胶灰化掉，从而达到去胶的目的。对于去胶方法的选择，一般推荐优先考虑湿法，因为湿法去胶更加简单，如果发生湿法无法去除的则考虑使用干法去胶，这里需要注意的是，干法去胶的过程中使用氧等离子体，可能会对样品有氧化。例如，lift-off工艺中不适合使用干法去胶，原因是去胶效果不如湿法去胶，且氧等离子体有可能使被剥离的金属产生氧化。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2021/07/15/%E5%85%89%E5%88%BB%E5%B7%A5%E8%89%BA%E6%B5%81%E7%A8%8B/" title="光刻工艺流程">https://github.nanfeng.ink/2021/07/15/光刻工艺流程/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag"><i class="fa fa-tag"></i> 工艺</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/06/14/LCD1602%E9%A9%B1%E5%8A%A8%E6%A8%A1%E5%9D%97%E8%AE%BE%E8%AE%A1/" rel="prev" title="LCD1602驱动模块设计">
+      <i class="fa fa-chevron-left"></i> LCD1602驱动模块设计
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/08/13/%E5%88%A9%E7%94%A8Lift-off%E5%B7%A5%E8%89%BA%E5%88%B6%E4%BD%9C%E9%87%91%E5%B1%9E%E7%94%B5%E6%9E%81/" rel="next" title="利用Lift-off工艺制作金属电极">
+      利用Lift-off工艺制作金属电极 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%89%E5%88%BB%E6%A6%82%E5%BF%B5"><span class="nav-number">2.</span> <span class="nav-text">光刻概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%89%E5%88%BB%E5%B7%A5%E8%89%BA%E6%B5%81%E7%A8%8B%EF%BC%9A"><span class="nav-number">3.</span> <span class="nav-text">光刻工艺流程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%AC%E5%BA%95%E9%A2%84%E5%A4%84%E7%90%86%EF%BC%88Substrate-Pre-treatment%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">衬底预处理（Substrate Pre-treatment）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B6%82%E8%83%B6%EF%BC%88Coating%EF%BC%89"><span class="nav-number">5.</span> <span class="nav-text">涂胶（Coating）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%82%E8%83%B6%E6%96%B9%E5%BC%8F"><span class="nav-number">5.1.</span> <span class="nav-text">涂胶方式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E7%83%98%EF%BC%88Soft-bake%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">前烘（Soft bake）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E7%83%98%E7%9B%AE%E7%9A%84"><span class="nav-number">6.1.</span> <span class="nav-text">前烘目的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E7%9A%84%E7%83%98%E7%83%A4%E6%96%B9%E5%BC%8F"><span class="nav-number">6.2.</span> <span class="nav-text">常见的烘烤方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">6.3.</span> <span class="nav-text">注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9B%9D%E5%85%89%EF%BC%88exposure%EF%BC%89"><span class="nav-number">7.</span> <span class="nav-text">曝光（exposure）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8E%E7%83%98%EF%BC%88post-exposure-bake-PEB%EF%BC%89"><span class="nav-number">8.</span> <span class="nav-text">后烘（post exposure bake-PEB）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%98%BE%E5%BD%B1%EF%BC%88development%EF%BC%89"><span class="nav-number">9.</span> <span class="nav-text">显影（development）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E7%9A%84%E6%98%BE%E5%BD%B1%E6%96%B9%E5%BC%8F"><span class="nav-number">9.1.</span> <span class="nav-text">常见的显影方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E5%BD%B1%E6%B6%B2%E7%A7%8D%E7%B1%BB"><span class="nav-number">9.2.</span> <span class="nav-text">显影液种类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E5%BD%B1%E7%9A%84%E5%BD%B1%E5%93%8D%E5%9B%A0%E7%B4%A0"><span class="nav-number">9.3.</span> <span class="nav-text">显影的影响因素</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E5%BD%B1%EF%BC%88stopping%EF%BC%89"><span class="nav-number">10.</span> <span class="nav-text">定影（stopping）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9D%9A%E8%86%9C%EF%BC%88hard-bake%EF%BC%89"><span class="nav-number">11.</span> <span class="nav-text">坚膜（hard bake）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E5%BD%A2%E8%BD%AC%E7%A7%BB%EF%BC%88pattern-transfer%EF%BC%89"><span class="nav-number">12.</span> <span class="nav-text">图形转移（pattern transfer）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%BB%E8%83%B6%EF%BC%88remove%EF%BC%89"><span class="nav-number">13.</span> <span class="nav-text">去胶（remove）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%BB%E8%83%B6%E6%96%B9%E5%BC%8F"><span class="nav-number">13.1.</span> <span class="nav-text">去胶方式</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言 由于疫情爆发，学校要求每次填报定位信息，但是鉴于我也不怎么出去，外加上记忆力比较差，所以只能想个办法替我去完成这些重复性操作了。脚本是原来有的西电大佬写好的，在这里我只是借用稍加修改了一下（仅适用于广州研究院，因为定位在广州）。脚本可以从我的GitHub仓库中下载。  实现原理  * 首先微信的晨午检虽然在微信中，但其实只是一个网页，上面的填的信息都可以认为是一些个表单，只需要一个脚本能够自">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于Python的晨午检自动填报脚本">
+<meta property="og:url" content="https://github.nanfeng.ink/2020/02/15/%E5%9F%BA%E4%BA%8EPython%E7%9A%84%E6%99%A8%E5%8D%88%E4%BF%AD%E8%87%AA%E5%8A%A8%E5%A1%AB%E6%8A%A5%E8%84%9A%E6%9C%AC/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="前言 由于疫情爆发，学校要求每次填报定位信息，但是鉴于我也不怎么出去，外加上记忆力比较差，所以只能想个办法替我去完成这些重复性操作了。脚本是原来有的西电大佬写好的，在这里我只是借用稍加修改了一下（仅适用于广州研究院，因为定位在广州）。脚本可以从我的GitHub仓库中下载。  实现原理  * 首先微信的晨午检虽然在微信中，但其实只是一个网页，上面的填的信息都可以认为是一些个表单，只需要一个脚本能够自">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780036760-59a74079-b97e-400d-82c3-907dd71dd0db.png#align=left&display=inline&height=284&margin=%5Bobject%20Object%5D&originHeight=737&originWidth=1257&status=done&style=none&width=485">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780037131-be2eea0b-5845-47eb-9d0b-843efbdd033c.png#align=left&display=inline&height=198&margin=%5Bobject%20Object%5D&originHeight=198&originWidth=397&status=done&style=none&width=397">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780037616-d9424312-2095-439c-948c-3d405a2835a7.png#align=left&display=inline&height=204&margin=%5Bobject%20Object%5D&originHeight=480&originWidth=960&status=done&style=none&width=407">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780038141-4483eb09-e1c3-4a69-be31-701f341213e4.png#align=left&display=inline&height=144&margin=%5Bobject%20Object%5D&originHeight=297&originWidth=1164&status=done&style=none&width=563">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780038456-48a165d5-5f08-4be6-84d9-5a9d433527cd.png#align=left&display=inline&height=506&margin=%5Bobject%20Object%5D&originHeight=598&originWidth=591&status=done&style=none&width=500">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780038764-cd289101-a334-472e-81bf-8851cfdc63dd.png#align=left&display=inline&height=451&margin=%5Bobject%20Object%5D&originHeight=524&originWidth=572&status=done&style=none&width=492">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780039187-8e66b4e9-2e1b-44a8-9dcb-a4f9be64be01.png#align=left&display=inline&height=25&margin=%5Bobject%20Object%5D&originHeight=25&originWidth=207&status=done&style=none&width=207">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780039769-2efd9a9d-5ace-4155-ab9b-4bd1f3c38c13.png#align=left&display=inline&height=310&margin=%5Bobject%20Object%5D&originHeight=519&originWidth=993&status=done&style=none&width=594">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780040004-ed214db4-89a8-44aa-8f52-a885c3522c0b.png#align=left&display=inline&height=37&margin=%5Bobject%20Object%5D&originHeight=37&originWidth=259&status=done&style=none&width=259">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780040339-871d83db-487b-4005-8dd2-05f50df872ae.png#align=left&display=inline&height=108&margin=%5Bobject%20Object%5D&originHeight=108&originWidth=674&status=done&style=none&width=674">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780040844-eeb14c71-e872-40f3-9795-cbd16aa92ca2.png#align=left&display=inline&height=154&margin=%5Bobject%20Object%5D&originHeight=154&originWidth=564&status=done&style=none&width=564">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780041494-bed3ac40-b8fa-47ae-87c7-5abff2e87eae.png#align=left&display=inline&height=323&margin=%5Bobject%20Object%5D&originHeight=715&originWidth=1000&status=done&style=none&width=452">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780041883-760fe3cc-fea4-4c47-b46b-2b36b24758cb.png#align=left&display=inline&height=67&margin=%5Bobject%20Object%5D&originHeight=67&originWidth=463&status=done&style=none&width=463">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780042509-21cf2af9-4ed6-4e86-8bb4-d923d1c26c83.png#align=left&display=inline&height=289&margin=%5Bobject%20Object%5D&originHeight=579&originWidth=1037&status=done&style=none&width=518">
+<meta property="article:published_time" content="2020-02-15T08:57:05.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="脚本">
+<meta property="article:tag" content="Python">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780036760-59a74079-b97e-400d-82c3-907dd71dd0db.png#align=left&display=inline&height=284&margin=%5Bobject%20Object%5D&originHeight=737&originWidth=1257&status=done&style=none&width=485">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2020/02/15/%E5%9F%BA%E4%BA%8EPython%E7%9A%84%E6%99%A8%E5%8D%88%E4%BF%AD%E8%87%AA%E5%8A%A8%E5%A1%AB%E6%8A%A5%E8%84%9A%E6%9C%AC/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>基于Python的晨午检自动填报脚本 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2020/02/15/%E5%9F%BA%E4%BA%8EPython%E7%9A%84%E6%99%A8%E5%8D%88%E4%BF%AD%E8%87%AA%E5%8A%A8%E5%A1%AB%E6%8A%A5%E8%84%9A%E6%9C%AC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          基于Python的晨午检自动填报脚本
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-02-15 16:57:05" itemprop="dateCreated datePublished" datetime="2020-02-15T16:57:05+08:00">2020-02-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E9%A1%B9%E7%9B%AE%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">项目篇</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>由于疫情爆发，学校要求每次填报定位信息，但是鉴于我也不怎么出去，外加上记忆力比较差，所以只能想个办法替我去完成这些重复性操作了。脚本是原来有的<a target="_blank" rel="noopener" href="https://github.com/Apache553/xidian-ncov-report">西电大佬</a>写好的，在这里我只是借用稍加修改了一下（仅适用于广州研究院，因为定位在广州）。脚本可以从<a target="_blank" rel="noopener" href="https://github.com/Mr-southerly/xidian-ncov-report">我的GitHub仓库</a>中下载。</p>
+<h2 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h2><ul>
+<li><p>首先微信的晨午检虽然在微信中，但其实只是一个网页，上面的填的信息都可以认为是一些个表单，只需要一个脚本能够自动把表单存下来，然后代替人去将表单数据提交个后台服务器就行了，唯一难搞的就是需要的定位信息。</p>
+</li>
+<li><p>那么表单我们怎么生成呢，直接生成有点不利于观看，因此用代码交互填进去。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/python3</span><br><span class="line"># -*- coding: UTF-<span class="number">8</span> -*-</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line">def AskInteractive(description, options, delta=<span class="number">0</span>):</span><br><span class="line">    print(description)</span><br><span class="line">    <span class="keyword">for</span> index in range(len(options)):</span><br><span class="line">        print(str(index)+<span class="string">&quot;. &quot;</span>+options[index])</span><br><span class="line">    <span class="keyword">while</span> True:</span><br><span class="line">        ret = <span class="keyword">input</span>(<span class="string">&quot;你的选择: &quot;</span>)</span><br><span class="line">        try:</span><br><span class="line">            val = <span class="keyword">int</span>(ret)</span><br><span class="line">            <span class="keyword">if</span> val &gt;= <span class="number">0</span> <span class="keyword">and</span> val &lt; len(options):</span><br><span class="line">                <span class="keyword">return</span> val+delta</span><br><span class="line">        except:</span><br><span class="line">            pass</span><br><span class="line">    </span><br><span class="line">def AskText(description):</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">input</span>(description)</span><br><span class="line">    </span><br><span class="line">def AskBoolean(description):</span><br><span class="line">    <span class="keyword">while</span> True:</span><br><span class="line">        ret = <span class="keyword">input</span>(description+&#x27;&lt;Y/N&gt; &#x27;)<span class="variable">.upper</span>()</span><br><span class="line">        <span class="keyword">if</span> ret == <span class="string">&quot;Y&quot;</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">        elif ret == <span class="string">&quot;N&quot;</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># Configuration</span><br><span class="line"></span><br><span class="line"># 具体填报项目</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;#####\n温馨提示： 不外出、不聚集、不吃野味， 戴口罩、勤洗手、咳嗽有礼，开窗通风，发热就诊\n#####\n\n&quot;</span>)</span><br><span class="line"></span><br><span class="line">data = &#123;&#125;</span><br><span class="line"></span><br><span class="line"># 统一认证账号密码</span><br><span class="line">data<span class="variable">.update</span>(&#123;<span class="string">&quot;_u&quot;</span>:AskText(<span class="string">&quot;统一认证账号: &quot;</span>)&#125;)</span><br><span class="line">data<span class="variable">.update</span>(&#123;<span class="string">&quot;_p&quot;</span>:AskText(<span class="string">&quot;统一认证密码: &quot;</span>)&#125;)</span><br><span class="line"></span><br><span class="line"># 今日是否在校</span><br><span class="line">data<span class="variable">.update</span>(&#123;<span class="string">&quot;sfzx&quot;</span>:AskBoolean(<span class="string">&quot;今日是否在校:&quot;</span>)&#125;)</span><br><span class="line"></span><br><span class="line"># 定位</span><br><span class="line">data<span class="variable">.update</span>(&#123;<span class="string">&quot;geo_api_info&quot;</span>: &#x27;&#123;<span class="string">&quot;type&quot;</span>:<span class="string">&quot;complete&quot;</span>,<span class="string">&quot;position&quot;</span>:&#123;<span class="string">&quot;Q&quot;</span>:<span class="number">23</span><span class="variable">.285822043836</span>,<span class="string">&quot;R&quot;</span>:<span class="number">113</span><span class="variable">.606406850871</span>,<span class="string">&quot;lng&quot;</span>:<span class="number">113</span><span class="variable">.6064068</span>,<span class="string">&quot;lat&quot;</span>:<span class="number">23</span><span class="variable">.2858220</span>&#125;,<span class="string">&quot;location_type&quot;</span>:<span class="string">&quot;html5&quot;</span>,<span class="string">&quot;message&quot;</span>:<span class="string">&quot;Get ipLocation failed.Get geolocation success.Convert Success.Get address success.&quot;</span>,<span class="string">&quot;accuracy&quot;</span>:<span class="number">65</span>,<span class="string">&quot;isConverted&quot;</span>:true,<span class="string">&quot;status&quot;</span>:<span class="number">1</span>,<span class="string">&quot;addressComponent&quot;</span>:&#123;<span class="string">&quot;citycode&quot;</span>:<span class="string">&quot;020&quot;</span>,<span class="string">&quot;adcode&quot;</span>:<span class="string">&quot;440112&quot;</span>,<span class="string">&quot;businessAreas&quot;</span>:[],<span class="string">&quot;neighborhoodType&quot;</span>:<span class="string">&quot;&quot;</span>,<span class="string">&quot;neighborhood&quot;</span>:<span class="string">&quot;&quot;</span>,<span class="string">&quot;building&quot;</span>:<span class="string">&quot;&quot;</span>,<span class="string">&quot;buildingType&quot;</span>:<span class="string">&quot;&quot;</span>,<span class="string">&quot;street&quot;</span>:<span class="string">&quot;九龙大道&quot;</span>,<span class="string">&quot;streetNumber&quot;</span>:<span class="string">&quot;108号&quot;</span>,<span class="string">&quot;country&quot;</span>:<span class="string">&quot;中国&quot;</span>,<span class="string">&quot;province&quot;</span>:<span class="string">&quot;广东省&quot;</span>,<span class="string">&quot;city&quot;</span>:<span class="string">&quot;广州市&quot;</span>,<span class="string">&quot;district&quot;</span>:<span class="string">&quot;黄埔区&quot;</span>,<span class="string">&quot;township&quot;</span>:<span class="string">&quot;九龙镇&quot;</span>&#125;,<span class="string">&quot;formattedAddress&quot;</span>:<span class="string">&quot;广东省广州市黄埔区九龙镇御禾田公寓广州绿地城&quot;</span>,<span class="string">&quot;roads&quot;</span>:[],<span class="string">&quot;crosses&quot;</span>:[],<span class="string">&quot;pois&quot;</span>:[],<span class="string">&quot;info&quot;</span>:<span class="string">&quot;SUCCESS&quot;</span>&#125;&#x27;&#125;)</span><br><span class="line"></span><br><span class="line">geo = json<span class="variable">.loads</span>(data[<span class="string">&quot;geo_api_info&quot;</span>])</span><br><span class="line">data<span class="variable">.update</span>(&#123;<span class="string">&quot;address&quot;</span>:geo[<span class="string">&quot;formattedAddress&quot;</span>],<span class="string">&quot;area&quot;</span>:geo[<span class="string">&quot;addressComponent&quot;</span>][<span class="string">&quot;province&quot;</span>] + &#x27; &#x27; + geo[<span class="string">&quot;addressComponent&quot;</span>][<span class="string">&quot;city&quot;</span>] + &#x27; &#x27; + geo[<span class="string">&quot;addressComponent&quot;</span>][<span class="string">&quot;district&quot;</span>],<span class="string">&quot;province&quot;</span>:geo[<span class="string">&quot;addressComponent&quot;</span>][<span class="string">&quot;province&quot;</span>],<span class="string">&quot;city&quot;</span>:geo[<span class="string">&quot;addressComponent&quot;</span>][<span class="string">&quot;city&quot;</span>]&#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> data[<span class="string">&quot;city&quot;</span>]<span class="variable">.strip</span>() == <span class="string">&quot;&quot;</span> <span class="keyword">and</span> data[<span class="string">&quot;province&quot;</span>] in [<span class="string">&quot;北京市&quot;</span>,<span class="string">&quot;上海市&quot;</span>,<span class="string">&quot;重庆市&quot;</span>,<span class="string">&quot;天津市&quot;</span>]:</span><br><span class="line">    data[<span class="string">&quot;city&quot;</span>] = data[<span class="string">&quot;province&quot;</span>]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   </span><br><span class="line"># 体温范围</span><br><span class="line">data<span class="variable">.update</span>(&#123;<span class="string">&quot;tw&quot;</span>:AskInteractive(<span class="string">&quot;今日体温范围(℃): &quot;</span>,[<span class="string">&quot;(-inf, 36]&quot;</span>,<span class="string">&quot;(36, 36.5]&quot;</span>,<span class="string">&quot;(36.5, 36.9]&quot;</span>,<span class="string">&quot;(36.9, 37.3]&quot;</span>,<span class="string">&quot;(37.3, 38]&quot;</span>,<span class="string">&quot;(38, 38.5]&quot;</span>,<span class="string">&quot;(38.5, 39]&quot;</span>,<span class="string">&quot;(39, 40]&quot;</span>,<span class="string">&quot;(40, +inf)&quot;</span>],<span class="number">0</span>)&#125;)</span><br><span class="line"></span><br><span class="line"># 今日是否出现发热、乏力、干咳、呼吸困难等症状</span><br><span class="line">data<span class="variable">.update</span>(&#123;<span class="string">&quot;sfyzz&quot;</span>:AskBoolean(<span class="string">&quot;今日是否出现发热、乏力、干咳、呼吸困难等症状: &quot;</span>)&#125;)</span><br><span class="line"></span><br><span class="line"># 是否处于隔离期</span><br><span class="line">data<span class="variable">.update</span>(&#123;<span class="string">&quot;sfcyglq&quot;</span>:AskBoolean(<span class="string">&quot;是否处于隔离期: &quot;</span>)&#125;)</span><br><span class="line"></span><br><span class="line"># 一码通颜色</span><br><span class="line">data<span class="variable">.update</span>(&#123;<span class="string">&quot;ymtys&quot;</span>:AskInteractive(<span class="string">&quot;西安一码通颜色: &quot;</span>,[<span class="string">&quot;绿&quot;</span>,<span class="string">&quot;黄&quot;</span>,<span class="string">&quot;红&quot;</span>])&#125;)</span><br><span class="line"></span><br><span class="line"># 其他信息</span><br><span class="line">data<span class="variable">.update</span>(&#123;<span class="string">&quot;qtqk&quot;</span>:AskText(<span class="string">&quot;其他信息: &quot;</span>)&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">&quot;data_3chk.json&quot;</span>,<span class="string">&quot;w&quot;</span>) as fd:</span><br><span class="line">    json<span class="variable">.dump</span>(data,fd)</span><br><span class="line">    print(<span class="string">&quot;保存成功&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+<li><p>通过上面的配置文件，我们把每天要填写的信息都生成一个json文件，然后就是这个文件可以用我们的脚本提交上去，其中的定位信息是通过浏览器抓取的经纬度信息，手动填上去的，应该有一些api接口可以自动获取，但本人学艺不精，暂时还不会。</p>
+</li>
+<li><p>然后生成完的数据我们就剩下一个提交了，提交也只是python模拟浏览器进行的动作。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/python3</span><br><span class="line"># -*- coding: UTF-<span class="number">8</span> -*-</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">time</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> os<span class="variable">.path</span><span class="variable">.exists</span>(<span class="string">&quot;NOSUBMIT&quot;</span>):</span><br><span class="line">    exit()</span><br><span class="line">  </span><br><span class="line">data = &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">&quot;data_3chk.json&quot;</span>,<span class="string">&quot;r&quot;</span>) as fd:</span><br><span class="line">    data=json<span class="variable">.load</span>(fd)</span><br><span class="line">    </span><br><span class="line">conn = requests<span class="variable">.Session</span>()</span><br><span class="line"></span><br><span class="line"># Login</span><br><span class="line">result = conn<span class="variable">.post</span>(&#x27;https:<span class="comment">//xxcapp.xidian.edu.cn/uc/wap/login/check&#x27;,data=&#123;&#x27;username&#x27;:data[&#x27;_u&#x27;],&#x27;password&#x27;:data[&#x27;_p&#x27;]&#125;)</span></span><br><span class="line"><span class="keyword">if</span> result<span class="variable">.status_code</span> != <span class="number">200</span>:</span><br><span class="line">    print(&#x27;认证大失败&#x27;)</span><br><span class="line">    exit()</span><br><span class="line"></span><br><span class="line"># Submit</span><br><span class="line">del data[&#x27;_u&#x27;]</span><br><span class="line">del data[&#x27;_p&#x27;]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">result = conn<span class="variable">.post</span>(&#x27;https:<span class="comment">//xxcapp.xidian.edu.cn/xisuncov/wap/open-report/save&#x27;,data=data)</span></span><br><span class="line">print(result<span class="variable">.text</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">time</span><span class="variable">.sleep</span>(<span class="number">5</span>)  <span class="comment">//</span></span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="使用前须知"><a href="#使用前须知" class="headerlink" title="使用前须知"></a>使用前须知</h2><p>为了脚本的更好体验，本程序有两种使用方法，由于程序仅仅具备一键提交的功能，因此在使用时需要配合电脑操作系统的定时任务功能才能实现完全自动化填写（电脑或服务器白天时段必须保证开机）。</p>
+<ol>
+<li>如拥有云服务器、树莓派、自建服务器（其实用腾讯的云函数理论上也以）等长期保持开机状态的linux设备的兄弟，自然不用我多说，Linux的crontab 定时跑脚本就行了。</li>
+<li>在工位或使用自己电脑等windows系统的朋友，因为我的电脑设置的每天早上八点到晚上十一点自动开关机（这个百度好多教程，自动开机需要改bios，自动关机只需要定时执行shutdown命令即可），因此也不用担心漏报。当然懒得搞得话也可以每天手动开关机。</li>
+<li>由于原来脚本中的定位api我没看懂，因此改成手动定位了，所以这个脚本可以在任何地方运行，都可以填报，例如家里一直开机的树莓派、阿里腾讯华为甚至国外搬瓦工等服务器。</li>
+</ol>
+<h2 id="使用方法（windows）"><a href="#使用方法（windows）" class="headerlink" title="使用方法（windows）"></a>使用方法（windows）</h2><h3 id="安装Python环境"><a href="#安装Python环境" class="headerlink" title="安装Python环境"></a>安装Python环境</h3><ul>
+<li>打开官网<a target="_blank" rel="noopener" href="https://www.python.org/">https://www.python.org/</a>  下载最新版的python即可，建议直接默认安装，在安装的最后一步 勾选 <code>Add Python to PATH</code>  否则的话就要自己百度添加环境变量</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780036760-59a74079-b97e-400d-82c3-907dd71dd0db.png#align=left&display=inline&height=284&margin=%5Bobject%20Object%5D&originHeight=737&originWidth=1257&status=done&style=none&width=485"></p>
+<h3 id="安装request库"><a href="#安装request库" class="headerlink" title="安装request库"></a>安装request库</h3><ul>
+<li>操作：win+R 输入cmd</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780037131-be2eea0b-5845-47eb-9d0b-843efbdd033c.png#align=left&display=inline&height=198&margin=%5Bobject%20Object%5D&originHeight=198&originWidth=397&status=done&style=none&width=397"></p>
+<ul>
+<li>在黑框程序里面输入 pip install requests （因为我已经安装过，所以显示下图）</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780037616-d9424312-2095-439c-948c-3d405a2835a7.png#align=left&display=inline&height=204&margin=%5Bobject%20Object%5D&originHeight=480&originWidth=960&status=done&style=none&width=407"></p>
+<h3 id="生成表单"><a href="#生成表单" class="headerlink" title="生成表单"></a>生成表单</h3><ul>
+<li>先打开表单配置文件，然后点击运行</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780038141-4483eb09-e1c3-4a69-be31-701f341213e4.png#align=left&display=inline&height=144&margin=%5Bobject%20Object%5D&originHeight=297&originWidth=1164&status=done&style=none&width=563"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780038456-48a165d5-5f08-4be6-84d9-5a9d433527cd.png#align=left&display=inline&height=506&margin=%5Bobject%20Object%5D&originHeight=598&originWidth=591&status=done&style=none&width=500"></p>
+<ul>
+<li>运行成功后会出现表单填入信息，逐步填入个人信息即可（注意账号密码必须用英文状态下输入否则会失败）</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780038764-cd289101-a334-472e-81bf-8851cfdc63dd.png#align=left&display=inline&height=451&margin=%5Bobject%20Object%5D&originHeight=524&originWidth=572&status=done&style=none&width=492"></p>
+<ul>
+<li>保存成功之后文件夹中会多出一个json文件，这是浏览器需要提交的表单文件</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780039187-8e66b4e9-2e1b-44a8-9dcb-a4f9be64be01.png#align=left&display=inline&height=25&margin=%5Bobject%20Object%5D&originHeight=25&originWidth=207&status=done&style=none&width=207"></p>
+<h3 id="脚本提交表单"><a href="#脚本提交表单" class="headerlink" title="脚本提交表单"></a>脚本提交表单</h3><ul>
+<li>可以使用了，双击submit_3chk.Py,如果档时段未填报则显示，“操作成功”，否则显示“你已上报过”</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780039769-2efd9a9d-5ace-4155-ab9b-4bd1f3c38c13.png#align=left&display=inline&height=310&margin=%5Bobject%20Object%5D&originHeight=519&originWidth=993&status=done&style=none&width=594"><br>至此已经实现了一键填报功能，</p>
+<h3 id="配置定时提交"><a href="#配置定时提交" class="headerlink" title="配置定时提交"></a>配置定时提交</h3><ul>
+<li>文件夹选择电脑的一个位置放下，我是放在了桌面</li>
+<li>新建文本文档</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780040004-ed214db4-89a8-44aa-8f52-a885c3522c0b.png#align=left&display=inline&height=37&margin=%5Bobject%20Object%5D&originHeight=37&originWidth=259&status=done&style=none&width=259"></p>
+<ul>
+<li>输入两行命令，（如果你放在了C盘以外的位置（例如D盘）第一条命令要换成<code>cd \d D:\XXX\XXX</code>）</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780040339-871d83db-487b-4005-8dd2-05f50df872ae.png#align=left&display=inline&height=108&margin=%5Bobject%20Object%5D&originHeight=108&originWidth=674&status=done&style=none&width=674"></p>
+<ul>
+<li>写完之后将文本文件的后缀名改成.bat   例如login.bat </li>
+<li>双击此文件也可以填报</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780040844-eeb14c71-e872-40f3-9795-cbd16aa92ca2.png#align=left&display=inline&height=154&margin=%5Bobject%20Object%5D&originHeight=154&originWidth=564&status=done&style=none&width=564"></p>
+<ul>
+<li>右键点击此电脑，打开管理，创建基本定时任务</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780041494-bed3ac40-b8fa-47ae-87c7-5abff2e87eae.png#align=left&display=inline&height=323&margin=%5Bobject%20Object%5D&originHeight=715&originWidth=1000&status=done&style=none&width=452"></p>
+<ul>
+<li>输入计划任务的名称和描述——下一步选择每天——设定时间，例如早上八点——操作是启动程序——下一步选择程序或脚本 浏览找到刚才的批处理文件，例如我的——最后保存</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780041883-760fe3cc-fea4-4c47-b46b-2b36b24758cb.png#align=left&display=inline&height=67&margin=%5Bobject%20Object%5D&originHeight=67&originWidth=463&status=done&style=none&width=463"></p>
+<ul>
+<li>在任务列表中找到刚才新建的定时任务，选择触发器，新建几个不同时间的触发任务，即可实现完全自动填报</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622780042509-21cf2af9-4ed6-4e86-8bb4-d923d1c26c83.png#align=left&display=inline&height=289&margin=%5Bobject%20Object%5D&originHeight=579&originWidth=1037&status=done&style=none&width=518"></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2020/02/15/%E5%9F%BA%E4%BA%8EPython%E7%9A%84%E6%99%A8%E5%8D%88%E4%BF%AD%E8%87%AA%E5%8A%A8%E5%A1%AB%E6%8A%A5%E8%84%9A%E6%9C%AC/" title="基于Python的晨午检自动填报脚本">https://github.nanfeng.ink/2020/02/15/基于Python的晨午俭自动填报脚本/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag"><i class="fa fa-tag"></i> 脚本</a>
+              <a href="/tags/Python/" rel="tag"><i class="fa fa-tag"></i> Python</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/02/15/python%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B/" rel="prev" title="Python快速上手">
+      <i class="fa fa-chevron-left"></i> Python快速上手
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/15/%E4%BA%8C%E7%BA%A7%E6%9C%89%E6%BA%90%E8%B4%9F%E8%BD%BD%E5%B7%AE%E5%88%86%E6%94%BE%E5%A4%A7%E5%99%A8%E8%AE%BE%E8%AE%A1/" rel="next" title="二级有源负载差分放大器设计">
+      二级有源负载差分放大器设计 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">实现原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%89%8D%E9%A1%BB%E7%9F%A5"><span class="nav-number">3.</span> <span class="nav-text">使用前须知</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95%EF%BC%88windows%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">使用方法（windows）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Python%E7%8E%AF%E5%A2%83"><span class="nav-number">4.1.</span> <span class="nav-text">安装Python环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85request%E5%BA%93"><span class="nav-number">4.2.</span> <span class="nav-text">安装request库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E8%A1%A8%E5%8D%95"><span class="nav-number">4.3.</span> <span class="nav-text">生成表单</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%84%9A%E6%9C%AC%E6%8F%90%E4%BA%A4%E8%A1%A8%E5%8D%95"><span class="nav-number">4.4.</span> <span class="nav-text">脚本提交表单</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E5%AE%9A%E6%97%B6%E6%8F%90%E4%BA%A4"><span class="nav-number">4.5.</span> <span class="nav-text">配置定时提交</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言 本文转载自利用LIFT-OFF工艺制作金属电极，仅用于资料备份供个人学习使用。 在材料、微电子等研究课题中，制作高品质的电极是准确反映材料或者器件本身性能的前提条件，为此我们需要制作一个高品质的电极。在此，光刻中剥离（lift-off）工艺是我们制作电极的基础手段。  概述 剥离工艺（lift-off），在衬底上用光刻工艺获得图案化的光刻胶结构或者金属等掩膜（shadow mask），利用镀">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用Lift-off工艺制作金属电极">
+<meta property="og:url" content="https://github.nanfeng.ink/2021/08/13/%E5%88%A9%E7%94%A8Lift-off%E5%B7%A5%E8%89%BA%E5%88%B6%E4%BD%9C%E9%87%91%E5%B1%9E%E7%94%B5%E6%9E%81/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="前言 本文转载自利用LIFT-OFF工艺制作金属电极，仅用于资料备份供个人学习使用。 在材料、微电子等研究课题中，制作高品质的电极是准确反映材料或者器件本身性能的前提条件，为此我们需要制作一个高品质的电极。在此，光刻中剥离（lift-off）工艺是我们制作电极的基础手段。  概述 剥离工艺（lift-off），在衬底上用光刻工艺获得图案化的光刻胶结构或者金属等掩膜（shadow mask），利用镀">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1628821660598-6719071b-7cbb-4b47-8206-0e3ec560888b.png#align=left&display=inline&height=603&margin=%5Bobject%20Object%5D&originHeight=708&originWidth=802&size=0&status=done&style=none&width=683">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1628821837037-160e4d12-dec4-441a-a190-a7eb5d0b082d.png#align=left&display=inline&height=611&margin=%5Bobject%20Object%5D&originHeight=611&originWidth=1013&size=0&status=done&style=none&width=1013">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1628821947285-cb73c322-5ce4-4d32-89cd-b39c80c93229.png#align=left&display=inline&height=540&margin=%5Bobject%20Object%5D&originHeight=540&originWidth=871&size=0&status=done&style=none&width=871">
+<meta property="article:published_time" content="2021-08-13T02:40:58.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="工艺">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1628821660598-6719071b-7cbb-4b47-8206-0e3ec560888b.png#align=left&display=inline&height=603&margin=%5Bobject%20Object%5D&originHeight=708&originWidth=802&size=0&status=done&style=none&width=683">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2021/08/13/%E5%88%A9%E7%94%A8Lift-off%E5%B7%A5%E8%89%BA%E5%88%B6%E4%BD%9C%E9%87%91%E5%B1%9E%E7%94%B5%E6%9E%81/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>利用Lift-off工艺制作金属电极 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2021/08/13/%E5%88%A9%E7%94%A8Lift-off%E5%B7%A5%E8%89%BA%E5%88%B6%E4%BD%9C%E9%87%91%E5%B1%9E%E7%94%B5%E6%9E%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          利用Lift-off工艺制作金属电极
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-13 10:40:58" itemprop="dateCreated datePublished" datetime="2021-08-13T10:40:58+08:00">2021-08-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">笔记篇</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/%E5%B7%A5%E8%89%BA/" itemprop="url" rel="index"><span itemprop="name">工艺</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文转载自<a target="_blank" rel="noopener" href="https://www.prlib.cn/knowledge-base/%E5%88%A9%E7%94%A8lift-off%E5%B7%A5%E8%89%BA%E5%88%B6%E4%BD%9C%E9%87%91%E5%B1%9E%E7%94%B5%E6%9E%81">利用LIFT-OFF工艺制作金属电极</a>，仅用于资料备份供个人学习使用。<br>在材料、微电子等研究课题中，制作高品质的电极是准确反映材料或者器件本身性能的前提条件，为此我们需要制作一个高品质的电极。在此，光刻中剥离（lift-off）工艺是我们制作电极的基础手段。</p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>剥离工艺（lift-off），在衬底上用光刻工艺获得图案化的光刻胶结构或者金属等掩膜（shadow mask），利用镀膜工艺在掩膜上镀上目标涂层，再利用去胶液（又称剥离液）溶解光刻胶或者机械去除金属硬掩膜的方式获得与图案一致的目标图形结构，我们称之为剥离工艺。<br>与其他图形转移手段相比，lift-off工艺更加简单易行。如下图所示，相同的结构可以通过不同的图形化工艺获得。这里我们重点介绍lift-off工艺，关于刻蚀（湿法以及干法刻蚀）、金属微结构或者模板的加工，待我们介绍<a target="_blank" rel="noopener" href="https://www.prlib.cn/knowledge-base/liga-%e7%94%b5%e9%93%b8%e6%8a%80%e6%9c%af%e6%a6%82%e8%bf%b0">LIGA</a>再进行详细描述。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1628821660598-6719071b-7cbb-4b47-8206-0e3ec560888b.png#align=left&display=inline&height=603&margin=%5Bobject%20Object%5D&originHeight=708&originWidth=802&size=0&status=done&style=none&width=683"></p>
+<h2 id="影响lift-off工艺的因素"><a href="#影响lift-off工艺的因素" class="headerlink" title="影响lift-off工艺的因素"></a><strong>影响lift-off工艺的因素</strong></h2><p>通过上面的描述，不难理解lift-off工艺的实现过程，但是这里面有一些细节，决定这lift-off工艺的成败与否。</p>
+<h3 id="光刻胶的厚度"><a href="#光刻胶的厚度" class="headerlink" title="光刻胶的厚度"></a><strong>光刻胶的厚度</strong></h3><p>由上述定义可以看出，光刻胶在lift-off工艺中起到形成图案，以及让光刻胶上的薄膜层以及衬底上的沉积的薄膜层断开，从而实现光刻胶在去胶液中溶解过程中，上层金属飘落下来。<br>所以，这里光刻胶的厚度值是很关键的参数，通常我们会有一个经验值：<strong>光刻胶厚度/被剥离金属厚度≥3。</strong><br>但是需要注意，光刻胶的厚度会影响其分辨率，所以lift-off工艺不适用于特别厚的金属剥离。</p>
+<h3 id="光刻胶种类"><a href="#光刻胶种类" class="headerlink" title="光刻胶种类"></a><strong>光刻胶种类</strong></h3><p>lift-off工艺在紫外光刻和电子束光刻中都是很常见的工艺，但是两者在光刻胶的选择上却有着较大的差异。这里我们先引入一个名词：<strong>底切（under cut）</strong>和顶切（top cut），其对应的光刻胶的形态见下图所示。由图我们也能看出光刻胶的形态对于lift-off成功与否有着直接关系。所以我们需要under cut结构。</p>
+<ul>
+<li>对于紫外光刻（含激光直写），由于其机理决定了，负胶（例如<a target="_blank" rel="noopener" href="https://www.allresist.cn/?product=ar-n-4340">AR-N 4340</a>）相比于正胶更容易获得under cut形态，图形反转胶（<a target="_blank" rel="noopener" href="https://www.allresist.cn/?product_cat=image-reversal-resist">AR-U 4000</a>）的负胶工艺能帮我们获得完美的under cut结构。</li>
+<li>对于电子束胶来说，由于电子与光刻胶作用过程中的散射，正胶（如<a target="_blank" rel="noopener" href="https://www.allresist.cn/?product=ar-p-631%EF%BD%9E679pmma">PMMA</a>）相比于负胶更容易获得under cut结构。当然，我们也可以通过工艺手段控制形成undercut结构（见下面双层胶工艺）；</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1628821837037-160e4d12-dec4-441a-a190-a7eb5d0b082d.png#align=left&display=inline&height=611&margin=%5Bobject%20Object%5D&originHeight=611&originWidth=1013&size=0&status=done&style=none&width=1013"></p>
+<h3 id="双层剥离方案"><a href="#双层剥离方案" class="headerlink" title="双层剥离方案"></a><strong>双层剥离方案</strong></h3><p>上面介绍了光刻胶形态对lift-off工艺的影响，因此，我们也可以通过双层胶体系来获得under cut结构，这里紫外胶和电子束胶的原理和方案上有一些区别：</p>
+<ul>
+<li>紫外胶，我们需要将不含光敏的<strong>剥离胶</strong>（<a target="_blank" rel="noopener" href="https://www.allresist.cn/?product=ar-br-5400">LOL，LOR，如AR-BR 5400</a>）置于紫外正胶或者负胶底层，利用上层胶的光刻胶经曝光显影后开出窗口，底层胶在显影液中继续腐蚀，并产生横向拓展，形成under cut结构，横向拓展的深度与显影液的碱当量以及显影时间呈正相关。</li>
+<li>对于电子束胶，通常选择<strong>两种不同灵敏度的正胶</strong>，将高灵敏度的胶置于底层，低灵敏度的胶置于上层，在曝光过程显影过程中高灵敏度胶相比于地灵敏度胶显影结构会更宽，从而获得under cut结构。当然，也可将LOR胶置于电子束胶下层，利用两次显影工艺获得under cut结构，如下图所示，双层胶体系中要求，<strong>底层胶的厚度至少是被剥离金属层厚度的1.25倍以上</strong>，上层胶来控制线宽，另外，横向拓展深度不易过深，否则容易在定影后的干燥环节由于液体表面张力的存在导致胶体坍塌。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1628821947285-cb73c322-5ce4-4d32-89cd-b39c80c93229.png#align=left&display=inline&height=540&margin=%5Bobject%20Object%5D&originHeight=540&originWidth=871&size=0&status=done&style=none&width=871"></p>
+<h3 id="镀膜方式"><a href="#镀膜方式" class="headerlink" title="镀膜方式"></a><strong>镀膜方式</strong></h3><p>我们做电极最常用的镀膜方式有蒸发和溅射两种，这里我们仅以这两种镀膜方式为例子进行说明。</p>
+<ul>
+<li>蒸发（包括电子束蒸发和热蒸发）方式其金属以类似辐射的方式由源材料沉积到衬底上，方向性好。</li>
+<li>溅射工艺，金属粒子能量大，弥散在整个真空腔室中，没有很好的方向性。</li>
+</ul>
+<p>这种方向性决定了金属化过程中金属膜对光刻胶侧壁的包覆性。溅射镀膜会将整个光刻胶断面包覆起来，轻度的将导致剥离困难，或者形成的电极边缘不光滑、有毛刺，重度的将导致任你选用何种剥离液，是否辅以超声或者加热，都无法实现剥离。所以，这里我们<strong>首选蒸发镀膜</strong>的方式。</p>
+<h3 id="温度"><a href="#温度" class="headerlink" title="温度"></a><strong>温度</strong></h3><p>这里我们介绍两个工艺过程的温度对lift-off工艺的影响。</p>
+<ul>
+<li>坚膜（hard bake），我们在光刻胶的产品资料中常常会见到坚膜步骤会标注为选做步骤，那么对于lift-off工艺来说，我们一般建议<strong>不做坚膜</strong>，因为坚膜会使光刻胶的稳定性得到提高，也就会对后续的剥离步骤带来困难；</li>
+<li>镀膜过程中的温度，镀膜过程中我们一定要<strong>控制好温度</strong>，因为温度过高（超过光刻胶的玻璃态转化温度）则会导致光刻胶软化，图案变形。另外，有些胶在这个温度下会加剧交联化，导致后续使用去胶液很难去除光刻胶。</li>
+</ul>
+<p>利用蒸发镀膜的膜厚胶厚的情况下一定要注意温度，因为较厚的镀膜往往需要较长的镀膜时间，光刻胶不可避免的被加热，由于<strong>镀膜过程中受热</strong>可能导致<strong>光刻胶变形</strong>、光刻胶与衬底以及薄膜的热膨胀系数不同，会导致<strong>薄膜层褶皱</strong>，<strong>边缘翘起</strong>等现象。必要的时候可以选择间歇镀膜来改善这种热效应。</p>
+<h3 id="剥离过程"><a href="#剥离过程" class="headerlink" title="剥离过程"></a><strong>剥离过程</strong></h3><p>通常我们每款光刻胶都会有推荐的去胶液，在正常工艺下，<strong>使用配套的去胶液</strong>是能够很好的实现lift-off工艺的，如果遇到剥离困难，也可考虑使用<strong>超声辅助</strong>，或者将部分剥离液<strong>升高温度</strong>至50~80℃来加速剥离过程（注意部分有机溶剂加热会有危险，需正确谨慎的操作）。这里请尽可能<strong>不要使用去胶机</strong>（如<a target="_blank" rel="noopener" href="http://www.germantech.com.cn/new/cplook.asp?id=400">alpha plasma Q 235</a>）来做lift-off工艺，因为完全依赖光刻胶很小的开口使光刻胶灰化不仅效果达不到效果，反而去胶机的氧等离子体有可能使金属电极发生氧化。当然去胶机在lift-off工艺中可以实现打底胶工艺（下面介绍）。<br>综上所述，我们通过规范的操作就能获得一个形态完美的金属电极了，但是他未必是一个高品质的电极。因此，我们通常还得注意一下细节。</p>
+<ul>
+<li><strong>接触电阻：</strong>在绝大多数情况下，我们无需担心接触电阻的问题，但是当我们做完电极后发现其品质较差，那我们就得排除是否由于光刻胶显影后的残胶导致的接触电阻过大，我们可以通过在镀膜前利用去胶机的氧等离子稍微打一下，我们称之为打底胶工艺，从而去除残胶。打底胶过程不易过长，否则光刻胶的整体厚度会减小很多。推荐使用微波等离子体去胶机（如<a target="_blank" rel="noopener" href="http://www.germantech.com.cn/new/cplook.asp?id=400">alpha plasma Q系列</a>），相比于射频去胶机来说，对衬底没有物理轰击损伤；</li>
+<li><strong>对于纳米线或者纳米带结构：</strong>这种结构在垂直方向有一定的厚度，在边缘处如果比较陡直的话，我们需要要注意金属电极的厚度，不能太薄了（常规电极厚度80nm左右即可），否则容易导致金属电极在材料边缘断线。</li>
+<li><strong>金属与衬底的粘附性：</strong>在做电极时，我们要特别注意金属电极层与衬底的粘附性，如果粘附性不好需要做一些处理，如Au在Si衬底上的粘附性就不是很好，所以我们通常需要做Ti/Ni/Au。避免在做lift-off的工艺时金属漂落。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2021/08/13/%E5%88%A9%E7%94%A8Lift-off%E5%B7%A5%E8%89%BA%E5%88%B6%E4%BD%9C%E9%87%91%E5%B1%9E%E7%94%B5%E6%9E%81/" title="利用Lift-off工艺制作金属电极">https://github.nanfeng.ink/2021/08/13/利用Lift-off工艺制作金属电极/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag"><i class="fa fa-tag"></i> 工艺</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/07/15/%E5%85%89%E5%88%BB%E5%B7%A5%E8%89%BA%E6%B5%81%E7%A8%8B/" rel="prev" title="光刻工艺流程">
+      <i class="fa fa-chevron-left"></i> 光刻工艺流程
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/09/15/%E6%B5%8B%E9%87%8F%E8%8C%83%E5%BE%B7%E5%A0%A1%E6%B3%95%E7%94%B5%E9%98%BB%E7%8E%87%E5%92%8C%E9%9C%8D%E5%B0%94%E7%94%B5%E5%8E%8B/" rel="next" title="测量范德堡法电阻率和霍尔电压">
+      测量范德堡法电阻率和霍尔电压 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">2.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%B1%E5%93%8Dlift-off%E5%B7%A5%E8%89%BA%E7%9A%84%E5%9B%A0%E7%B4%A0"><span class="nav-number">3.</span> <span class="nav-text">影响lift-off工艺的因素</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%89%E5%88%BB%E8%83%B6%E7%9A%84%E5%8E%9A%E5%BA%A6"><span class="nav-number">3.1.</span> <span class="nav-text">光刻胶的厚度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%89%E5%88%BB%E8%83%B6%E7%A7%8D%E7%B1%BB"><span class="nav-number">3.2.</span> <span class="nav-text">光刻胶种类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8C%E5%B1%82%E5%89%A5%E7%A6%BB%E6%96%B9%E6%A1%88"><span class="nav-number">3.3.</span> <span class="nav-text">双层剥离方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%95%80%E8%86%9C%E6%96%B9%E5%BC%8F"><span class="nav-number">3.4.</span> <span class="nav-text">镀膜方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%A9%E5%BA%A6"><span class="nav-number">3.5.</span> <span class="nav-text">温度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%A5%E7%A6%BB%E8%BF%87%E7%A8%8B"><span class="nav-number">3.6.</span> <span class="nav-text">剥离过程</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

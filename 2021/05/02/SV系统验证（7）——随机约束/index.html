@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="概述  * 随着设计越来越大，要产生一个完整的激励来测试功能也变得越来越困难。定向激励的测试方法早已经无法满足检查功能完整性的要求。  * SoC的集成度提高带来的模块之间交互的复杂度也是指数攀升，这就使得无法预测接下来用户使用过程中会发生什么样的状况。  * 随机-约束，两个词组合在一起就构成了目前动态仿真验证的主流方法。  * 随机约束测试（CRT，Constrained-Random Tes">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SV系统验证（7）——随机约束">
+<meta property="og:url" content="https://github.nanfeng.ink/2021/05/02/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%887%EF%BC%89%E2%80%94%E2%80%94%E9%9A%8F%E6%9C%BA%E7%BA%A6%E6%9D%9F/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="概述  * 随着设计越来越大，要产生一个完整的激励来测试功能也变得越来越困难。定向激励的测试方法早已经无法满足检查功能完整性的要求。  * SoC的集成度提高带来的模块之间交互的复杂度也是指数攀升，这就使得无法预测接下来用户使用过程中会发生什么样的状况。  * 随机-约束，两个词组合在一起就构成了目前动态仿真验证的主流方法。  * 随机约束测试（CRT，Constrained-Random Tes">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620115797121-35a9bb65-9640-4afb-8304-0123b5a6c40b.png#align=left&display=inline&height=145&id=bPs0J&margin=%5Bobject%20Object%5D&name=image.png&originHeight=145&originWidth=428&size=21052&status=done&style=none&width=428">
+<meta property="article:published_time" content="2021-05-02T01:48:58.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="SystemVerilog">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620115797121-35a9bb65-9640-4afb-8304-0123b5a6c40b.png#align=left&display=inline&height=145&id=bPs0J&margin=%5Bobject%20Object%5D&name=image.png&originHeight=145&originWidth=428&size=21052&status=done&style=none&width=428">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2021/05/02/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%887%EF%BC%89%E2%80%94%E2%80%94%E9%9A%8F%E6%9C%BA%E7%BA%A6%E6%9D%9F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SV系统验证（7）——随机约束 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2021/05/02/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%887%EF%BC%89%E2%80%94%E2%80%94%E9%9A%8F%E6%9C%BA%E7%BA%A6%E6%9D%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SV系统验证（7）——随机约束
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-05-02 09:48:58" itemprop="dateCreated datePublished" datetime="2021-05-02T09:48:58+08:00">2021-05-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">笔记篇</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/%E6%95%B0%E5%AD%97%E9%AA%8C%E8%AF%81/" itemprop="url" rel="index"><span itemprop="name">数字验证</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><ul>
+<li>随着设计越来越大，要产生一个完整的激励来测试功能也变得越来越困难。定向激励的测试方法早已经<strong>无法满足</strong>检查功能完整性的要求。</li>
+<li>SoC的集成度提高带来的模块之间交互的<strong>复杂度也是指数攀升</strong>，这就使得<strong>无法预测</strong>接下来用户使用过程中会发生什么样的状况。</li>
+<li>随机-约束，两个词组合在一起就构成了目前<strong>动态仿真验证</strong>的主流方法。</li>
+<li>随机约束测试（CRT，Constrained-Random Test）即能够产生你感兴趣的、你想不到的的测试向量，通过回归测试、替随机种子的方式来提高单位测试用例的覆盖率收集效率。</li>
+<li>随机测试带来的<strong>额外负担是环境的复杂度会提高</strong>，因为从环境组件上考虑不再只需要发送激励的组件，而且还包括<strong>监测器、比较器</strong>等。</li>
+<li>随机测试带来的<strong>环境复杂度</strong>还包括由于对环境复用和测试复用带来的组件封装要求，这会使得代码量加大。</li>
+<li>这种额外的代码量、环境集成要求也随之带来了<strong>更加灵活</strong>、更<strong>易集成复用</strong>的验证环境。</li>
+</ul>
+<h2 id="产生随机数"><a href="#产生随机数" class="headerlink" title="产生随机数"></a>产生随机数</h2><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> stim; </span><br><span class="line">  <span class="keyword">bit</span> [<span class="number">15</span>:<span class="number">0</span>] addr; </span><br><span class="line">  <span class="keyword">bit</span> [<span class="number">31</span>:<span class="number">0</span>] data; </span><br><span class="line">  <span class="keyword">function</span>  <span class="keyword">bit</span> gen_stim(); </span><br><span class="line">    <span class="keyword">bit</span> success, rd_wr;    </span><br><span class="line">    success = randomize(addr, data, rd_wr); <span class="comment">//call std::randomize  使用系统函数调用随机数库</span></span><br><span class="line">    <span class="keyword">return</span> rd_wr;</span><br><span class="line">  <span class="keyword">endfunction</span> </span><br><span class="line"><span class="keyword">endmodule</span></span><br><span class="line"><span class="comment">//通过 系统函数std::randomize() 对一些变量即可完成随机化或者理解为产生随机数并赋予这些变量。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//我们还可以通过其它一些与随机数生成有关的系统函数来产生。</span></span><br><span class="line">$urandom();                        <span class="comment">//可以生成一个32位的无符号随机数。</span></span><br><span class="line">$urandom_range(maxval, minval=<span class="number">0</span>);  <span class="comment">//产生在max和min之间的无符号随机数</span></span><br></pre></td></tr></table></figure>
+<h2 id="约束随机变量"><a href="#约束随机变量" class="headerlink" title="约束随机变量"></a>约束随机变量</h2><ul>
+<li>以上我们<strong>独立地生成一些随机数</strong>，在面向DUT的随机激励发生过程中，为了符合协议、满足测试需求，我们还需要<strong>添加一些约束</strong>。这些“约束”会使得变量朝着希望他们变化的方向去随机。不但如此，这些约束也会对变量与变量之间的关系生效。</li>
+<li>我们需要一个“载体“去容纳这些变量以及它们之间的约束这个“载体”即是<strong>类（在SV中只能是类）</strong>，而类的成员变量均可声明为“<strong>随机</strong>“属性，用<strong>rand或者randc</strong>来表示。</li>
+</ul>
+<h3 id="随机变量"><a href="#随机变量" class="headerlink" title="随机变量"></a>随机变量</h3><ul>
+<li><p><strong>任何类中的整型</strong>（bit/byte/int）变量都可以声明为rand/randc。</p>
+</li>
+<li><p><strong>定长数组、动态数组、关联数组和队列</strong>都可以声明为rand/randc，可以对动态数组和队列的<strong>长度加以约束</strong>。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">rand</span> <span class="keyword">bit</span> [<span class="number">7</span>：<span class="number">0</span>] len;</span><br><span class="line"><span class="keyword">rand</span> <span class="keyword">integer</span> data[]</span><br><span class="line"><span class="keyword">constraint</span> db&#123;data<span class="variable">.size</span>==len;&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>指向对象的<strong>句柄成员</strong>，也可以声明为rand（<strong>不能被声明为randc</strong>），随机时该句柄指向<strong>对象中的随机变量也会一并被随机</strong>。</p>
+</li>
+</ul>
+<h3 id="带有约束随机的类"><a href="#带有约束随机的类" class="headerlink" title="带有约束随机的类"></a>带有约束随机的类</h3><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> Packet;</span><br><span class="line">  <span class="keyword">rand</span> <span class="keyword">bit</span> [<span class="number">31</span>:<span class="number">0</span>] src, dst, data[<span class="number">8</span>]; <span class="comment">//The random variables </span></span><br><span class="line">  <span class="keyword">randc</span> <span class="keyword">bit</span> [<span class="number">7</span>:<span class="number">0</span>] kind;</span><br><span class="line">  <span class="keyword">constraint</span> cstr&#123;src&gt;<span class="number">10</span>; </span><br><span class="line">                  src&lt;<span class="number">15</span>;&#125;         <span class="comment">// Limit the values for src </span></span><br><span class="line">  <span class="keyword">function</span> print();</span><br><span class="line">    <span class="built_in">$display</span>(<span class="string">&quot;src is %0d\n dst is %0d\n kind is %0d\n data is %p&quot;</span>,src, dst, kind, data);</span><br><span class="line"><span class="keyword">endclass</span></span><br><span class="line">Packet p; </span><br><span class="line"><span class="keyword">initial</span> <span class="keyword">begin</span> </span><br><span class="line">  p=<span class="keyword">new</span>();          <span class="comment">//Create a packet </span></span><br><span class="line">  <span class="built_in">$display</span>(<span class="string">&quot;before randomize&quot;</span>);</span><br><span class="line">  p<span class="variable">.print</span>;</span><br><span class="line">  p<span class="variable">.randomize</span>()     <span class="comment">//如果没有指定参数，那么值随机化含有rand属性的变量，如果指定了，按指定参数随机化</span></span><br><span class="line">  <span class="built_in">$display</span>(<span class="string">&quot;after randomize&quot;</span>);</span><br><span class="line">  p<span class="variable">.print</span>;</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//非组合型结构体可以声明为rand，非组合型的成员可以声明rand/randc。</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span>&#123;</span><br><span class="line">  <span class="keyword">randc</span> <span class="keyword">int</span> addr = <span class="number">1</span>+constant;       <span class="comment">//非组合型的成员</span></span><br><span class="line">  <span class="keyword">int</span> crc;</span><br><span class="line">  <span class="keyword">rand</span> <span class="keyword">byte</span> data[]=&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>&#125;;   <span class="comment">//非组合型的成员</span></span><br><span class="line">&#125; header;</span><br><span class="line">  <span class="keyword">rand</span> header h1;            <span class="comment">//非组合型结构体，如果需要在类里声明结构体，声明时前面要添加rand</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//添加额外约束（临时约束）    </span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span>&#123;</span><br><span class="line">  <span class="keyword">rand</span> <span class="keyword">bit</span> [<span class="number">31</span>:<span class="number">0</span>] src;</span><br><span class="line">  <span class="keyword">rand</span> <span class="keyword">bit</span> [<span class="number">31</span>:<span class="number">0</span>] dst; </span><br><span class="line">  <span class="keyword">rand</span> <span class="keyword">bit</span> [<span class="number">31</span>:<span class="number">0</span>] data[<span class="number">4</span>]; </span><br><span class="line">  <span class="keyword">rand</span> <span class="keyword">bit</span> [<span class="number">7</span>:<span class="number">0</span>] kind;</span><br><span class="line">&#125; packet_t;</span><br><span class="line">packet_t pkt;</span><br><span class="line"><span class="keyword">initial</span> <span class="keyword">begin</span></span><br><span class="line">  std::randomize(pkt) <span class="keyword">with</span> (src&gt;<span class="number">10</span>, src&lt;<span class="number">15</span>); <span class="comment">//添加额外约束（临时约束）</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="修饰符rand和randc"><a href="#修饰符rand和randc" class="headerlink" title="修饰符rand和randc"></a>修饰符rand和randc</h3><ul>
+<li>对于rand修饰符，表示在可生成的范围内，每个值的可能性相同的（每次随机都从整个范围内随机选取）。</li>
+<li>对于randc修饰符，它的值将会随机并且遍历其可取值范围（在整个范围内，每个数只可能出现一次）。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">rand</span> <span class="keyword">bit</span> [<span class="number">7</span>:<span class="number">0</span>] y;</span><br></pre></td></tr></table></figure>
+<img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620115797121-35a9bb65-9640-4afb-8304-0123b5a6c40b.png#align=left&display=inline&height=145&id=bPs0J&margin=%5Bobject%20Object%5D&name=image.png&originHeight=145&originWidth=428&size=21052&status=done&style=none&width=428" alt="image.png"></li>
+</ul>
+<h2 id="约束块"><a href="#约束块" class="headerlink" title="约束块"></a>约束块</h2><ul>
+<li>有用的激励不仅仅是随机值，变量之间也有着<strong>相互关系</strong>。</li>
+<li>没有约束的随机变量会包含许多<strong>无效的和非法</strong>的值，这会使得有效激励的产生变得低效。</li>
+<li>需要用包含一个或多个约束表达式的<strong>约束块定义这些相互关系</strong>。</li>
+<li>约束块支持整形通过set操作符来设置它们的可取值范围。</li>
+<li>除了成员集合设置（以下代代码均声明在类中），约束块也支持设置可取值的同时也为其设置随机时的权重。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">rand</span> <span class="keyword">integer</span> x,y,z; </span><br><span class="line"><span class="keyword">constraint</span> cl &#123;x <span class="keyword">inside</span> &#123;<span class="number">3</span>, <span class="number">5</span>, [<span class="number">9</span>:<span class="number">15</span>], [<span class="number">24</span>:<span class="number">32</span>], [y:<span class="number">2</span>*y], z&#125;;&#125;  <span class="comment">//可取范围：3、5、9-15、24-32、y-2y、z</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">rand</span> <span class="keyword">integer</span> a,b,c; </span><br><span class="line"><span class="keyword">constraint</span> c2 &#123;a <span class="keyword">inside</span> &#123;b,c&#125;;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">integer</span> fives[<span class="number">4</span>]=&#x27;&#123;<span class="number">5</span>,<span class="number">10</span>,<span class="number">15</span>,<span class="number">20</span>&#125;; </span><br><span class="line"><span class="keyword">rand</span> <span class="keyword">integer</span> v; </span><br><span class="line"><span class="keyword">constraint</span> c3&#123;v <span class="keyword">inside</span> &#123;fives&#125;;&#125;             <span class="comment">//可取范围：five数组的成员</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="权重分布"><a href="#权重分布" class="headerlink" title="权重分布"></a>权重分布</h3><blockquote>
+<p>对于<strong>：=操作符</strong>，它们表示每一个值的权重是相同的。<br>对于<strong>：/操作符</strong>，它们表示权重会<strong>平均</strong>分配到每一个值。</p>
+</blockquote>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//操作符控制权重分布</span></span><br><span class="line">x在<span class="number">100</span>, <span class="number">101</span>, <span class="number">102</span>, <span class="number">200</span>和<span class="number">300</span>的权重是<span class="number">1</span>-<span class="number">1</span>-<span class="number">1</span>-<span class="number">2</span>-<span class="number">5</span></span><br><span class="line">xdist &#123;[<span class="number">100</span>：<span class="number">102</span>]：=<span class="number">1</span>, <span class="number">200</span>：=<span class="number">2</span>, <span class="number">300</span>：=<span class="number">5</span>&#125;</span><br><span class="line"></span><br><span class="line">x在<span class="number">100</span>, <span class="number">101</span>, <span class="number">102</span>, <span class="number">200</span>和<span class="number">300</span>的权重是<span class="number">1</span>/<span class="number">3</span>-<span class="number">1</span>/<span class="number">3</span>-<span class="number">1</span>/<span class="number">3</span>-<span class="number">2</span>-<span class="number">5</span></span><br><span class="line">xdist &#123;[<span class="number">100</span>：<span class="number">102</span>]:/<span class="number">1</span>, <span class="number">200</span>：=<span class="number">2</span>, <span class="number">300</span>:=<span class="number">5</span>&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="唯一标识"><a href="#唯一标识" class="headerlink" title="唯一标识"></a>唯一标识</h3><ul>
+<li><strong>unique</strong>可以用来约束一组变量，使得其在随机后变量之间<strong>不会有相同</strong>的数值。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">rand</span> <span class="keyword">byte</span> a[<span class="number">5</span>]; </span><br><span class="line"><span class="keyword">rand</span> <span class="keyword">byte</span> b; </span><br><span class="line"><span class="keyword">rand</span> <span class="keyword">byte</span> excluded; </span><br><span class="line"><span class="keyword">constraint</span> u &#123;<span class="keyword">unique</span> &#123;b, a[<span class="number">2</span>:<span class="number">3</span>], excluded&#125;;&#125;   <span class="comment">//a[2], a[3], b和excluded在随机化之后将包含不相同的数值。</span></span><br><span class="line"><span class="keyword">constraint</span> exclusion &#123;excluded==<span class="number">5</span>;&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="条件约束"><a href="#条件约束" class="headerlink" title="条件约束"></a>条件约束</h3><ul>
+<li>可以<strong>使用if-else或者 -&gt;操作符</strong>来表示条件约束。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mode==little -&gt; len&lt;<span class="number">10</span>；</span><br><span class="line">mode==big -&gt; len&gt;<span class="number">100</span>；</span><br><span class="line"></span><br><span class="line"><span class="keyword">bit</span> [<span class="number">3</span>:<span class="number">0</span>]a,b; </span><br><span class="line"><span class="keyword">constraint</span> c&#123;(a==<span class="number">0</span>)-&gt;(b==<span class="number">1</span>);&#125;</span><br><span class="line"><span class="keyword">if</span>(mode==little)</span><br><span class="line">len&lt;<span class="number">10</span>; <span class="keyword">else</span> <span class="keyword">if</span>(mode==big)</span><br><span class="line">len&gt;<span class="number">100</span>;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="迭代约束"><a href="#迭代约束" class="headerlink" title="迭代约束"></a>迭代约束</h3><ul>
+<li><strong>foreach</strong>可以用来迭代约束数组中的元素，这些数组可以是长数组、动态数组、关联数组或者队列。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> C; </span><br><span class="line">  <span class="keyword">rand</span> <span class="keyword">byte</span> A[]; </span><br><span class="line">  <span class="keyword">constraint</span> C1 &#123; <span class="keyword">foreach</span> (A[i]) A[i] <span class="keyword">inside</span>&#123;<span class="number">2</span>,<span class="number">4</span>,<span class="number">8</span>,<span class="number">16</span>&#125;; &#125;   <span class="comment">//A[]的成员在&#123;2、4、8、16&#125;中选取</span></span><br><span class="line">  <span class="keyword">constraint</span> C2 &#123; <span class="keyword">foreach</span> (A[j]) A[j]&gt;<span class="number">2</span>*j; &#125;         <span class="comment">//未限定A[]的size，则size默认是0，成员大小也是0</span></span><br><span class="line"><span class="keyword">endclass</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">constraint</span> &#123;</span><br><span class="line">  &#123; <span class="keyword">foreach</span> (A[i]) A[i] <span class="keyword">inside</span>&#123;<span class="number">2</span>,<span class="number">4</span>,<span class="number">8</span>,<span class="number">16</span>&#125;;  </span><br><span class="line">    <span class="keyword">foreach</span> (A[j]) A[j]&gt;<span class="number">2</span>*j; </span><br><span class="line">   A<span class="variable">.size</span>()&lt;<span class="number">100</span> &#125;                     <span class="comment">//限定数组大小之后，用VCS可以仿真出来，questsim无法仿真（不同仿真器底层不同）</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//数组缩减的方法做迭代约束</span></span><br><span class="line"><span class="keyword">class</span> C; </span><br><span class="line">  <span class="keyword">rand</span> <span class="keyword">bit</span> [<span class="number">7</span>:<span class="number">0</span>] A[]; </span><br><span class="line">  <span class="keyword">constraint</span> cl&#123;A<span class="variable">.size</span>()==<span class="number">5</span>;&#125;</span><br><span class="line">  <span class="keyword">constraint</span> c2&#123;A<span class="variable">.sum</span>()&lt;<span class="number">1000</span>;&#125; </span><br><span class="line"><span class="keyword">endclass</span> </span><br><span class="line">  A[<span class="number">0</span>]+A[<span class="number">1</span>]+A[<span class="number">2</span>]+A[<span class="number">3</span>]+A[<span class="number">4</span>]&lt;<span class="number">1000</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="函数调用"><a href="#函数调用" class="headerlink" title="函数调用"></a>函数调用</h3><ul>
+<li>有时候在一些表达式中无法简单地来表述约束，可以在约束块中调用该函数来描述约束。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span>                             <span class="comment">//例如要计算合并数组中的1</span></span><br><span class="line">  <span class="keyword">int</span> count_ones(<span class="keyword">bit</span> [<span class="number">9</span>:<span class="number">0</span>]w); </span><br><span class="line">  <span class="keyword">for</span>(count_ones=<span class="number">0</span>; W!=<span class="number">0</span>; W=W&gt;&gt;<span class="number">1</span>)</span><br><span class="line">    count_ones +=w &amp;<span class="number">1&#x27;b1</span>;  </span><br><span class="line"><span class="keyword">endfunction</span></span><br><span class="line"><span class="keyword">constraint</span> C1 &#123;length ==count_ones)v);&#125;  <span class="comment">//约束中调用函数计数</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="软约束"><a href="#软约束" class="headerlink" title="软约束"></a>软约束</h3><ul>
+<li>在没有soft描述时的约束，我们称之为硬约束，而带有<strong>soft描述是软约束</strong>。</li>
+<li>软约束用来指定变量的默认值和权重。</li>
+<li>如果用户在使用时，指定了外部约束对同一个变量做二次约束，用户定义了子类，也对同一个变量做二次约束时，那么硬约束可以软约束，并且不会导致随机数产生的失败。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> Packet; </span><br><span class="line">  <span class="keyword">rand</span> <span class="keyword">int</span> length; </span><br><span class="line">  <span class="keyword">constraint</span> deflt &#123;<span class="keyword">soft</span> length <span class="keyword">inside</span> &#123;<span class="number">32</span>,<span class="number">1024</span>&#125;;&#125;  <span class="comment">//软约束 长度可选32和1024  如果有多个软约束采用就近原则</span></span><br><span class="line"><span class="keyword">endclass</span> </span><br><span class="line">Packet p=<span class="keyword">new</span>(); </span><br><span class="line">p<span class="variable">.randomize</span>() <span class="keyword">with</span> &#123;length==<span class="number">1512</span>;&#125;          <span class="comment">//硬约束 长度为1512 优先级高于软约束</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="内嵌约束"><a href="#内嵌约束" class="headerlink" title="内嵌约束"></a>内嵌约束</h3><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> C1; </span><br><span class="line">  <span class="keyword">rand</span> <span class="keyword">integer</span> x; </span><br><span class="line"><span class="keyword">endclass</span> </span><br><span class="line"><span class="keyword">class</span> C2; </span><br><span class="line">  <span class="keyword">integer</span> x; </span><br><span class="line">  <span class="keyword">integer</span> y; </span><br><span class="line">  <span class="keyword">task</span> doit(Cl f, <span class="keyword">integer</span> x, <span class="keyword">integer</span> z); </span><br><span class="line">    <span class="keyword">int</span> result; </span><br><span class="line">    result = f<span class="variable">.randomize</span>() <span class="keyword">with</span> &#123;x&lt;y+z;&#125;;    <span class="comment">//x采取就近原则（加上this也是指向C1），指向C1类型的对象f中的x</span></span><br><span class="line">  <span class="keyword">endtask</span>                                      <span class="comment">//如果需要指向C2中的x需要加上限定词local</span></span><br><span class="line"><span class="keyword">endclass</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//以上代码指向不明确不推荐重名，以下代码为较好的格式</span></span><br><span class="line"><span class="keyword">class</span> C; </span><br><span class="line">  <span class="keyword">rand</span> <span class="keyword">integer</span> x; </span><br><span class="line"><span class="keyword">endclass</span> </span><br><span class="line"><span class="keyword">function</span> <span class="keyword">int</span> F(C obj, <span class="keyword">integer</span> y); </span><br><span class="line">  F=obj<span class="variable">.randomize</span>.() <span class="keyword">with</span> (x)&#123;x&lt;y;&#125;; </span><br><span class="line"><span class="keyword">endfunction</span></span><br></pre></td></tr></table></figure>
+<h3 id="local域指向"><a href="#local域指向" class="headerlink" title="local域指向"></a>local域指向</h3><ul>
+<li>之前在使用内嵌约束随机时，对于<strong>同名的变量处在不同的域</strong>中可能会出现指向模糊的情况，之前我们已经给出了一种方法。</li>
+<li>接下来我们可以通过<strong>local:：的域索引方式</strong>来明确随机变量的指即local:：指向的变量会在包含randomize（）方法的对象中。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> C; </span><br><span class="line">  <span class="keyword">rand</span> <span class="keyword">integer</span> x; </span><br><span class="line"><span class="keyword">endclass</span> </span><br><span class="line"><span class="keyword">function</span> <span class="keyword">int</span> F(C obj, <span class="keyword">integer</span> x=<span class="number">20</span>); </span><br><span class="line">  F=obj<span class="variable">.randomize</span>() <span class="keyword">with</span> &#123;x &lt; <span class="keyword">local</span>::x;&#125;;    <span class="comment">//索引当前文本域中的x，即function中的x</span></span><br><span class="line"><span class="keyword">endfunction</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="随机控制"><a href="#随机控制" class="headerlink" title="随机控制"></a>随机控制</h2><ul>
+<li>rand_mode可以<strong>使能或者禁止</strong>随机变量，当随机数被禁止时，同普通变量一样，不参与随机化。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> Packet;</span><br><span class="line"><span class="keyword">rand</span> <span class="keyword">integer</span> source value, dest value;</span><br><span class="line">... other declarations </span><br><span class="line"><span class="keyword">endclass</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> ret; </span><br><span class="line">Packet packet a=<span class="keyword">new</span>;</span><br><span class="line"><span class="comment">//关闭所有变量的随机化 </span></span><br><span class="line">packet a<span class="variable">.rand_mode</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//使能souce_value的随机化 </span></span><br><span class="line">packet a<span class="variable">.source_value</span><span class="variable">.rand_mode</span>(<span class="number">1</span>); </span><br><span class="line">ret=packet_a<span class="variable">.dest_value</span><span class="variable">.rand_mode</span>();</span><br><span class="line"></span><br><span class="line">randomize(source_value) <span class="comment">//使用randomize，不管变量在定义的时候有没有rand属性，传入参数都可以直接随机化，并且原来定义时候的rand属性在有参数之后不起作用。</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="约束控制"><a href="#约束控制" class="headerlink" title="约束控制"></a>约束控制</h2><ul>
+<li>类似于随机控制，一些约束块或者某个类的约束块集合都可以使用constraint_mode实现单个控制或者集体控制。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> Packet;</span><br><span class="line">  <span class="keyword">rand</span> <span class="keyword">integer</span> source value; </span><br><span class="line">  <span class="keyword">constraint</span> filterl &#123;source value&gt;<span class="number">2</span>*m;&#125;</span><br><span class="line"><span class="keyword">endclass</span> </span><br><span class="line"><span class="keyword">function</span> <span class="keyword">integer</span> toggle_rand(Packet p); <span class="comment">//实现反转</span></span><br><span class="line">  <span class="keyword">if</span>(p<span class="variable">.filterl</span><span class="variable">.constraint_mode</span>())</span><br><span class="line">    p<span class="variable">.filterl</span><span class="variable">.constraint_mode</span>(<span class="number">0</span>);  </span><br><span class="line">  <span class="keyword">else</span> p<span class="variable">.filterl</span><span class="variable">.constraint_mode</span>(<span class="number">1</span>); </span><br><span class="line">    toggle_rand=p<span class="variable">.randomize</span>();</span><br><span class="line"><span class="keyword">endfunction</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="内嵌变量控制"><a href="#内嵌变量控制" class="headerlink" title="内嵌变量控制"></a>内嵌变量控制</h2><ul>
+<li>在使用类的随机化函数randomize（）时，如果<strong>伴有参数</strong>，那么只会随机化这些变量（参数优先级高于声明优先级），而其余变量无论是否之前被声明为rand/randc，<strong>都将不会参与到随机化当中</strong>。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> CA; </span><br><span class="line">  <span class="keyword">rand</span> <span class="keyword">byte</span> x,y; </span><br><span class="line">  <span class="keyword">byte</span> v,w; </span><br><span class="line">  <span class="keyword">constraint</span> cl&#123;x&lt;v &amp;&amp; y&gt;w;&#125;; </span><br><span class="line">  <span class="keyword">endclass</span></span><br><span class="line">CA a=<span class="keyword">new</span>; </span><br><span class="line">a<span class="variable">.randomize</span>();   <span class="comment">//随机变量:x, y</span></span><br><span class="line">a<span class="variable">.randomize</span>(x);  <span class="comment">//随机变量:x </span></span><br><span class="line">a<span class="variable">.randomize</span>(v,w);<span class="comment">//随机变量:v, w</span></span><br><span class="line">a<span class="variable">.randomize</span>(w,x);<span class="comment">//随机变量:w,x</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="思考问题"><a href="#思考问题" class="headerlink" title="思考问题"></a>思考问题</h2><ul>
+<li>随机测试相比于定向测试，就你目前的认识，你认为有哪些优缺点？</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2021/05/02/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%887%EF%BC%89%E2%80%94%E2%80%94%E9%9A%8F%E6%9C%BA%E7%BA%A6%E6%9D%9F/" title="SV系统验证（7）——随机约束">https://github.nanfeng.ink/2021/05/02/SV系统验证（7）——随机约束/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SystemVerilog/" rel="tag"><i class="fa fa-tag"></i> SystemVerilog</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/04/18/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%886%EF%BC%89%E2%80%94%E2%80%94%E7%B1%BB%E7%9A%84%E5%B0%81%E8%A3%85%E3%80%81%E7%BB%A7%E6%89%BF%E5%92%8C%E5%8C%85/" rel="prev" title="SV系统验证（6）——类的封装、继承和包">
+      <i class="fa fa-chevron-left"></i> SV系统验证（6）——类的封装、继承和包
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/05/07/%E7%BA%B3%E7%B1%B3%E7%94%B5%E5%AD%90%E5%AD%A6%E6%A6%82%E8%BF%B0/" rel="next" title="纳米电子学概述">
+      纳米电子学概述 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%A7%E7%94%9F%E9%9A%8F%E6%9C%BA%E6%95%B0"><span class="nav-number">2.</span> <span class="nav-text">产生随机数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%A6%E6%9D%9F%E9%9A%8F%E6%9C%BA%E5%8F%98%E9%87%8F"><span class="nav-number">3.</span> <span class="nav-text">约束随机变量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E5%8F%98%E9%87%8F"><span class="nav-number">3.1.</span> <span class="nav-text">随机变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%A6%E6%9C%89%E7%BA%A6%E6%9D%9F%E9%9A%8F%E6%9C%BA%E7%9A%84%E7%B1%BB"><span class="nav-number">3.2.</span> <span class="nav-text">带有约束随机的类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E9%A5%B0%E7%AC%A6rand%E5%92%8Crandc"><span class="nav-number">3.3.</span> <span class="nav-text">修饰符rand和randc</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%A6%E6%9D%9F%E5%9D%97"><span class="nav-number">4.</span> <span class="nav-text">约束块</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%83%E9%87%8D%E5%88%86%E5%B8%83"><span class="nav-number">4.1.</span> <span class="nav-text">权重分布</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%94%AF%E4%B8%80%E6%A0%87%E8%AF%86"><span class="nav-number">4.2.</span> <span class="nav-text">唯一标识</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%A1%E4%BB%B6%E7%BA%A6%E6%9D%9F"><span class="nav-number">4.3.</span> <span class="nav-text">条件约束</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%AD%E4%BB%A3%E7%BA%A6%E6%9D%9F"><span class="nav-number">4.4.</span> <span class="nav-text">迭代约束</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8"><span class="nav-number">4.5.</span> <span class="nav-text">函数调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E7%BA%A6%E6%9D%9F"><span class="nav-number">4.6.</span> <span class="nav-text">软约束</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%B5%8C%E7%BA%A6%E6%9D%9F"><span class="nav-number">4.7.</span> <span class="nav-text">内嵌约束</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#local%E5%9F%9F%E6%8C%87%E5%90%91"><span class="nav-number">4.8.</span> <span class="nav-text">local域指向</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E6%8E%A7%E5%88%B6"><span class="nav-number">5.</span> <span class="nav-text">随机控制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%A6%E6%9D%9F%E6%8E%A7%E5%88%B6"><span class="nav-number">6.</span> <span class="nav-text">约束控制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%B5%8C%E5%8F%98%E9%87%8F%E6%8E%A7%E5%88%B6"><span class="nav-number">7.</span> <span class="nav-text">内嵌变量控制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%9D%E8%80%83%E9%97%AE%E9%A2%98"><span class="nav-number">8.</span> <span class="nav-text">思考问题</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

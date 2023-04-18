@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="请简述弹道输运、相位干涉、普适电导涨落、弱局域化、载流子热化、隧穿现象以及单电子现象与库伦阻塞的物理含义 弹道输运 首先在欧姆型导体中载流子的输运是扩散输运。所谓扩散输运就是导体中电子在电场作用下的运动不断受到各种散射机制的散射作用，电子的迁移过程是一个扩散过程。如果一个介观导体样品，其尺度小于载流子的平均自由程，在载流子输运过程中很可能就不会受到散射而通过样品。由于没有散射的作用，电子的运动仅遵">
+<meta property="og:type" content="article">
+<meta property="og:title" content="纳米电子学概述">
+<meta property="og:url" content="https://github.nanfeng.ink/2021/05/07/%E7%BA%B3%E7%B1%B3%E7%94%B5%E5%AD%90%E5%AD%A6%E6%A6%82%E8%BF%B0/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="请简述弹道输运、相位干涉、普适电导涨落、弱局域化、载流子热化、隧穿现象以及单电子现象与库伦阻塞的物理含义 弹道输运 首先在欧姆型导体中载流子的输运是扩散输运。所谓扩散输运就是导体中电子在电场作用下的运动不断受到各种散射机制的散射作用，电子的迁移过程是一个扩散过程。如果一个介观导体样品，其尺度小于载流子的平均自由程，在载流子输运过程中很可能就不会受到散射而通过样品。由于没有散射的作用，电子的运动仅遵">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620478354407-a09a2756-9533-4317-8d0e-e48719d8c417.png#align=left&display=inline&height=95&margin=%5Bobject%20Object%5D&name=image.png&originHeight=95&originWidth=294&size=11002&status=done&style=none&width=294">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620477184479-213b4f00-114f-4bf2-990c-728400806834.png#align=left&display=inline&height=166&id=DhC2r&margin=%5Bobject%20Object%5D&originHeight=166&originWidth=476&status=done&style=none&width=476">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620477185010-b1e7b1a8-8d14-4347-a807-dc3a6fd69277.png#align=left&display=inline&height=295&id=O2NaC&margin=%5Bobject%20Object%5D&originHeight=295&originWidth=333&status=done&style=none&width=333">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620477185435-486fd2c2-5d68-49d6-8f57-3e20b6111f2b.png#align=left&display=inline&height=395&id=KHt7h&margin=%5Bobject%20Object%5D&originHeight=395&originWidth=706&status=done&style=none&width=706">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620477185733-c4d99ea6-7fa6-4b6e-b121-cfb23adeed44.png#align=left&display=inline&height=226&id=n32kW&margin=%5Bobject%20Object%5D&originHeight=435&originWidth=329&status=done&style=none&width=171">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620477186173-b9ea3f0b-2bc9-4718-9095-b9f47d1d39c6.png#align=left&display=inline&height=262&id=nlCWp&margin=%5Bobject%20Object%5D&originHeight=372&originWidth=576&status=done&style=none&width=405">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620477186536-d4ed987d-e0e6-4883-adfd-11a131637ce3.png#align=left&display=inline&height=320&id=E5eIX&margin=%5Bobject%20Object%5D&originHeight=320&originWidth=481&status=done&style=none&width=481">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620477186775-e28902e3-6fd8-47b5-a3af-92b50fd81d9d.png#align=left&display=inline&height=345&id=pOTE9&margin=%5Bobject%20Object%5D&originHeight=345&originWidth=531&status=done&style=none&width=531">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620477187069-05673eec-edb0-4442-aa4f-a9065f1266c3.png#align=left&display=inline&height=191&id=g3YHv&margin=%5Bobject%20Object%5D&originHeight=236&originWidth=514&status=done&style=none&width=417">
+<meta property="article:published_time" content="2021-05-07T12:40:58.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="器件">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620478354407-a09a2756-9533-4317-8d0e-e48719d8c417.png#align=left&display=inline&height=95&margin=%5Bobject%20Object%5D&name=image.png&originHeight=95&originWidth=294&size=11002&status=done&style=none&width=294">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2021/05/07/%E7%BA%B3%E7%B1%B3%E7%94%B5%E5%AD%90%E5%AD%A6%E6%A6%82%E8%BF%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>纳米电子学概述 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2021/05/07/%E7%BA%B3%E7%B1%B3%E7%94%B5%E5%AD%90%E5%AD%A6%E6%A6%82%E8%BF%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          纳米电子学概述
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-05-07 20:40:58" itemprop="dateCreated datePublished" datetime="2021-05-07T20:40:58+08:00">2021-05-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">笔记篇</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/%E5%99%A8%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">器件</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="请简述弹道输运、相位干涉、普适电导涨落、弱局域化、载流子热化、隧穿现象以及单电子现象与库伦阻塞的物理含义"><a href="#请简述弹道输运、相位干涉、普适电导涨落、弱局域化、载流子热化、隧穿现象以及单电子现象与库伦阻塞的物理含义" class="headerlink" title="请简述弹道输运、相位干涉、普适电导涨落、弱局域化、载流子热化、隧穿现象以及单电子现象与库伦阻塞的物理含义"></a>请简述弹道输运、相位干涉、普适电导涨落、弱局域化、载流子热化、隧穿现象以及单电子现象与库伦阻塞的物理含义</h2><h3 id="弹道输运"><a href="#弹道输运" class="headerlink" title="弹道输运"></a>弹道输运</h3><p>首先在欧姆型导体中载流子的输运是扩散输运。所谓扩散输运就是导体中电子在电场作用下的运动不断受到各种散射机制的散射作用，电子的迁移过程是一个扩散过程。如果一个介观导体样品，其尺度小于载流子的平均自由程，在载流子输运过程中很可能就不会受到散射而通过样品。由于没有散射的作用，电子的运动仅遵从牛顿定律，被称为弹道(ballistic)输运，这种情况下，电子只有碰到了边界才会改变运动方向。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620478354407-a09a2756-9533-4317-8d0e-e48719d8c417.png#align=left&display=inline&height=95&margin=%5Bobject%20Object%5D&name=image.png&originHeight=95&originWidth=294&size=11002&status=done&style=none&width=294" alt="image.png"><br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620477184479-213b4f00-114f-4bf2-990c-728400806834.png#align=left&display=inline&height=166&id=DhC2r&margin=%5Bobject%20Object%5D&originHeight=166&originWidth=476&status=done&style=none&width=476"><br>能够产生弹道输运的导体称为弹道导体，即不存在对载流子散射的导体。在一般的介质中电阻一般是由电子散射而产生，这可以是因为杂质、缺陷或者在平衡位置附近震荡的原子/分子引起的散射；也可以是由在气体和液体中自由运动的原子/分子引起的。而在弹道导体中并非没有散射就没有电阻，其电阻主要不同材料界面或不同几何区域的边界，除了界面势垒的反射，电子在弹道导体中的运动是弹性的没有能量损失。</p>
+<h3 id="相位干涉"><a href="#相位干涉" class="headerlink" title="相位干涉"></a>相位干涉</h3><p>在量子力学理论中，当系统的尺度达到与粒子的德布罗意（de Broglie）波长可比拟的尺度时，粒子展现出波动-粒子二象属性。它的座标和动量，及能量和时间将满足测不准原理，体系的状态用粒子波函数描述。波函数具有幅值和相位两个特征参量，并遵从波的叠加原理。波的“叠加” 意味着波的两个波幅相加，这是不同于通常意义下的“混合”或“相加”。量子“叠加”性在“介观系统”的量子相位相干涨落效应中是非常重要，它将明确地呈现于观测到的物理性质中。例如，我们可以观测到电子的干涉和衍射现象。一般情况下波函数的相位是时间和座标的函数。粒子的量子行为会因增大系统尺度、大量粒子的热运动、以及被杂质的散射等因素被破坏掉，其结果使粒子量子相干性消失。然而，我们必须注意到这样一个事实：降低温度，会使对应的退相干时间增长。<br>微观系统中粒子的相位效应是明显的，一个最简单的例子是玻尔最早提出的氢原子的量子论，其量子化条件可以认为是电子绕原子核转动一周，相位变化为2Π的整数倍。<br>超导电性的研究中最先发现了宏观物理量与电子相位相关的量子效应。20世纪30年代初，发现了超导体的迈斯纳（Meissner）效应：置于磁场中的金属，当温度降低到临界温度以下时，变为超导体；达到稳定以后，磁场被排斥到超导体以外，即磁场不能深入到超导体内部。超导实际上是一种宏观量子现象。<br>相位干涉有两个条件：<br>①沿一闭合路径相反方向运动的两电子分波，这两个运动过程具有时间反演对称性<br>②当样品尺寸L≤L时，电子分波仅限制在数目较少的若干路径上运动，干涉的贡献显得非常重要。</p>
+<h3 id="普适电导涨落"><a href="#普适电导涨落" class="headerlink" title="普适电导涨落"></a>普适电导涨落</h3><p>前述在一定的条件下观察到周期为ħ/e的电导谐振。只有当样品为环形结构时才能发生这种谐振。低温下不同，样品为简并，导电（或其他输运）过程主要是费米表面的载流子参与。杂质为散射势场的中心，载流子围绕它运动。<br>栅极电势或者由于所加磁场变化都会引起费米能的变化，载流子可能经过不同的路径绕过杂质，在这些路径上费米能略有差异。通过两个轨迹载流子相位的变化等价于通过A-B环的两个臂的情况，在这样的过程中可以产生e2/ħ的电导变化。<br>电导涨落产生条件：F&lt;&lt;l&lt;&lt;L≤L，满足样品是介观的，处于正常导电区域。这种电导的涨落的产生与费米能级的变化相关，在时间上是相当稳定的。电导涨落的幅值与样品的形状和空间维数只有微弱的依赖关系。涨落与散射中心在样品中精确位置有关，不同的样品有不同的涨落，因而这种涨落可以作为介观导体样品的“指纹”。电导涨落幅值的数量级是e2/h~4×10-5S,一个普适量，与样品特性无关。</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620477185010-b1e7b1a8-8d14-4347-a807-dc3a6fd69277.png#align=left&display=inline&height=295&id=O2NaC&margin=%5Bobject%20Object%5D&originHeight=295&originWidth=333&status=done&style=none&width=333"></p>
+<h3 id="弱局域化"><a href="#弱局域化" class="headerlink" title="弱局域化"></a>弱局域化</h3><p>电子在固体中扩散运动时，以一定的概率返回它的出发点，这样的路径为闭合路径。 这两条路径是具有时间反演对称性的路径可以证明电子经过时间反演对称散射路径时，香味的移动是相等的。虽然大量电子扩散路径的电子分波的干涉趋于相互抵消，但是经过时间反演路径的电子波的干涉却互相增强了。这说明波在经历了漫散射后仍能产生一定量的回波（echo）。<img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620477185435-486fd2c2-5d68-49d6-8f57-3e20b6111f2b.png#align=left&display=inline&height=395&id=KHt7h&margin=%5Bobject%20Object%5D&originHeight=395&originWidth=706&status=done&style=none&width=706"><br>由于电子波动性的效应，电子似乎更倾向于呆在原出发点，这就是所谓的“弱局域化现象”</p>
+<h3 id="载流子热化"><a href="#载流子热化" class="headerlink" title="载流子热化"></a>载流子热化</h3><p>一般来说，弱场输运可以用弛豫时间近似方法处理，使得动量空间的分布函数产生刚性移动，载流子获得净的漂移速度，而保留用热平衡下的分布函数描述载流电子分布，并且载流子具有通常的费米能。载流子热化的情况下来自外加场的输入能量和电势导致粒子的动量，以及直线方向的漂移速度增加，分布函数不再是热平衡分布函数。这时主要的问题是需要找一个新的分布函数。经典的BTE的最强限制是仅限于外场与散射事件之间没有相互影响，或者每一个散射事件都是完全离散的，散射事件或过程之间没有相互影响。这一假设在强场或者纳米结构的几何限制中不再成立。<br>纳米结构的一个关键是输运不能孤立处理。量子动力学方程与边界有强烈的耦合，通过边界，方程与整个环境相耦合。</p>
+<h3 id="隧穿现象"><a href="#隧穿现象" class="headerlink" title="隧穿现象"></a>隧穿现象</h3><p>势垒贯穿（简称隧穿）是量子力学中一种独特的现象。固体中隧穿现象，即金属电子的场致发射，也就是电场辅助电子从金属中热发射到真空。带间隧穿是电子通过带隙从固体的一个能带跃迁到另一个能带。共振隧穿概念是指电子的隧穿概率围绕某一个能量值以尖锐的峰值形式出现的隧穿。类似于通过光学滤波器的光强作为波长的函数，形成尖锐的跃迁蜂值。</p>
+<h3 id="单电子现象与库伦阻塞"><a href="#单电子现象与库伦阻塞" class="headerlink" title="单电子现象与库伦阻塞"></a>单电子现象与库伦阻塞</h3><p>按照经典物理理论，电子不可能通过绝缘层构成的势垒，隧道结就像一个电容器。把隧道结连接到外电路，隧道结的充电能为Q=CV，V是所加外电压，Q是电极中电子相对于背景正电荷移动而感应出的电荷。人们发现这样小的隧道结势垒两边电荷分布之间的相互作用仍然能够用充电能Q2/2C来描述。<br>考虑到量子效应，电子有可能隧穿通过势垒。隧穿过程与电子在电极内部运动过程不同。电子必须以完整粒子形式隧穿通过势垒。每一次隧穿，电荷变化为一个电子的电量。<br>电子隧穿过程中，充电能的变化可以表示为Ec=e2/2C。电子在电极内部移动感应出的电荷Q可以是电子电量的若干分之一。<br>在一个小系统中，势能的改变有可能大于热能kBT,特别是在低温下。由于单一电荷的传输而引起如此大的静电能的改变可以在费米能处产生一个能量间隙，将阻止电子进入岛中，称为库仑阻塞。</p>
+<h2 id="请简述量子点系统的共振隧穿现象以及物理模型"><a href="#请简述量子点系统的共振隧穿现象以及物理模型" class="headerlink" title="请简述量子点系统的共振隧穿现象以及物理模型"></a>请简述量子点系统的共振隧穿现象以及物理模型</h2><h3 id="量子点系统的共振隧穿现象"><a href="#量子点系统的共振隧穿现象" class="headerlink" title="量子点系统的共振隧穿现象"></a>量子点系统的共振隧穿现象</h3><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620477185733-c4d99ea6-7fa6-4b6e-b121-cfb23adeed44.png#align=left&display=inline&height=226&id=n32kW&margin=%5Bobject%20Object%5D&originHeight=435&originWidth=329&status=done&style=none&width=171"><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620477186173-b9ea3f0b-2bc9-4718-9095-b9f47d1d39c6.png#align=left&display=inline&height=262&id=nlCWp&margin=%5Bobject%20Object%5D&originHeight=372&originWidth=576&status=done&style=none&width=405"><br>在这种纳米结构中，电子横向运动限制在槽形势阱中，如图6.2所示，势能包括抛物型部分和平坦部分。与传统的大面积的RTD相比较，这种结构称为零维共振隧穿二极管（ODRTD）。<br>高温下ODRTD的I-V特性曲线表现出与2DRTD基本相同的NDC。可是，在较低的温度出现一系列小的电流峰，叠加在NDC上。这些精细结构可以归因于通过量子点3D量子化态的共振隧穿。0D RTD中的隧穿一般远比的RTD复杂<br>在0D RTD中会出现一些特殊的问题，例如<br>     —由于非均匀限制势引起的横向模式混合<br>     —量子阱中电荷量子化<br>     —共振隧穿与库仑阻塞单电子隧穿互相影响<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620477186536-d4ed987d-e0e6-4883-adfd-11a131637ce3.png#align=left&display=inline&height=320&id=E5eIX&margin=%5Bobject%20Object%5D&originHeight=320&originWidth=481&status=done&style=none&width=481"></p>
+<h3 id="Reed零维共振隧穿模型"><a href="#Reed零维共振隧穿模型" class="headerlink" title="Reed零维共振隧穿模型"></a>Reed零维共振隧穿模型</h3><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620477186775-e28902e3-6fd8-47b5-a3af-92b50fd81d9d.png#align=left&display=inline&height=345&id=pOTE9&margin=%5Bobject%20Object%5D&originHeight=345&originWidth=531&status=done&style=none&width=531"><br>Reed引入两个量子数y和y’,分别描述电子在发射极和量子阱中的横向运动。<br>这样电子在这两个区域中的运动的能量近似表示为εy+Ekz和εy’+Ekz0，其中εy是第个横向模式的能量，Ekz是能量的z分量（=ħ2kz2/2m*)，z方向是沿着半导体异质结构生长方向。 Ekz0是量子阱中最低准束缚态的能量。<br>每当阱中一个能级与发射极一个能级对准，电子通过这一对能级隧穿到达集电极，产生一个共振电流峰。<br>如果y= y’，隧穿保持横向模式守恒（横向动量守恒），如果不是这样，则为横向模式不守恒隧穿。Reed等证实量子阱能级与发射极能级差是所加偏压的函数，并将它们与观察到的峰电压比较。计算结果与实验结果一致，这一事实表明横向模式不守恒隧穿对电流有贡献。</p>
+<h2 id="请简述单电荷现象产生条件以及单电子系统的基本结构及类型"><a href="#请简述单电荷现象产生条件以及单电子系统的基本结构及类型" class="headerlink" title="请简述单电荷现象产生条件以及单电子系统的基本结构及类型"></a>请简述单电荷现象产生条件以及单电子系统的基本结构及类型</h2><h3 id="单电荷现象产生的条件"><a href="#单电荷现象产生的条件" class="headerlink" title="单电荷现象产生的条件"></a>单电荷现象产生的条件</h3><p>在两个电极之间有一个被称为岛(island)的孤立金属单元，三个导体之间有间隙（或绝缘体）。从源极到漏极的电荷输运必须通过岛。<br>假设通过源极与岛及岛与漏极之间的绝缘间隙的电荷输运是通过量子隧穿完成的，而且整个输运过程进行的很快，可以认为每一次仅有一个电子通过绝缘间隙。<br>相继通过一个特定隧道结的隧穿事件是彼此不相关的，并且构成Poisson过程。电子在从源极到漏极的旅行过程中，岛中电荷的变化必须是载流子电荷的量值。<br>对于普通的电子器件载流子的电量是一个非常小的量。可是，对于足够小的岛，当岛中增加一个过剩电荷，岛的电势升高就足以明显使隧穿概率减小。这种反馈效应的存在是在几十年前就提出了。<br>在这样纳米尺度的隧道结系统中，可以产生相当大的库仑间隙(Coulomb gap)。<br>应用这种结构可以研究栅极电压控制的单个电子电荷精度的电流，即单个电荷在受控状态下从一个岛到另一个岛的传输，<br>该现象背后的机制是利用了系统中一部分电荷与另一部分电荷之间库仑作用能的反馈效应。更普遍的情况下，这种反馈效应称为是单电子隧穿效应。这种现象可以在金属和半导体纳米结构中以电子或空穴的形式进行单电荷传输。</p>
+<h3 id="产生单电子隧穿效应的条件"><a href="#产生单电子隧穿效应的条件" class="headerlink" title="产生单电子隧穿效应的条件"></a>产生单电子隧穿效应的条件</h3><p><strong>条件—</strong>：系统必须具有一个库仑岛，它仅通过隧穿势垒与其他导体相连接。隧道结“电阻”远大于电阻量子RQ=h/e2~25.8kΩ，即RT&gt;&gt;RQ。隧穿电阻是一个唯象的物理量。它定义为当电极两边加载的电压V固定时，V与电子通过势垒的隧穿率γ的比，即：γ=V/eRT。<br><strong>条件二</strong>：岛足够小，其库仑能满足EC&gt;kBT<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1620477187069-05673eec-edb0-4442-aa4f-a9065f1266c3.png#align=left&display=inline&height=191&id=g3YHv&margin=%5Bobject%20Object%5D&originHeight=236&originWidth=514&status=done&style=none&width=417"></p>
+<h3 id="单电子系统的基本结构"><a href="#单电子系统的基本结构" class="headerlink" title="单电子系统的基本结构"></a>单电子系统的基本结构</h3><p>目前研究的能产生单电子现象的系统主要有两种类型。一种是金属一绝缘体结构类型；另一种是半导体二维电于气结构类型。当前大多数单电子实验是基于第一种类型的结构。<br>目前大多数金属一绝缘体单电子结构是用金属Al薄膜制造，利用光刻制造出岛的形状并且用氧化层势垒分隔开。在此情形下，电子气被限制在一个小的区域里，并通过厚度约为100mm的氧化层势垒耦合到外电路。隧道结的电容构成系统电容的主要部分。这种系统也是人们研究库柏对电荷效应的结构。<br>第二种研究单电子效应的实验系统是利用肖特基栅将GaAs/AlGaAs异质结构二维电子气限制在小的区域（岛）中。</p>
+<h2 id="何谓介观？分析其与宏观、微观的区别。分析介观导体与欧姆导体的区别"><a href="#何谓介观？分析其与宏观、微观的区别。分析介观导体与欧姆导体的区别" class="headerlink" title="何谓介观？分析其与宏观、微观的区别。分析介观导体与欧姆导体的区别"></a>何谓介观？分析其与宏观、微观的区别。分析介观导体与欧姆导体的区别</h2><h3 id="介观"><a href="#介观" class="headerlink" title="介观"></a>介观</h3><p>介观是介于宏观与微观之间的一种体系。处于介观的物体在尺寸上已是宏观的，因而具有宏观体系的特点；但是由于其中电子运动的相干性，会出现一系列新的与量子力学相位相联系的干涉现象, 这又与微观体系相似，故称“介观”。</p>
+<h3 id="介观、微观、宏观的区别"><a href="#介观、微观、宏观的区别" class="headerlink" title="介观、微观、宏观的区别"></a>介观、微观、宏观的区别</h3><p>微观尺度是原子核、粒子物理学研究原子核、基本粒子及与之相应的场的尺度。微观世界的各层次都具有波粒二象性，服从量子力学规律。<br>通常被认为是宏观的长度尺度，大致在1毫米至1公里之间。宏观体系的特点是物理量具有自平均性：即可以把宏观物体看成是由许多的小块所组成，每一小块是统计独立的，整个宏观物体所表现出来的性质是各小块的平均值，如果减小宏观物体的尺寸，只要还是足够大，测量的物理量，例如电导率，和系统的平均值的差别就很小。<br>宏观世界容易观察的物质层次。宏观世界一般服从经典力学规律，但是不同质的宏观世界具有不同的运行规律。<br>宏观是具有牛顿力学特征的物质存在状态，微观符合是量子力学规律的存在状态，而介观由于其具有量子力学和牛顿力学的双重特征，部分物质可能出于宏观和介观、介观和微观的双重状态。<br>介观尺度就是指介于宏观和微观之间的尺度；一般认为它的尺度在纳米和毫米之间。物体的尺寸具有宏观大小，但具有那些我们原来认为只能在微观世界中才能观察到的许多物理现象。介观粒子仍属宏观粒子，然而这种宏观粒子在低温条件下的实验结果，却表现出了微观粒子才有的量子效应，这种呈现出微观物理效应的宏观系统叫介观系统。它所服从的是介观物理学的规律，这是介乎微观与宏观之间的第三种规律──介观规律。</p>
+<h3 id="介观导体与欧姆导体的区别"><a href="#介观导体与欧姆导体的区别" class="headerlink" title="介观导体与欧姆导体的区别"></a>介观导体与欧姆导体的区别</h3><p>欧姆定律能够成立的导体称为欧姆导体，欧姆导体的长度远大于电子的德布罗意波长、平均自由程、相位弛豫长度。导体中电子在电场作用下的运动不断受到各种散射机制的散射作用，电子的迁移过程是扩散过程。<br>介观(mesoscopic)导体表示介于宏观与微观之间的导体（1nm~1um），远大于像原子这样的微观客体，但是又不能大到成为欧姆型导体，介观现象和效应是波粒二象性与空间尺度限制下共同导致的。介观导体不遵从欧姆定律，而是会出现纳米结构的新现象例如弹道输运、相位干涉、普适电导涨落、弱局域化、载流子热化、隧穿现象以及单电子现象与库伦阻塞。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="https://www.yuque.com/attachments/yuque/0/2021/pdf/12924220/1620477504928-0fec869a-09a7-43c4-b198-b1b5e5ff8e07.pdf?_lake_card=%7B%22src%22:%22https://www.yuque.com/attachments/yuque/0/2021/pdf/12924220/1620477504928-0fec869a-09a7-43c4-b198-b1b5e5ff8e07.pdf%22,%22name%22:%22%E7%BA%B3%E7%B1%B3%E7%94%B5%E5%AD%90%E5%AD%A6%5B%E6%9D%9C%E7%A3%8A%5D.pdf%22,%22size%22:19843006,%22type%22:%22application/pdf%22,%22ext%22:%22pdf%22,%22status%22:%22done%22,%22taskId%22:%22u864a2eca-5b6f-4fb4-8c25-42a8224d57b%22,%22taskType%22:%22upload%22,%22id%22:%22u23dd058f%22,%22card%22:%22file%22%7D">纳米电子学[杜磊].pdf</a><br><a target="_blank" rel="noopener" href="https://www.yuque.com/attachments/yuque/0/2021/ppt/12924220/1620477516055-15f3ac95-5b0c-4842-b795-6b3006894416.ppt?_lake_card=%7B%22src%22:%22https://www.yuque.com/attachments/yuque/0/2021/ppt/12924220/1620477516055-15f3ac95-5b0c-4842-b795-6b3006894416.ppt%22,%22name%22:%22%E7%AC%AC%E4%B8%80%E7%AB%A0%E7%BB%AA%E8%AE%BA.ppt%22,%22size%22:14362112,%22type%22:%22application/vnd.ms-powerpoint%22,%22ext%22:%22ppt%22,%22status%22:%22done%22,%22taskId%22:%22ub452d132-d018-4256-9f02-dab02861801%22,%22taskType%22:%22upload%22,%22id%22:%22ua463fe1c%22,%22card%22:%22file%22%7D">第一章绪论.ppt</a><br><a target="_blank" rel="noopener" href="https://www.yuque.com/attachments/yuque/0/2021/pptx/12924220/1620477518078-85bc04d9-1461-479d-a55b-6217c031029b.pptx?_lake_card=%7B%22src%22:%22https://www.yuque.com/attachments/yuque/0/2021/pptx/12924220/1620477518078-85bc04d9-1461-479d-a55b-6217c031029b.pptx%22,%22name%22:%22%E7%AC%AC%E4%BA%8C%E7%AB%A0%E5%85%B1%E6%8C%AF%E9%9A%A7%E7%A9%BF%E7%8E%B0%E8%B1%A1%E4%B8%8E%E5%99%A8%E4%BB%B6.pptx%22,%22size%22:5412250,%22type%22:%22application/vnd.openxmlformats-officedocument.presentationml.presentation%22,%22ext%22:%22pptx%22,%22status%22:%22done%22,%22taskId%22:%22u822bd4f3-1a26-4787-8101-04e8bf79a49%22,%22taskType%22:%22upload%22,%22id%22:%22udc94e1b1%22,%22card%22:%22file%22%7D">第二章共振隧穿现象与器件.pptx</a><br><a target="_blank" rel="noopener" href="https://www.yuque.com/attachments/yuque/0/2021/ppt/12924220/1620477528756-b30676eb-059f-4cad-8b86-02821cde4a98.ppt?_lake_card=%7B%22src%22:%22https://www.yuque.com/attachments/yuque/0/2021/ppt/12924220/1620477528756-b30676eb-059f-4cad-8b86-02821cde4a98.ppt%22,%22name%22:%22%E7%AC%AC%E4%B8%89%E7%AB%A0%E5%8D%95%E7%94%B5%E5%AD%90%E5%99%A8%E4%BB%B6%E5%92%8C%E7%8E%B0%E8%B1%A1.ppt%22,%22size%22:11172352,%22type%22:%22application/vnd.ms-powerpoint%22,%22ext%22:%22ppt%22,%22status%22:%22done%22,%22taskId%22:%22u064d79f5-b49b-41e7-8094-c78db86f284%22,%22taskType%22:%22upload%22,%22id%22:%22u9ffa0476%22,%22card%22:%22file%22%7D">第三章单电子器件和现象.ppt</a><br><a target="_blank" rel="noopener" href="https://www.yuque.com/attachments/yuque/0/2021/ppt/12924220/1620477531020-2dc80ca7-8e56-4312-bbf9-6f350545d9c4.ppt?_lake_card=%7B%22src%22:%22https://www.yuque.com/attachments/yuque/0/2021/ppt/12924220/1620477531020-2dc80ca7-8e56-4312-bbf9-6f350545d9c4.ppt%22,%22name%22:%22%E7%AC%AC%E4%BA%94%E7%AB%A0%E5%8D%8A%E5%AF%BC%E4%BD%93%E9%87%8F%E5%AD%90%E7%82%B9%E5%99%A8%E4%BB%B6.ppt%22,%22size%22:9416192,%22type%22:%22application/vnd.ms-powerpoint%22,%22ext%22:%22ppt%22,%22status%22:%22done%22,%22taskId%22:%22ua30e25b3-6688-4f1f-9afe-90200381ac2%22,%22taskType%22:%22upload%22,%22id%22:%22ub23f2224%22,%22card%22:%22file%22%7D">第五章半导体量子点器件.ppt</a></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2021/05/07/%E7%BA%B3%E7%B1%B3%E7%94%B5%E5%AD%90%E5%AD%A6%E6%A6%82%E8%BF%B0/" title="纳米电子学概述">https://github.nanfeng.ink/2021/05/07/纳米电子学概述/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag"><i class="fa fa-tag"></i> 器件</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/05/02/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%887%EF%BC%89%E2%80%94%E2%80%94%E9%9A%8F%E6%9C%BA%E7%BA%A6%E6%9D%9F/" rel="prev" title="SV系统验证（7）——随机约束">
+      <i class="fa fa-chevron-left"></i> SV系统验证（7）——随机约束
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/05/09/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%888%EF%BC%89%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5%E3%80%81%E9%80%9A%E4%BF%A1%E5%92%8C%E8%99%9A%E6%96%B9%E6%B3%95/" rel="next" title="SV系统验证（8）——线程同步、通信和虚方法">
+      SV系统验证（8）——线程同步、通信和虚方法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%B7%E7%AE%80%E8%BF%B0%E5%BC%B9%E9%81%93%E8%BE%93%E8%BF%90%E3%80%81%E7%9B%B8%E4%BD%8D%E5%B9%B2%E6%B6%89%E3%80%81%E6%99%AE%E9%80%82%E7%94%B5%E5%AF%BC%E6%B6%A8%E8%90%BD%E3%80%81%E5%BC%B1%E5%B1%80%E5%9F%9F%E5%8C%96%E3%80%81%E8%BD%BD%E6%B5%81%E5%AD%90%E7%83%AD%E5%8C%96%E3%80%81%E9%9A%A7%E7%A9%BF%E7%8E%B0%E8%B1%A1%E4%BB%A5%E5%8F%8A%E5%8D%95%E7%94%B5%E5%AD%90%E7%8E%B0%E8%B1%A1%E4%B8%8E%E5%BA%93%E4%BC%A6%E9%98%BB%E5%A1%9E%E7%9A%84%E7%89%A9%E7%90%86%E5%90%AB%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text">请简述弹道输运、相位干涉、普适电导涨落、弱局域化、载流子热化、隧穿现象以及单电子现象与库伦阻塞的物理含义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%B9%E9%81%93%E8%BE%93%E8%BF%90"><span class="nav-number">1.1.</span> <span class="nav-text">弹道输运</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E4%BD%8D%E5%B9%B2%E6%B6%89"><span class="nav-number">1.2.</span> <span class="nav-text">相位干涉</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%99%AE%E9%80%82%E7%94%B5%E5%AF%BC%E6%B6%A8%E8%90%BD"><span class="nav-number">1.3.</span> <span class="nav-text">普适电导涨落</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%B1%E5%B1%80%E5%9F%9F%E5%8C%96"><span class="nav-number">1.4.</span> <span class="nav-text">弱局域化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%BD%E6%B5%81%E5%AD%90%E7%83%AD%E5%8C%96"><span class="nav-number">1.5.</span> <span class="nav-text">载流子热化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%A7%E7%A9%BF%E7%8E%B0%E8%B1%A1"><span class="nav-number">1.6.</span> <span class="nav-text">隧穿现象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E7%94%B5%E5%AD%90%E7%8E%B0%E8%B1%A1%E4%B8%8E%E5%BA%93%E4%BC%A6%E9%98%BB%E5%A1%9E"><span class="nav-number">1.7.</span> <span class="nav-text">单电子现象与库伦阻塞</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%B7%E7%AE%80%E8%BF%B0%E9%87%8F%E5%AD%90%E7%82%B9%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%85%B1%E6%8C%AF%E9%9A%A7%E7%A9%BF%E7%8E%B0%E8%B1%A1%E4%BB%A5%E5%8F%8A%E7%89%A9%E7%90%86%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">请简述量子点系统的共振隧穿现象以及物理模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8F%E5%AD%90%E7%82%B9%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%85%B1%E6%8C%AF%E9%9A%A7%E7%A9%BF%E7%8E%B0%E8%B1%A1"><span class="nav-number">2.1.</span> <span class="nav-text">量子点系统的共振隧穿现象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reed%E9%9B%B6%E7%BB%B4%E5%85%B1%E6%8C%AF%E9%9A%A7%E7%A9%BF%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.2.</span> <span class="nav-text">Reed零维共振隧穿模型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%B7%E7%AE%80%E8%BF%B0%E5%8D%95%E7%94%B5%E8%8D%B7%E7%8E%B0%E8%B1%A1%E4%BA%A7%E7%94%9F%E6%9D%A1%E4%BB%B6%E4%BB%A5%E5%8F%8A%E5%8D%95%E7%94%B5%E5%AD%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%BB%93%E6%9E%84%E5%8F%8A%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">请简述单电荷现象产生条件以及单电子系统的基本结构及类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E7%94%B5%E8%8D%B7%E7%8E%B0%E8%B1%A1%E4%BA%A7%E7%94%9F%E7%9A%84%E6%9D%A1%E4%BB%B6"><span class="nav-number">3.1.</span> <span class="nav-text">单电荷现象产生的条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%A7%E7%94%9F%E5%8D%95%E7%94%B5%E5%AD%90%E9%9A%A7%E7%A9%BF%E6%95%88%E5%BA%94%E7%9A%84%E6%9D%A1%E4%BB%B6"><span class="nav-number">3.2.</span> <span class="nav-text">产生单电子隧穿效应的条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E7%94%B5%E5%AD%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%BB%93%E6%9E%84"><span class="nav-number">3.3.</span> <span class="nav-text">单电子系统的基本结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%95%E8%B0%93%E4%BB%8B%E8%A7%82%EF%BC%9F%E5%88%86%E6%9E%90%E5%85%B6%E4%B8%8E%E5%AE%8F%E8%A7%82%E3%80%81%E5%BE%AE%E8%A7%82%E7%9A%84%E5%8C%BA%E5%88%AB%E3%80%82%E5%88%86%E6%9E%90%E4%BB%8B%E8%A7%82%E5%AF%BC%E4%BD%93%E4%B8%8E%E6%AC%A7%E5%A7%86%E5%AF%BC%E4%BD%93%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">4.</span> <span class="nav-text">何谓介观？分析其与宏观、微观的区别。分析介观导体与欧姆导体的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8B%E8%A7%82"><span class="nav-number">4.1.</span> <span class="nav-text">介观</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8B%E8%A7%82%E3%80%81%E5%BE%AE%E8%A7%82%E3%80%81%E5%AE%8F%E8%A7%82%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">4.2.</span> <span class="nav-text">介观、微观、宏观的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8B%E8%A7%82%E5%AF%BC%E4%BD%93%E4%B8%8E%E6%AC%A7%E5%A7%86%E5%AF%BC%E4%BD%93%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">4.3.</span> <span class="nav-text">介观导体与欧姆导体的区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言： 由于现在需要找实习，还啥也不会呢，不知道咋地就对模拟有点感兴趣，就去图书馆借了本模拟集成电路的书，看了一两章，感觉东西不少于是想整理下来，虽然现在常用的SPICE仿真软件都有很好的GUI界面例如Cadence，在用仿真库中的元器件连成原理图后就可以进行仿真（当然要设置必要的仿真参数），但实际上只是用原理图自动产生了SPICE的格式语句，还是要通过读取语句来进行仿真，这是历史的遗留问题。 在">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spice语法基础入门">
+<meta property="og:url" content="https://github.nanfeng.ink/2020/09/21/Spice%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A8/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="前言： 由于现在需要找实习，还啥也不会呢，不知道咋地就对模拟有点感兴趣，就去图书馆借了本模拟集成电路的书，看了一两章，感觉东西不少于是想整理下来，虽然现在常用的SPICE仿真软件都有很好的GUI界面例如Cadence，在用仿真库中的元器件连成原理图后就可以进行仿真（当然要设置必要的仿真参数），但实际上只是用原理图自动产生了SPICE的格式语句，还是要通过读取语句来进行仿真，这是历史的遗留问题。 在">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617278101656-70d7a21a-54c3-482a-9bff-00bb2db6f98b.png#height=200&id=LGUnU&margin=%5Bobject%20Object%5D&name=image.png&originHeight=200&originWidth=321&originalType=binary&size=45844&status=done&style=none&width=321">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617281007201-38abd98c-c847-49e9-b6da-e2906616e6e5.png#height=699&id=wjnxq&margin=%5Bobject%20Object%5D&name=image.png&originHeight=699&originWidth=445&originalType=binary&size=285866&status=done&style=none&width=445">
+<meta property="article:published_time" content="2020-09-21T01:58:58.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="Spice">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617278101656-70d7a21a-54c3-482a-9bff-00bb2db6f98b.png#height=200&id=LGUnU&margin=%5Bobject%20Object%5D&name=image.png&originHeight=200&originWidth=321&originalType=binary&size=45844&status=done&style=none&width=321">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2020/09/21/Spice%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Spice语法基础入门 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2020/09/21/Spice%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spice语法基础入门
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-09-21 09:58:58" itemprop="dateCreated datePublished" datetime="2020-09-21T09:58:58+08:00">2020-09-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">笔记篇</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/%E6%A8%A1%E6%8B%9F/" itemprop="url" rel="index"><span itemprop="name">模拟</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h2><p>由于现在需要找实习，还啥也不会呢，不知道咋地就对模拟有点感兴趣，就去图书馆借了本模拟集成电路的书，看了一两章，感觉东西不少于是想整理下来，虽然现在常用的SPICE仿真软件都有很好的GUI界面例如Cadence，在用仿真库中的元器件连成原理图后就可以进行仿真（当然要设置必要的仿真参数），但实际上只是用原理图自动产生了SPICE的格式语句，还是要通过读取语句来进行仿真，这是历史的遗留问题。<br>在spice早期研究的技术条件下，无法用图形方式输入电路结构，只能通过文本文件来描述，也就是所谓网表。SPICE软件的设计者规范了要进行仿真的电路对应的SPICE网表文件格式，还定义了许多仿真描述语句和分析控制语句等，使仿真软件能通过读取这些特殊信息来进行相关计算和运行，最后获得要求的结果。<br>因为技术的进步，虽然现在已经不需要手工书写并输入网表了，但了解一些基本语句还是很有用的，不仅可以理解仿真时要设置的那些参数的含义，而且在出错时还易于通过网表来排错。</p>
+<h1 id="SPICE仿真软件基础"><a href="#SPICE仿真软件基础" class="headerlink" title="SPICE仿真软件基础"></a>SPICE仿真软件基础</h1><blockquote>
+<p>SPICE网表文件是文本文件，默认的输入文件名为：*_.cir_</p>
+</blockquote>
+<p>因为目前各个版本的SPICE软件都已图形化，并增加了很多功能，所以产生的语句顺序和格式有了一些变化，但主要是以*开头的注释语句的不同变化，便于阅读和模块化，而基本的语句变化不大，包括以下几种：</p>
+<ul>
+<li><p><strong>标题语句：</strong>网表文件第一行为标题语句，由任意字符串和字母组成，软件并不处理，而是直接在输出文件中作为第一行打印出来</p>
+</li>
+<li><p><strong>注释语句：</strong>由*开头的字符串，为文件的说明部分，为方便阅读而在自动产生的SPICE网表文件中大量存在</p>
+</li>
+<li><p><strong>电路描述语句：</strong>定义电路拓扑结构和元器件参数的语句，由元器件描述语句、模型描述语句、电源语句等组成</p>
+</li>
+<li><p><strong>电路特性分析和控制语句：</strong>以.开头的语句，描述要分析的电路特性及控制命令</p>
+</li>
+<li><p><strong>结束语句：</strong>即.END ，标志电路描述语句的结束，在文件最后一行（最后将会给出SPICE网表文件的例子）</p>
+<h2 id="电路描述语句："><a href="#电路描述语句：" class="headerlink" title="电路描述语句："></a>电路描述语句：</h2><p>是SPICE网表文件中最多也最复杂的，有以下一些规定：</p>
+</li>
+<li><p><strong>名称：为字符串，只有前8个字符有效，其中第一个字符必须为A–Z的字符，且有固定含义，对应不同类型的元件。</strong></p>
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>元件名</th>
+<th>符号</th>
+<th>Table</th>
+<th>符号</th>
+<th>Cool</th>
+<th>符号</th>
+<th>Cool</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>B</td>
+<td>GaAs场效应晶体管</td>
+<td>C</td>
+<td>电容</td>
+<td>D</td>
+<td>二极管</td>
+<td>X</td>
+<td>子电路</td>
+</tr>
+<tr>
+<td>E</td>
+<td>电压控制电压源</td>
+<td>F</td>
+<td>电流控制电压源</td>
+<td>G</td>
+<td>电压控制电流源</td>
+<td>H</td>
+<td>电流控制电压源</td>
+</tr>
+<tr>
+<td>I</td>
+<td>独立电流源</td>
+<td>J</td>
+<td>结型场效应晶体管</td>
+<td>K</td>
+<td>互感和磁芯</td>
+<td>L</td>
+<td>电感</td>
+</tr>
+<tr>
+<td>M</td>
+<td>MOS场效应晶体管</td>
+<td>Q</td>
+<td>双极性晶体管</td>
+<td>R</td>
+<td>电阻</td>
+<td>S</td>
+<td>电压控制开关</td>
+</tr>
+<tr>
+<td>T</td>
+<td>传输线</td>
+<td>U</td>
+<td>数字电路器件</td>
+<td>V</td>
+<td>独立电压源</td>
+<td>W</td>
+<td>电流控制开关</td>
+</tr>
+</tbody></table>
+</li>
+<li><p><strong>数字：有几种形式，整数、浮点数、整数或浮点数加上整数指数、浮点数或整数后面加上比例因子,常用的比例因子：有T、G、MEG、K、M、U、N、P、F、MIL等，不分大小写</strong></p>
+<table>
+<thead>
+<tr>
+<th>T=10E12</th>
+<th>G=10E9</th>
+<th>MEG=10E6</th>
+<th>K=10E3</th>
+<th>MIL=25.4E-6</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>M=10E-3</td>
+<td>U=10E-6</td>
+<td>N=10E-9</td>
+<td>P=10E-12</td>
+<td>F=10E-15</td>
+</tr>
+</tbody></table>
+</li>
+<li><p><strong>分隔符：有空格、逗号、等号、左括号、右括号等</strong></p>
+</li>
+<li><p><strong>续行号：“+”，一行最多只能有80字符，如一行无法表达完全，可在第二行起始加+号，表示是前一行的继续</strong></p>
+</li>
+<li><p><strong>单位：使用国际标准单位制，语句中缺省</strong></p>
+</li>
+<li><p><strong>规定支路电流的正方向和支路电压的正方向一致</strong></p>
+</li>
+<li><p><strong>节点编号：可以是任意的数字或字符串，节点0规定为地，不允许有悬浮的节点，即每个节点对0节点都必须有直流的通路。当实际电路不满足这个要求时，可在悬浮节点与地之间接一个大电阻（如1G）</strong></p>
+</li>
+<li><p><strong>不能分析的问题：电压源回路、电感回路、电压源和电感组成的回路、隔断的电流源和（或）电容</strong></p>
+<h3 id="无源元件描述语句"><a href="#无源元件描述语句" class="headerlink" title="无源元件描述语句"></a>无源元件描述语句</h3><h4 id="电阻描述语句"><a href="#电阻描述语句" class="headerlink" title="电阻描述语句"></a>电阻描述语句</h4></li>
+</ul>
+<p><strong>RXXXXXXX N+ N- &lt;(MODEL)NAME&gt; VALUE &lt;TC=TC1&gt;</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">  RXXXXXXX        //元件名称</span><br><span class="line">  N+ N-           //电阻两端的节点号，当电阻上加正电压时，电流从N+流向N-</span><br><span class="line">  (MODEL)NAME     //可选项，指出电阻将用上后面由.MODEL语句定义的模型</span><br><span class="line">  VALUE           //电阻值，单位Ohm</span><br><span class="line">  TC=&quot;TC1&quot; &lt;TC2&gt;  //可选的温度系数，TC1 TC2分别是一阶、二阶温度系数</span><br><span class="line">       </span><br><span class="line">电阻的温度公式：VALUE(T)=RR0[1+TC1(T-T0)+TC2*(T-T0)*(T-T0)]</span><br><span class="line">  //R0为电阻描述语句中的阻值，T0为常温300K</span><br><span class="line">			</span><br><span class="line">电阻模型语句：      </span><br><span class="line">	.MODEL MNAME RES R=”PVAL1” &lt;TC1=PVAL2&gt; &lt;TC2=PVAL3&gt; &lt;TCE=PVAL4&gt;</span><br><span class="line">     //RES为电阻模型关键字，R定义电阻倍乘系数，TCE定义指数温度系数</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>例句：</strong>R4 0 3 RMOD 100<br>.MODEL RMOD RES(R=2 TC1=0.1 TC2=0.01)</p>
+</blockquote>
+<h4 id="电容电感描述语句"><a href="#电容电感描述语句" class="headerlink" title="电容电感描述语句"></a>电容电感描述语句</h4><p><strong>CXXXXXXX N+ N- &lt;(MODEL)NAME&gt; VALUE &lt;IC=INCOND&gt;</strong><br><strong>LXXXXXXX N+ N- &lt;(MODEL)NAME&gt; VALUE &lt;IC=INCOND&gt;</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">   VALUE          //电容电感的值，不能为零</span><br><span class="line">                 //IC规定初始条件，仅在瞬态分析语句中设关键字UIC时赋值才有意义</span><br><span class="line">                      </span><br><span class="line">电容电感模型语句：</span><br><span class="line">  .MODEL MNAME CAP(C=PVAL1 VC1=PVAL2 VC2=PVAL3 TC1=PVAL4 TC2=PVAL5)</span><br><span class="line">  .MODEL MNAME IND(L=PVAL1 IL1=PVAL2 IL2=PVAL3 TC1=PVAL4 TC2=PVAL5)</span><br><span class="line">    C、L            //定义电容电感的倍乘系数</span><br><span class="line">    VC1、VC2        //分别是电容的一阶、二阶电压系数</span><br><span class="line">    IL1、IL2        //分别是电感的一阶、二阶电流系数</span><br><span class="line">    TC1、TC2        //分别是电容、电感的温度系数</span><br><span class="line">         </span><br><span class="line">电容电感的求值公式：</span><br><span class="line">    C(V)=C0*C(1+VC1*V+VC2*V*V)</span><br><span class="line">    L(I)=L0*L(1+IL1*I+IL2*I*I)</span><br><span class="line">      //C0、L0分别是元件描述语句中的值</span><br><span class="line">         </span><br><span class="line">电容电感的温度公式与电阻的温度公式类似</span><br></pre></td></tr></table></figure>
+<h4 id="互感描述语句"><a href="#互感描述语句" class="headerlink" title="互感描述语句"></a>互感描述语句</h4><p><strong>KXXXXXXX LYYYYYYY LZZZZZZZ … VALUE &lt;(MODEL)NAME&gt; &lt;(SIZE)VALUE&gt;</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">		KXXXXXXX、LYYYYYYY      //是两个耦合电感的名称，也可以多个耦合电感按顺序写</span><br><span class="line">    VALUE                   //为耦合系数的值，0&lt;VALUE&lt;1，耦合规则通常在每个电感的第一个节点上加&#x27;.&#x27;,作为同名端</span><br><span class="line">    (MODEL)NAME             //为模型名，指出将用上后面由.MODEL语句定义的模型</span><br><span class="line">    (SIZE)VALUE             //用来定义磁芯的截面积的大小，缺省值为1</span><br><span class="line">    </span><br><span class="line">磁芯的模型语句：</span><br><span class="line">   .MODEL MNAME CORE AREA=”PVAL1” PATH=”PVAL2” GAP=”PVAL3” PACK=”PVAL4” MS=…</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>磁芯模型关键字</th>
+<th>磁芯模型关键字</th>
+<th>单位</th>
+<th>缺省值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AREA</td>
+<td>平均磁通横截面积</td>
+<td>cm2</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>PATH</td>
+<td>平均磁路长度</td>
+<td>cm</td>
+<td>1</td>
+</tr>
+<tr>
+<td>GAP</td>
+<td>有效气隙长度</td>
+<td>cm</td>
+<td>0</td>
+</tr>
+<tr>
+<td>PACK</td>
+<td>叠层系数</td>
+<td>-</td>
+<td>1</td>
+</tr>
+<tr>
+<td>MS</td>
+<td>磁饱和电流</td>
+<td>A/m</td>
+<td>1.00E+06</td>
+</tr>
+<tr>
+<td>ALPHA</td>
+<td>平均磁场系数</td>
+<td>-</td>
+<td>1.00E-03</td>
+</tr>
+<tr>
+<td>A</td>
+<td>形状参数</td>
+<td>A/m</td>
+<td>1.00E+03</td>
+</tr>
+<tr>
+<td>C</td>
+<td>磁畴壁的挠曲常数</td>
+<td>-</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>K</td>
+<td>磁畴壁的销连常数</td>
+<td>-</td>
+<td>500</td>
+</tr>
+</tbody></table>
+<h4 id="无损传输线描述语句"><a href="#无损传输线描述语句" class="headerlink" title="无损传输线描述语句"></a>无损传输线描述语句</h4><p><strong>TXXXXXXX N1 N2 N3 N4 Z0-VALUE &lt;TD=VALUE&gt; &lt;F=FREQ &lt;NL=NRMLEN&gt;&gt;+&lt;IC=V1,I1,V2,I2&gt;</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">N1、N2         //端口1的正负节点</span><br><span class="line">N3、N4         //端口2的正负节点</span><br><span class="line">Z0             //特性阻抗</span><br><span class="line">TD             //传输延迟，频率F及在频率F时相对于传输波长的归一化电学长度NL可用来确定延迟，两种表示方式要选一种</span><br><span class="line">IC             //确定每个端口的电压和电流，只在瞬态分析中用到（加UIC时）</span><br></pre></td></tr></table></figure>
+<h4 id="电压控制开关描述语句"><a href="#电压控制开关描述语句" class="headerlink" title="电压控制开关描述语句"></a>电压控制开关描述语句</h4><p><strong>SXXXXXXX N+ N- NC+ NC- &lt;(MODEL)NAME&gt;</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">  N+ N-         //分别是开关的正负节点</span><br><span class="line">  NC+ NC-       //分别是控制端的正负节点</span><br><span class="line">  (MODEL)NAME   //模型名，指出将用后面由.MODEL语句定义的模型</span><br><span class="line">    </span><br><span class="line">电压控制开关模型语句：</span><br><span class="line">  .MODEL NAME VSWITCH RON=”PVAL1” ROFF=”PVAL2” VON=”PVAL3” VOFF=”PVAL4”</span><br><span class="line">    VSWITCH     //压控开关模型的关键字</span><br><span class="line">    RON         //定义开关的导通电阻，缺省为1欧姆</span><br><span class="line">    ROFF        //定义开关的关断电阻，缺省为1兆欧姆</span><br><span class="line">    VON         //定义开关导通的阈值电压</span><br><span class="line">    VOFF        //定义开关关断的阈值电压</span><br></pre></td></tr></table></figure>
+<h4 id="电流控制开关的描述语句"><a href="#电流控制开关的描述语句" class="headerlink" title="电流控制开关的描述语句"></a>电流控制开关的描述语句</h4><p><strong>WXXXXXXX N+ N- VNAME &lt;(MODEL)NAME&gt;</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">  N+ N-         //分别是开关的正负节点</span><br><span class="line">  VNAME         //是控制电流流过的电压源的名称</span><br><span class="line">  (MODEL)NAME   //模型名，指出将用上后面由.MODEL语句定义的模型</span><br><span class="line">    </span><br><span class="line">电流控制开关模型语句：</span><br><span class="line">  .MODEL ISMOD ISWITCH RON=”PVAL1” ROFF=”PVAL2” ION=”PVAL3” IOFF=”PVAL4”</span><br><span class="line">    //ISWITCH为流控开关模型的关键字</span><br><span class="line">    //ION为导通的阈值电流</span><br><span class="line">    //IOFF为关断的阈值电流</span><br></pre></td></tr></table></figure>
+<h3 id="有源元件描述语句"><a href="#有源元件描述语句" class="headerlink" title="有源元件描述语句"></a>有源元件描述语句</h3><h4 id="二极管描述语句"><a href="#二极管描述语句" class="headerlink" title="二极管描述语句"></a>二极管描述语句</h4><p><strong>DXXXXXXX N+ N- MNAME   &lt;IC=VD&gt;</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">  N+ N-         //为二极管的正负节点</span><br><span class="line">  MNAME         //为二极管的模型名，为必选项</span><br><span class="line">  AREA          //为面积因子</span><br><span class="line">  OFF           //为直流分析时的初始条件</span><br><span class="line">  IC=           //&quot;VD为瞬态分析时的初始条件&quot;</span><br><span class="line">    </span><br><span class="line">二极管的模型语句：</span><br><span class="line">  .MODEL MNAME D(PNAME1=PVAL1 PNAME2=PVAL2 ...)</span><br><span class="line">    //D为二极管模型的关键字，后面为二极管参数序列，一般二极管模型参数有15--25个</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>半导体二极管参数表（其中带*的受面积参数影响）</th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>符号</td>
+<td>名称</td>
+<td>默认值</td>
+<td>典型值</td>
+<td>单位</td>
+</tr>
+<tr>
+<td>IS</td>
+<td>饱和电流*</td>
+<td>1.00E-14</td>
+<td>1.00E-14</td>
+<td>A</td>
+</tr>
+<tr>
+<td>RS</td>
+<td>寄生串联电阻*</td>
+<td>0</td>
+<td>10</td>
+<td>ohm</td>
+</tr>
+<tr>
+<td>N</td>
+<td>发射系数</td>
+<td>1</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>TT</td>
+<td>渡越时间</td>
+<td>0</td>
+<td>0.1</td>
+<td>ns</td>
+</tr>
+<tr>
+<td>CJO</td>
+<td>零偏PN结电容</td>
+<td>0</td>
+<td>2</td>
+<td>pF</td>
+</tr>
+<tr>
+<td>VJ</td>
+<td>PN结电势</td>
+<td>1</td>
+<td>0.6</td>
+<td>V</td>
+</tr>
+<tr>
+<td>M</td>
+<td>PN结梯度因子</td>
+<td>0.5</td>
+<td>0.5</td>
+<td></td>
+</tr>
+<tr>
+<td>EG</td>
+<td>禁带宽度</td>
+<td>1.11</td>
+<td>1.11</td>
+<td>eV</td>
+</tr>
+<tr>
+<td>XT1</td>
+<td>IS的温度系数</td>
+<td>3</td>
+<td>3</td>
+<td></td>
+</tr>
+<tr>
+<td>KF</td>
+<td>闪烁噪声系数</td>
+<td>0</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>AF</td>
+<td>闪烁噪声指数</td>
+<td>1</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>FC</td>
+<td>正偏耗尽层电容系数</td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>BV</td>
+<td>反向击穿电压</td>
+<td>无穷大</td>
+<td>50</td>
+<td>V</td>
+</tr>
+<tr>
+<td>IBV</td>
+<td>反向击穿电流*</td>
+<td>1.00E-10</td>
+<td></td>
+<td>A</td>
+</tr>
+</tbody></table>
+<h4 id="双极型晶体管描述语句"><a href="#双极型晶体管描述语句" class="headerlink" title="双极型晶体管描述语句"></a>双极型晶体管描述语句</h4><p><strong>QXXXXXXX NC NB NE  MNAME   &lt;IC=VBE,VCE&gt;</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">		NC NB NE NS			//分别是双极型晶体管的集电极、基极、发射极以及衬底所在节点，NS缺省表示衬底接地</span><br><span class="line">    MNAME						//为双极型晶体管的模型名，为必选项</span><br><span class="line">    AREA						//为面积因子</span><br><span class="line">    OFF							//为直流分析时初始条件</span><br><span class="line">    IC=&quot;VBE&quot; 				//VBE、 VCE为瞬态分析时初始条件</span><br><span class="line">    </span><br><span class="line">双极型晶体管模型语句：</span><br><span class="line">		.MODEL MNAME NPN(OR PNP) (PNAME=PVAL1 PNAME=&quot;PVAL2&quot; ...)</span><br><span class="line">      //双极型晶体管模型有两种类型，NPN PNP分别为其模型关键字，后面为参数序列，一般双极型晶体管模型参数有40多个</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>双极型晶体管模型的参数表(带*的受面积参数影响)</th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>符号</td>
+<td>名称</td>
+<td>默认值</td>
+<td>典型值</td>
+<td>单位</td>
+</tr>
+<tr>
+<td>IS</td>
+<td>饱和电流*</td>
+<td>1.00E-16</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>BF</td>
+<td>理想最大正向电流放大系数</td>
+<td>100</td>
+<td>100</td>
+<td></td>
+</tr>
+<tr>
+<td>NF</td>
+<td>发射系数</td>
+<td>1</td>
+<td>1</td>
+<td></td>
+</tr>
+<tr>
+<td>VAF（VA）</td>
+<td>正向BTEA电压</td>
+<td>无穷大</td>
+<td>100</td>
+<td>V</td>
+</tr>
+<tr>
+<td>IKF（IK）</td>
+<td>正向BTEA大电流下降点，正向膝点电流</td>
+<td>无穷大</td>
+<td>1.00E-02</td>
+<td>A</td>
+</tr>
+<tr>
+<td>ISE（C2）</td>
+<td>基极-发射极漏饱和电流</td>
+<td>0</td>
+<td>1000</td>
+<td>A</td>
+</tr>
+<tr>
+<td>NE</td>
+<td>基极-发射极漏发射系数</td>
+<td>1.5</td>
+<td>2</td>
+<td></td>
+</tr>
+<tr>
+<td>BR</td>
+<td>理想最大反向电流放大系数</td>
+<td>1</td>
+<td>0.1</td>
+<td></td>
+</tr>
+<tr>
+<td>NR</td>
+<td>反向电流发射系数</td>
+<td>1</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>VAR（VB）</td>
+<td>反向ERALY电压</td>
+<td>无穷大</td>
+<td>100</td>
+<td>V</td>
+</tr>
+<tr>
+<td>IKR</td>
+<td>反向BETA大电流下降点，正向膝点电流*</td>
+<td>无穷大</td>
+<td>0.1</td>
+<td>A</td>
+</tr>
+<tr>
+<td>ISC（C4）</td>
+<td>基极-集电极漏饱和电流</td>
+<td>0</td>
+<td>1</td>
+<td>A</td>
+</tr>
+<tr>
+<td>NC</td>
+<td>基极-集电极漏发射系数</td>
+<td>2</td>
+<td>2</td>
+<td></td>
+</tr>
+<tr>
+<td>RB</td>
+<td>零偏基极电阻*</td>
+<td>0</td>
+<td>100</td>
+<td>ohm</td>
+</tr>
+<tr>
+<td>RBM</td>
+<td>大电流时最小基极电阻</td>
+<td>RB</td>
+<td>100</td>
+<td>ohm</td>
+</tr>
+<tr>
+<td>IRB</td>
+<td>基极电阻下降为Rb-Rbmin/2时的电流</td>
+<td>无穷大</td>
+<td></td>
+<td>A</td>
+</tr>
+<tr>
+<td>RE</td>
+<td>发射极电阻*</td>
+<td>0</td>
+<td>1</td>
+<td>ohm</td>
+</tr>
+<tr>
+<td>RC</td>
+<td>集电极电阻*</td>
+<td>0</td>
+<td>10</td>
+<td>ohm</td>
+</tr>
+<tr>
+<td>CJE</td>
+<td>零偏集电极PV结电容*</td>
+<td>0</td>
+<td>2</td>
+<td>pF</td>
+</tr>
+<tr>
+<td>VJE</td>
+<td>发射结内建电势</td>
+<td>0.75</td>
+<td>0.7</td>
+<td>V</td>
+</tr>
+<tr>
+<td>MJE（ME）</td>
+<td>发射结梯度因子</td>
+<td>0.33</td>
+<td>0.33</td>
+<td></td>
+</tr>
+<tr>
+<td>CJC</td>
+<td>零偏集电极PN结电容*</td>
+<td>0</td>
+<td>1</td>
+<td>pF</td>
+</tr>
+<tr>
+<td>VJC（PC)</td>
+<td>集电结内建电势</td>
+<td>0.75</td>
+<td>0.5</td>
+<td>V</td>
+</tr>
+<tr>
+<td>MJC（MC）</td>
+<td>集电结梯度因子</td>
+<td>0.33</td>
+<td>0.33</td>
+<td></td>
+</tr>
+<tr>
+<td>XCJC</td>
+<td>Cbc与Rb内连接部分</td>
+<td>1</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>CJS（CCS）</td>
+<td>零偏集电极-衬底PN结电容</td>
+<td>0</td>
+<td>2</td>
+<td>pF</td>
+</tr>
+<tr>
+<td>VJS（PS）</td>
+<td>衬底结内建电势</td>
+<td>0.75</td>
+<td></td>
+<td>V</td>
+</tr>
+<tr>
+<td>MJS（MS）</td>
+<td>衬底结梯度因子</td>
+<td>0</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>FC</td>
+<td>正偏势垒电容参数</td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>TF</td>
+<td>理想正向渡越时间（tf）</td>
+<td>0</td>
+<td>0.1</td>
+<td>s</td>
+</tr>
+<tr>
+<td>XTF</td>
+<td>tf随偏置变化系数</td>
+<td>0</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>VTF</td>
+<td>tf随偏置Vbe变化的电压参数</td>
+<td>无穷大</td>
+<td></td>
+<td>V</td>
+</tr>
+<tr>
+<td>ITF</td>
+<td>影响tf的大电流参数</td>
+<td>0</td>
+<td></td>
+<td>A</td>
+</tr>
+<tr>
+<td>PTF</td>
+<td>在1/（2PIt）Hz时的超前相移</td>
+<td>0</td>
+<td>PI/6</td>
+<td>RAD</td>
+</tr>
+<tr>
+<td>TR</td>
+<td>反向渡越时间</td>
+<td>0</td>
+<td>10</td>
+<td>ns</td>
+</tr>
+<tr>
+<td>EG</td>
+<td>禁带宽度</td>
+<td>1.11</td>
+<td>1.11</td>
+<td>eV</td>
+</tr>
+<tr>
+<td>XTB</td>
+<td>BR、BF的温度系数</td>
+<td>0</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>XT1（PT）</td>
+<td>IS的温度效应指数</td>
+<td>3</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>KF</td>
+<td>闪烁噪声系数</td>
+<td>0</td>
+<td>6.60E-16</td>
+<td></td>
+</tr>
+<tr>
+<td>AF</td>
+<td>闪烁噪声指数</td>
+<td>1</td>
+<td>1</td>
+<td></td>
+</tr>
+</tbody></table>
+<h4 id="MOS场效应晶体管描述语句"><a href="#MOS场效应晶体管描述语句" class="headerlink" title="MOS场效应晶体管描述语句"></a>MOS场效应晶体管描述语句</h4><p><strong>MXXXXXXX ND NG NS NB MNAME &lt;L=VAL&gt; &lt;W=VAL&gt; &lt;AD=VAL&gt; &lt;AS=VAL&gt; &lt;PD=VAL&gt; &lt;PS=VAL&gt;+&lt;NRD=VAL&gt; &lt;NRS=VAL&gt; <OFF> &lt;IC=VDS,VGS,VBS&gt;</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">  ND NG NS NB     //分别是MOS场效应晶体管的漏极、栅极、源极和衬底所在的节点</span><br><span class="line">  MNAME           //MOS场效应晶体管的模型名，为必选项</span><br><span class="line">  L W             //分别是MOS场效应晶体管沟道的长、宽</span><br><span class="line">  AD AS           //为漏极和源极的扩散区的面积</span><br><span class="line">  PD PS           //为漏极和源极的周长</span><br><span class="line">  NRD NRS         //为漏极和源极扩散区等效电阻的方块数</span><br><span class="line">  OFF             //为直流分析时初始条件</span><br><span class="line">  IC              //为瞬态分析时初始条件</span><br><span class="line"></span><br><span class="line">MOS场效应晶体管模型语句：</span><br><span class="line">  .MODEL MNAME NMOS(OR PMOS) (PNAME=PVAL1 PNAME=&quot;PVAL2&quot; ...)</span><br><span class="line">    //MOS场效应晶体管模型有两种类型，NMOS PMOS分别为其模型关键字</span><br><span class="line">    //后面为参数序列，一般模型参数有40--60个，大多为工艺参数</span><br><span class="line">    //MOS场效应晶体管模型有四个级别，用语句LEVEL来指定，缺省时LEVEL=1</span><br><span class="line">         LEVEL=&quot;1&quot;     Shichman-Hadges模型</span><br><span class="line">         LEVEL=&quot;2&quot;     基于几何图形的一种二维分析模型</span><br><span class="line">         LEVEL=&quot;3&quot;     半经验短沟道模型</span><br><span class="line">         LEVEL=&quot;4&quot;     亚微米BSIM模型</span><br><span class="line">    //因MOS场效应晶体管模型的参数较多（40--60个）而且较复杂，很多与制造工艺有关</span><br><span class="line">    涉及太多微电子的知识，就不再列出了</span><br><span class="line">    *系统级使用时一般使用相关制造厂商或第三方提供的模型参数*</span><br></pre></td></tr></table></figure>
+<h4 id="结型场效应晶体管描述语句"><a href="#结型场效应晶体管描述语句" class="headerlink" title="结型场效应晶体管描述语句"></a>结型场效应晶体管描述语句</h4><p><strong>JXXXXXXX ND NG NS MNAME <AREA> <OFF> &lt;IC=VDS,VGS&gt;</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">  ND NG NS       //分别是结型场效应晶体管的漏极、栅极、源极所在的节点</span><br><span class="line">  MNAME          //为结型场效应晶体管的模型名，为必选项</span><br><span class="line">  AREA           //为面积因子</span><br><span class="line">  OFF            //为直流分析时初始条件</span><br><span class="line">  IC=&quot;VDS&quot;,VGS   //为瞬态分析时初始条件</span><br><span class="line"></span><br><span class="line">结型场效应晶体管模型语句：</span><br><span class="line">  .MODEL MNAME NJF(OR PJF) (PNAME=PVAL1 PNAME=&quot;PVAL2&quot; ...)</span><br><span class="line">    //结型场效应晶体管模型有两种类型，NJF PJF分别为其模型关键字，后面为参数序列，一般模型参数有20多个</span><br><span class="line">    //结型场效应晶体管模型的参数也不再列出了，一般使用相关制造厂商或第三方提供的模型参数</span><br></pre></td></tr></table></figure>
+<h4 id="GaAs场效应晶体管描述语句"><a href="#GaAs场效应晶体管描述语句" class="headerlink" title="GaAs场效应晶体管描述语句"></a>GaAs场效应晶体管描述语句</h4><p><strong>BXXXXXXX ND NG NS MNAME <AREA> <OFF> &lt;IC=VDS,VGS,VBS&gt;</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">  ND NG NS          //分别是GaAs场效应晶体管漏极、栅极、源极所在的节点</span><br><span class="line">  MNAME             //为结型场效应晶体管的模型名，为必选项</span><br><span class="line">  AREA              //为面积因子</span><br><span class="line">  OFF               //为直流分析时初始条件</span><br><span class="line">  IC=&quot;VDS&quot;,VGS,VBS  //为瞬态分析时初始条件</span><br><span class="line">  </span><br><span class="line">GaAs场效应晶体管模型语句：</span><br><span class="line">  .MODEL MNAME GASFET (PNAME=PVAL1 PNAME=&quot;PVAL2&quot; ...)</span><br><span class="line">    //GASFET为GaAs场效应晶体管模型的关键字，后面为参数序列，一般模型参数约30个</span><br><span class="line">    //GaAs场效应晶体管模型有三个级别，用语句LEVEL来指定，缺省时LEVEL=1</span><br><span class="line">         LEVEL=&quot;1&quot;        Curtice模型</span><br><span class="line">         LEVEL=&quot;2&quot;        Statz或Raytheon模型</span><br><span class="line">         LEVEL=&quot;3&quot;        Triquint模型</span><br><span class="line">    //GaAs场效应晶体管模型的参数也不再列出了，一般使用相关制造厂商或第三方提供的模型参数</span><br></pre></td></tr></table></figure>
+<h4 id="数字电路器件描述语句"><a href="#数字电路器件描述语句" class="headerlink" title="数字电路器件描述语句"></a>数字电路器件描述语句</h4><p><strong>UXXXXXXX <NAME> <PRIMITIVE TYPE> [(<PARAMETER VALUE><em>)]+<DIGITAL POWER NODE> <DIGITAL GROUND NODE> <NODE></em><TIMING MODELNAME>+&lt;I/OMODEL NAME&gt; [MNTYMXDLY=<DELAY SELECT VALUE>]+[I/O-LEVEL=<INTERFACE SUBKET SELECT VALUE>]</strong></p>
+<p><strong>UXXXXXXX &lt;STIM (WIDTH)VALUE,(FORMAT)VALUE&gt; <NODE>*&lt;(I/O)MODEL NAME&gt;+&lt;TIMESTEP=(STEPSIZE)VALUE&gt; <WAVEFORM DESCRIPTION></strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">前一种表示数字电路，名称后是类型、参数值、节点、定时模型名、输入输出模型名</span><br><span class="line">      后一种表示激励波形发生器，将规定的激励加到指定的节点上</span><br><span class="line">2.6.1 子电路描述语句：以.SUBCKT作为开始，以.END作为结束的一组语句，作为以X开始的元件</span><br><span class="line">2.6.1.1 子电路定义开始语句：.SUBCKT &lt;SUBNAME&gt; N1 &lt;N2 N3 ...&gt;</span><br><span class="line">         其中：SUBNAME是子电路名称</span><br><span class="line">              N1 N2 N3等是子电路外部节点号</span><br><span class="line">2.6.1.2 子电路结束语句：.ENDS &lt;SUBNAME</span><br><span class="line">         表示结束SUBNAME子电路或结束所有子电路定义</span><br></pre></td></tr></table></figure>
+<h3 id="元器件库调用语句"><a href="#元器件库调用语句" class="headerlink" title="元器件库调用语句"></a>元器件库调用语句</h3><p><strong>.LIB <filename></strong><br>    //filename为库文件名，必须带扩展名.lib，缺省名为nom.lib，列出所有库文件</p>
+<h3 id="电源描述语句"><a href="#电源描述语句" class="headerlink" title="电源描述语句"></a>电源描述语句</h3><h4 id="独立电源描述语句"><a href="#独立电源描述语句" class="headerlink" title="独立电源描述语句"></a>独立电源描述语句</h4><p>独立<strong>电压源</strong>描述语句：<br><strong>VXXXXXXX N+ N- &lt;(DC)DC/TRAN VALUE&gt; &lt;AC (ACMAG (ACPHASE))&gt;</strong><br>独立<strong>电流源</strong>描述语句：<br><strong>IXXXXXXX N+ N- &lt;(DC)DC/TRAN VALUE&gt; &lt;AC (ACMAG (ACPHASE))&gt;</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//N+ N-为电源的正负节点，电流源的电流正方向为使电流从N+节点流出并流入N-节点</span><br><span class="line">//DC/TRAN VALUE指电源的直流或随时间变化的瞬时值，缺省为0</span><br></pre></td></tr></table></figure>
+<p><strong>独立电源按直流、交流、瞬态源等可细分为如下几种：</strong></p>
+<h5 id="直流电源"><a href="#直流电源" class="headerlink" title="直流电源"></a>直流电源</h5><p>  直流<strong>电压</strong>源：<strong>VXXXXXXX N+ N- [DC] VALUE</strong><br>  直流<strong>电流</strong>源：<strong>IXXXXXXX N+ N- [DC] VALUE</strong></p>
+<h5 id="交流电源"><a href="#交流电源" class="headerlink" title="交流电源"></a>交流电源</h5><p>  交流<strong>电压</strong>源：<strong>VXXXXXXX N+ N- AC &lt;ACMEG <ACPHASE>&gt;</strong><br>  交流<strong>电流</strong>源：<strong>IXXXXXXX N+ N- AC &lt;ACMEG <ACPHASE>&gt;</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//ACMEG为正弦波幅值，缺省值为1</span><br><span class="line">//ACPHASE为正弦波的初始相位，缺省为0</span><br></pre></td></tr></table></figure>
+<p><strong>瞬态电源</strong><br>  脉冲<strong>电压</strong>源：<strong>VXXXXXXX N+ N- PULSE (V1 V2 TR TF PW PER)</strong><br>  脉冲<strong>电流</strong>源：<strong>IXXXXXXX N+ N- PULSE (I1 I2 TR TF PW PER)</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">V1 I1    //为起始值</span><br><span class="line">V2 I2    //为脉动值</span><br><span class="line">TD       //为延迟时间，缺省值为0</span><br><span class="line">TR       //为上升时间，缺省值为TSTEP</span><br><span class="line">TF       //为下降时间，缺省值为TSTEP</span><br><span class="line">PW       //为脉冲宽度，缺省值为TSTOP</span><br><span class="line">PER      //为周期，缺省值为TSTOP</span><br><span class="line">TSTEP TSTOP   //为瞬态分析时的步长和中止时间</span><br></pre></td></tr></table></figure>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617278101656-70d7a21a-54c3-482a-9bff-00bb2db6f98b.png#height=200&id=LGUnU&margin=%5Bobject%20Object%5D&name=image.png&originHeight=200&originWidth=321&originalType=binary&size=45844&status=done&style=none&width=321" alt="image.png"></p>
+<h5 id="瞬态正弦电源"><a href="#瞬态正弦电源" class="headerlink" title="瞬态正弦电源"></a>瞬态正弦电源</h5><p>  瞬态正弦<strong>电压</strong>源：<strong>VXXXXXXX N+ N- SIN (V0 VA F TD THETA)</strong><br>  瞬态正弦<strong>电流</strong>源：<strong>IXXXXXXX N+ N- SIN (I0 IA F TD THETA)</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">    //V0 I0为偏置值</span><br><span class="line">    //VA IA为振幅</span><br><span class="line">    //F为频率，缺省值为1/TSTOP</span><br><span class="line">    //TD为延迟时间，缺省为0</span><br><span class="line">    //THETA为阻尼时间，缺省为0</span><br><span class="line"></span><br><span class="line">正弦曲线表达式：</span><br><span class="line">  V(T)=V0+VA*SIN(2*PI*(F*(T-TD)+PHASE/360))*EXP(-(T-TD)*THETA)</span><br><span class="line">  I(T)=I0+IA*SIN(2*PI*(F*(T-TD)+PHASE/360))*EXP(-(T-TD)*THETA)</span><br></pre></td></tr></table></figure>
+<h5 id="瞬态指数电源"><a href="#瞬态指数电源" class="headerlink" title="瞬态指数电源"></a>瞬态指数电源</h5><p>  瞬态指数<strong>电压</strong>源：<strong>VXXXXXXX N+ N- EXP(V1 V2 TD1 TAU1 TD2 TAU2)</strong><br>  瞬态指数<strong>电流</strong>源：<strong>IXXXXXXX N+ N- EXP(I1 I2 TD1 TAU1 TD2 TAU2)</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">//V1 I1为初始值</span><br><span class="line">//V2 I2为终止值</span><br><span class="line">//TD1为上升延迟时间，缺省为0</span><br><span class="line">//TAU1为上升时间常数，缺省为TSTEP</span><br><span class="line">//TD2为下降延迟时间，缺省为TD1+TSTEP</span><br><span class="line">//TAU2为下降时间常数，缺省为TSTEP</span><br></pre></td></tr></table></figure>
+<h5 id="分段线性电源"><a href="#分段线性电源" class="headerlink" title="分段线性电源"></a>分段线性电源</h5><p>  分段线性<strong>电压</strong>源：<strong>VXXXXXXX N+ N- PWL (T1 V1 &lt;T2 V2 T3 V3 T4 V4 …&gt;)</strong><br>  分段线性<strong>电流</strong>源：<strong>IXXXXXXX N+ N- PWL (T1 I1 &lt;T2 I2 T3 I3 T4 I4 …&gt;)</strong></p>
+<h5 id="瞬态单调调频电源"><a href="#瞬态单调调频电源" class="headerlink" title="瞬态单调调频电源"></a>瞬态单调调频电源</h5><p>  瞬态单调调频<strong>电压</strong>源：<strong>VXXXXXXX N+ N- SEFM (V0 VA FC MDI FS)</strong><br>  瞬态单调调频<strong>电流</strong>源：<strong>IXXXXXXX N+ N- SEFM (I0 IA FC MDI FS)</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">    //V0 I0为偏置</span><br><span class="line">    //VA IA为幅度</span><br><span class="line">    //FC为载波频率，缺省值为1/TSTOP</span><br><span class="line">    //MDI为调制系数</span><br><span class="line">    //FS为信号频率，缺省值为1/TSTOP</span><br><span class="line"></span><br><span class="line">调频曲线表达式：</span><br><span class="line">    V(T)=V0+VA*SIN[(2*PI*FC*T)+MDI*SIN(2*PI*FS*T)]</span><br></pre></td></tr></table></figure>
+<h4 id="线性受控源描述语句"><a href="#线性受控源描述语句" class="headerlink" title="线性受控源描述语句"></a>线性受控源描述语句</h4><p>压控<strong>电压</strong>源：<strong>EXXXXXXX N+ N- NC+ NC- VALUE</strong><br>压控<strong>电流</strong>源：<strong>GXXXXXXX N+ N- NC+ NC- VALUE</strong><br>流控<strong>电流</strong>源：<strong>HXXXXXXX N+ N- VNAME VALUE</strong><br>流控<strong>电流</strong>源：<strong>FXXXXXXX N+ N- VNAME VALUE</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//NC+ NC-为控制电压支路的正负节点</span><br><span class="line">//VNAME为控制电流流过的电压源的名称</span><br></pre></td></tr></table></figure>
+<h2 id="分析语句"><a href="#分析语句" class="headerlink" title="分析语句"></a>分析语句</h2><h3 id="直流分析"><a href="#直流分析" class="headerlink" title="直流分析"></a>直流分析</h3><ul>
+<li><p>直流<strong>工作点</strong>分析：  <strong>.OP</strong></p>
+</li>
+<li><p>直流<strong>扫描</strong>分析：**.DC <TYPE> VAR START STOP INC <VAR2 START2 STOP2>**</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">//TYPE为扫描类型，线性为LIN、数量级为DEC、倍频程为OCT、列表为LIST</span><br><span class="line">//VAR为扫描变量</span><br><span class="line">//START STOP为扫描变化范围</span><br><span class="line">//INC是扫描步长或者点数，必须为正数</span><br><span class="line">//VAR2是第二个扫描变量（外循环），可选项</span><br></pre></td></tr></table></figure></li>
+<li><p>直流小信号传输函数分析：**.TF OUTVAR INSRC**</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//OUTVAR为输出变量</span><br><span class="line">//INSRC为小信号输入源名称</span><br></pre></td></tr></table></figure></li>
+<li><p>直流小信号灵敏度分析：**.SENS**</p>
+</li>
+<li><p>节点电压设置：**.NODESET**</p>
+<h3 id="交流分析"><a href="#交流分析" class="headerlink" title="交流分析"></a>交流分析</h3></li>
+<li><p>交流小信号分析：**.AC TYPE Nx FSTART FSTOP**</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">线性   .AC LIN NP FSTART FSTOP</span><br><span class="line">数量级 .AC DEC ND FSTART FSTOP</span><br><span class="line">倍频程 .AC OCT NO FSTART FSTOP</span><br><span class="line">    //NP为步长</span><br><span class="line">    //ND为变化点数</span><br><span class="line">    //NO为变化点数</span><br></pre></td></tr></table></figure></li>
+<li><p>噪声分析：**.NOISE OUTV INSRC NUMS**</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">OUTV为某节点上总的噪声输出电压</span><br><span class="line">INSRC为作噪声输入基准的独立电压源或独立电流源名</span><br><span class="line">NUMS为频率间隔点数，在每个频率处打印出电路中每个噪声源的贡献</span><br></pre></td></tr></table></figure>
+<h3 id="瞬态分析"><a href="#瞬态分析" class="headerlink" title="瞬态分析"></a>瞬态分析</h3></li>
+<li><p>时域波形分析：**.TRAN TSTART TSTOP DISPSTART STEPMAX**</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//TSTART为起点时间</span><br><span class="line">//TSTOP为终点时间</span><br><span class="line">//DISPSTART为显示起点</span><br><span class="line">//STEPMAX为瞬态分析最大步长，可缺省而由系统选</span><br></pre></td></tr></table></figure></li>
+<li><p>傅立叶分析：**.FOUR FREQ OV1 &lt;OV2 OV3 …&gt;**</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//FREQ为基频</span><br><span class="line">//OV1 OV2 OV3为要求的输出变量</span><br></pre></td></tr></table></figure></li>
+<li><p>瞬态初始条件设置：**.IC**</p>
+<h3 id="综合分析"><a href="#综合分析" class="headerlink" title="综合分析"></a>综合分析</h3></li>
+<li><p>最坏情况分析：**.WCASE (ANALYSIS) (OUTVAR) <FUNCTION> <OPTION>**</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//ANALYSIS为DC/AC/TRAN中的一种</span><br><span class="line">//OUTVAR为输出变量，电压、电流等</span><br><span class="line">//FUNCTION为求值函数，有多种选择</span><br><span class="line">//OPTION为输出形式，LIST列每次运行模型参考值，OUTPUT输出文件或图形</span><br></pre></td></tr></table></figure></li>
+<li><p>蒙特卡罗分析：**.MC (RUNSVAL) (ANALYSIS) <OUTPUTVAR> <FUNCTION> <OPTION>**</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//RUNSVAL为运行次数</span><br><span class="line">//OUTPUTVAR为输出变量，电压、电流等</span><br></pre></td></tr></table></figure></li>
+<li><p>参数扫描分析：**.STEP**</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">线性扫描          .STEP (LIN) VAR START STOP INC</span><br><span class="line">数量级倍频程扫描   .STEP &lt;DEC&gt; &lt;OCT&gt; VAR START STOP ND</span><br><span class="line">列表扫描          .STEP VAR LIST VAL1 &lt;VAL2 ...&gt;</span><br><span class="line">                        //INC为步长</span><br><span class="line">                        //ND为变化点数</span><br></pre></td></tr></table></figure></li>
+<li><p>温度分析：**.TEMP**</p>
+<h2 id="控制语句"><a href="#控制语句" class="headerlink" title="控制语句"></a>控制语句</h2></li>
+<li><p>别名设置语句：**.ALIASES<strong>和</strong>.ENDALIAS**，中间为设置内容</p>
+</li>
+<li><p>文本输出文件中打印：**.PRINT**</p>
+</li>
+<li><p>文本输出文件中绘图：**.PLOT**</p>
+</li>
+<li><p>绘图软件包调用：**.PROBE**</p>
+</li>
+<li><p>参数及表达式设置：**.PARAM (NAME1=VALUE1) &lt;NAME2=VALUE2&gt; …**</p>
+<p>                                               //其中的VALUE也可用表达式EXPR</p>
+</li>
+<li><p>选择项设置：**.OPTION**</p>
+</li>
+<li><p>函数定义：**.FUNC**</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PSPICE中的PROBE控制语句：</span><br><span class="line">当输入文件中加入了.PROBE控制语句后，扫描计算结果存入*.dat文件中，可直观观察扫描结果</span><br><span class="line">PROBE自动将横坐标设为扫描变量，纵坐标需手动添加</span><br><span class="line">PROBE提供Cursor工具，方便使用鼠标的左右键控制两个光标，</span><br><span class="line">沿选定曲线进行测量，还有小窗口显示光标对应的值还有两光标间的差值</span><br></pre></td></tr></table></figure>
+<h2 id="变量扫描"><a href="#变量扫描" class="headerlink" title="变量扫描"></a>变量扫描</h2></li>
+</ul>
+<p><strong>对一些仿真参数，PSPICE可设置为变量，通过设置其变化范围，仿真出不同的结果，以便进行对照以选择最佳值</strong></p>
+<blockquote>
+<p>如：可把双极型晶体管的偏置电阻设为变量，仿真出不同偏置电阻值时的放大系数及集电极电流等参数，最终可选择最佳的偏置电阻值<br>可进行变量扫描的参数如下：</p>
+</blockquote>
+<ul>
+<li>独立源类：任何独立电压源和独立电流源都可以作为扫描变量</li>
+<li>模型参数类：任何一个.MODEL中描述的模型参数都可作为扫描变量，如温度系数、场效应管的沟道长度和宽度等</li>
+<li>温度变量：以TEMP作为扫描变量，可以观察在<strong>不同温度下的电路特性</strong></li>
+<li>总体参数：对<strong>元器件值</strong>扫描，必须通过模型的设置来实现</li>
+</ul>
+<p>熟练使用参数的变量扫描，可大大提高仿真效率</p>
+<h2 id="SPICE软件的适用范围及缺点"><a href="#SPICE软件的适用范围及缺点" class="headerlink" title="SPICE软件的适用范围及缺点"></a>SPICE软件的适用范围及缺点</h2><ul>
+<li>SPICE是进行元器件级的仿真，对含元器件少的功能较单一的电路进行仿真较合适和准确，比如放大器、调制器等，但对结构复杂且器件较多的电路进行分析则比较费时，结果也可能偏离较大。</li>
+<li>Spice采用变步长算法，对于周期性开关状态变化的电力电子电路而言，将造成把大量的时间耗费在寻求合适的步长上面，从而导致计算时间的延长。</li>
+<li>SPICE的器件模型都是针对小功率电子器件的，而对于电力电子电路中所用的大功率器件存在的高电压、大注入现象不尽适用，有时甚至可能导致错误的结果。</li>
+<li>SPICE的另一问题是仿真的收敛性问题，在对复杂电路进行仿真时，有时数据的准确性较低，甚至常出现不能收敛而导致仿真失败。SPICE软件更适合模拟电路仿真，可以做一些简单的数字电路仿真，但用于数模混合电路时很容易出问题。</li>
+<li>SPICE模型的分析精度主要取决于模型参数的来源(即数据的精确性)，以及模型方程式的适用范围，而模型方程式与各种不同的数字仿真器相结合时也可能会影响分析的精度。</li>
+<li>SPICE对元器件模型的依赖性很大，但这些参数通常都属于设计者和制造商的知识产权和机密，常因缺乏模型导致仿真无法实现。目前美国、欧洲的半导体厂商的分立元件的SPICE模型较多，特别是著名厂商网站上都可下载，但日本生产的元件就很少有模型，而IC的模型更是少得多，通常还要购买。</li>
+<li>SPICE最早主要是为集成电路设计开发的，半导体模型参数设计太多工艺参数和材料特性，而不是用户手册上的使用参数，使用非常不便，在遇到模型库中未有的元件时，就难以仿真。虽然一些公司的SPICE软件也有新建元器件模型的界面，如PSPICE，但因参数涉及很多微电子专业的术语，使用者不容易理解和转换。</li>
+<li>因各方面原因，仿真结果与实际调试出的电路的测试结果都有一些误差，而且常常在50%以上。</li>
+<li>SPICE在应用于一些脉冲电路时，如方波发生器、多谐振荡器、单稳触发器、迟滞比较器等，也常常无法得到正确结果。</li>
+<li>许多谐振器和振荡器电路都难以仿真。</li>
+<li>RF电路仿真能力较差，阻抗匹配和阻抗园图等都难以使用，各种端口参数也难以实现。</li>
+<li>在磁性元件的模型方面Spice也有待加强。<h2 id="SPICE网表文件的实例"><a href="#SPICE网表文件的实例" class="headerlink" title="SPICE网表文件的实例"></a>SPICE网表文件的实例</h2>是软件AIM-Spice附带的实例，而直观的原理图却没有提供，可自己试着画出来<br>（AIM-Spice是一个文本输入的Spice软件，功能单一且原始，但可免费下载，便于学习Spice。）<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">difpair ckt - simple differential pair</span><br><span class="line">vin 1 0 sin(0 0.1 5meg) ac 1</span><br><span class="line">vcc 8 0 12</span><br><span class="line">vee 9 0 -12</span><br><span class="line">q1 4 2 6 qnl</span><br><span class="line">q2 5 3 6 qnl</span><br><span class="line">rs1 1 2 1k</span><br><span class="line">rs2 3 0 1k</span><br><span class="line">rc1 4 8 10k</span><br><span class="line">rc2 5 8 10k</span><br><span class="line">q3 6 7 9 qnl</span><br><span class="line">q4 7 7 9 qnl</span><br><span class="line">rbias 7 8 20k</span><br><span class="line">.model qnl npn(bf=80 rb=&quot;100&quot; ccs=&quot;2pf&quot; tf=&quot;0&quot;.3ns tr=&quot;6ns&quot; cje=&quot;3pf&quot; cjc=&quot;2pf&quot;</span><br><span class="line">+ va=&quot;50&quot;)</span><br><span class="line">2. 用ORCAD10中附带的PSPICE模块自动产生的网表文件的实例（删去了空行）：</span><br><span class="line">**** 11/15/08 16:12:15 ******* PSpice 10.0.0 (Jan 2003) ******* ID# 1111111111</span><br><span class="line">  ** Profile: &quot;SCHEMATIC1-bias&quot; [ D:\My Documents\orcad\transistor-pspicefiles\schematic1\bias.sim ]</span><br><span class="line">  **** CIRCUIT DESCRIPTION</span><br><span class="line">******************************************************************************</span><br><span class="line">** Creating circuit file &quot;bias.cir&quot;</span><br><span class="line">** WARNING: THIS AUTOMATICALLY GENERATED FILE MAY BE OVERWRITTEN BY SUBSEQUENT SIMULATIONS</span><br><span class="line">*Libraries:</span><br><span class="line">* Profile Libraries :</span><br><span class="line">* Local Libraries :</span><br><span class="line">* From [PSPICE NETLIST] section of e:\OrCAD\OrCAD_10.0\tools\PSpice\PSpice.ini file:</span><br><span class="line">.lib &quot;nom.lib&quot;</span><br><span class="line">*Analysis directives:</span><br><span class="line">.TRAN 0 20ms 10ms</span><br><span class="line">.PROBE V(alias(*)) I(alias(*)) W(alias(*)) D(alias(*)) NOISE(alias(*))</span><br><span class="line">.INC &quot;..\SCHEMATIC1.net&quot;</span><br><span class="line">**** INCLUDING SCHEMATIC1.net ****</span><br><span class="line">* source TRANSISTOR</span><br><span class="line">Q_Q1         N00286 N00312 N00298 Q2N3904</span><br><span class="line">R_R1         N00312 N00256 470k</span><br><span class="line">R_R2         N00286 N00256 2.2k</span><br><span class="line">R_R3         0 N00298 47</span><br><span class="line">R_R5         0 N00374 10k</span><br><span class="line">C_C1         N00423 N00312 100n</span><br><span class="line">C_C2         N00286 N00374 100n</span><br><span class="line">V_V1         N00256 0 6Vdc</span><br><span class="line">V_V2         N00423 0 DC 0 AC 1</span><br><span class="line">+SIN 0 1m 1k 0 0 0</span><br><span class="line">**** RESUMING bias.cir ****</span><br><span class="line">.END</span><br></pre></td></tr></table></figure>
+其电路原理图及交流小信号分析和瞬态分析波形如下：<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617281007201-38abd98c-c847-49e9-b6da-e2906616e6e5.png#height=699&id=wjnxq&margin=%5Bobject%20Object%5D&name=image.png&originHeight=699&originWidth=445&originalType=binary&size=285866&status=done&style=none&width=445" alt="image.png"></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2020/09/21/Spice%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A8/" title="Spice语法基础入门">https://github.nanfeng.ink/2020/09/21/Spice语法基础入门/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spice/" rel="tag"><i class="fa fa-tag"></i> Spice</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/08/20/%E6%A8%A1%E6%8B%9F%E6%9B%B2%E5%B0%84%E7%94%B5%E7%A3%81%E7%82%AE%E8%AE%BE%E8%AE%A1/" rel="prev" title="模拟曲射电磁炮设计">
+      <i class="fa fa-chevron-left"></i> 模拟曲射电磁炮设计
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/09/22/%E5%B0%8F%E5%85%AD%E5%A3%AC%E9%A2%84%E6%B5%8B%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B/" rel="next" title="小六壬预测快速上手">
+      小六壬预测快速上手 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">前言：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SPICE%E4%BB%BF%E7%9C%9F%E8%BD%AF%E4%BB%B6%E5%9F%BA%E7%A1%80"><span class="nav-number"></span> <span class="nav-text">SPICE仿真软件基础</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%B5%E8%B7%AF%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">电路描述语句：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A0%E6%BA%90%E5%85%83%E4%BB%B6%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.1.</span> <span class="nav-text">无源元件描述语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%B5%E9%98%BB%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.1.1.</span> <span class="nav-text">电阻描述语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%B5%E5%AE%B9%E7%94%B5%E6%84%9F%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.1.2.</span> <span class="nav-text">电容电感描述语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%92%E6%84%9F%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.1.3.</span> <span class="nav-text">互感描述语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E6%8D%9F%E4%BC%A0%E8%BE%93%E7%BA%BF%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.1.4.</span> <span class="nav-text">无损传输线描述语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%B5%E5%8E%8B%E6%8E%A7%E5%88%B6%E5%BC%80%E5%85%B3%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.1.5.</span> <span class="nav-text">电压控制开关描述语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%B5%E6%B5%81%E6%8E%A7%E5%88%B6%E5%BC%80%E5%85%B3%E7%9A%84%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.1.6.</span> <span class="nav-text">电流控制开关的描述语句</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%89%E6%BA%90%E5%85%83%E4%BB%B6%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.2.</span> <span class="nav-text">有源元件描述语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E6%9E%81%E7%AE%A1%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.2.1.</span> <span class="nav-text">二极管描述语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%8C%E6%9E%81%E5%9E%8B%E6%99%B6%E4%BD%93%E7%AE%A1%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.2.2.</span> <span class="nav-text">双极型晶体管描述语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MOS%E5%9C%BA%E6%95%88%E5%BA%94%E6%99%B6%E4%BD%93%E7%AE%A1%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.2.3.</span> <span class="nav-text">MOS场效应晶体管描述语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E5%9E%8B%E5%9C%BA%E6%95%88%E5%BA%94%E6%99%B6%E4%BD%93%E7%AE%A1%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.2.4.</span> <span class="nav-text">结型场效应晶体管描述语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#GaAs%E5%9C%BA%E6%95%88%E5%BA%94%E6%99%B6%E4%BD%93%E7%AE%A1%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.2.5.</span> <span class="nav-text">GaAs场效应晶体管描述语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E5%AD%97%E7%94%B5%E8%B7%AF%E5%99%A8%E4%BB%B6%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.2.6.</span> <span class="nav-text">数字电路器件描述语句</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%83%E5%99%A8%E4%BB%B6%E5%BA%93%E8%B0%83%E7%94%A8%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.3.</span> <span class="nav-text">元器件库调用语句</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%B5%E6%BA%90%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.4.</span> <span class="nav-text">电源描述语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8B%AC%E7%AB%8B%E7%94%B5%E6%BA%90%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.4.1.</span> <span class="nav-text">独立电源描述语句</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%9B%B4%E6%B5%81%E7%94%B5%E6%BA%90"><span class="nav-number">1.4.1.1.</span> <span class="nav-text">直流电源</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BA%A4%E6%B5%81%E7%94%B5%E6%BA%90"><span class="nav-number">1.4.1.2.</span> <span class="nav-text">交流电源</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%9E%AC%E6%80%81%E6%AD%A3%E5%BC%A6%E7%94%B5%E6%BA%90"><span class="nav-number">1.4.1.3.</span> <span class="nav-text">瞬态正弦电源</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%9E%AC%E6%80%81%E6%8C%87%E6%95%B0%E7%94%B5%E6%BA%90"><span class="nav-number">1.4.1.4.</span> <span class="nav-text">瞬态指数电源</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%86%E6%AE%B5%E7%BA%BF%E6%80%A7%E7%94%B5%E6%BA%90"><span class="nav-number">1.4.1.5.</span> <span class="nav-text">分段线性电源</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%9E%AC%E6%80%81%E5%8D%95%E8%B0%83%E8%B0%83%E9%A2%91%E7%94%B5%E6%BA%90"><span class="nav-number">1.4.1.6.</span> <span class="nav-text">瞬态单调调频电源</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E5%8F%97%E6%8E%A7%E6%BA%90%E6%8F%8F%E8%BF%B0%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.4.2.</span> <span class="nav-text">线性受控源描述语句</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E8%AF%AD%E5%8F%A5"><span class="nav-number">2.</span> <span class="nav-text">分析语句</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B4%E6%B5%81%E5%88%86%E6%9E%90"><span class="nav-number">2.1.</span> <span class="nav-text">直流分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%A4%E6%B5%81%E5%88%86%E6%9E%90"><span class="nav-number">2.2.</span> <span class="nav-text">交流分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9E%AC%E6%80%81%E5%88%86%E6%9E%90"><span class="nav-number">2.3.</span> <span class="nav-text">瞬态分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%BC%E5%90%88%E5%88%86%E6%9E%90"><span class="nav-number">2.4.</span> <span class="nav-text">综合分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E8%AF%AD%E5%8F%A5"><span class="nav-number">3.</span> <span class="nav-text">控制语句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%98%E9%87%8F%E6%89%AB%E6%8F%8F"><span class="nav-number">4.</span> <span class="nav-text">变量扫描</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SPICE%E8%BD%AF%E4%BB%B6%E7%9A%84%E9%80%82%E7%94%A8%E8%8C%83%E5%9B%B4%E5%8F%8A%E7%BC%BA%E7%82%B9"><span class="nav-number">5.</span> <span class="nav-text">SPICE软件的适用范围及缺点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SPICE%E7%BD%91%E8%A1%A8%E6%96%87%E4%BB%B6%E7%9A%84%E5%AE%9E%E4%BE%8B"><span class="nav-number">6.</span> <span class="nav-text">SPICE网表文件的实例</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

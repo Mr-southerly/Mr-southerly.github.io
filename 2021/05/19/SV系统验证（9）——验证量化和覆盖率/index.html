@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="概述 “验证如果没有量化，那么就意味着没有尽头。” 伴随着复杂SoC系统的验证难度系数成倍增加，无论是定向测试还是随机测试，我们在验证的过程中终究需要回答两个问题：   * 是否所有设计的功能在验证计划中都已经验证？  * 代码中的某些部分是否从未执行过？  覆盖率就是用来帮助我们在仿真中回答以上问题的指标，已经被广泛采用，作为衡量验证过程中的重要数据 一旦通过覆盖率来量化验证，我们可以在更复杂的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SV系统验证（9）——验证量化和覆盖率">
+<meta property="og:url" content="https://github.nanfeng.ink/2021/05/19/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%889%EF%BC%89%E2%80%94%E2%80%94%E9%AA%8C%E8%AF%81%E9%87%8F%E5%8C%96%E5%92%8C%E8%A6%86%E7%9B%96%E7%8E%87/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="概述 “验证如果没有量化，那么就意味着没有尽头。” 伴随着复杂SoC系统的验证难度系数成倍增加，无论是定向测试还是随机测试，我们在验证的过程中终究需要回答两个问题：   * 是否所有设计的功能在验证计划中都已经验证？  * 代码中的某些部分是否从未执行过？  覆盖率就是用来帮助我们在仿真中回答以上问题的指标，已经被广泛采用，作为衡量验证过程中的重要数据 一旦通过覆盖率来量化验证，我们可以在更复杂的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1621067444892-a3380911-1fff-4196-9a68-a8c809479812.png#align=left&display=inline&height=337&margin=%5Bobject%20Object%5D&name=image.png&originHeight=570&originWidth=1162&size=192006&status=done&style=none&width=687">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1621067486566-4f67133a-62a8-46a6-9fb6-5e183b770aea.png#align=left&display=inline&height=351&margin=%5Bobject%20Object%5D&name=image.png&originHeight=621&originWidth=1248&size=327143&status=done&style=none&width=706">
+<meta property="article:published_time" content="2021-05-19T10:34:58.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="SystemVerilog">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1621067444892-a3380911-1fff-4196-9a68-a8c809479812.png#align=left&display=inline&height=337&margin=%5Bobject%20Object%5D&name=image.png&originHeight=570&originWidth=1162&size=192006&status=done&style=none&width=687">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2021/05/19/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%889%EF%BC%89%E2%80%94%E2%80%94%E9%AA%8C%E8%AF%81%E9%87%8F%E5%8C%96%E5%92%8C%E8%A6%86%E7%9B%96%E7%8E%87/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SV系统验证（9）——验证量化和覆盖率 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2021/05/19/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%889%EF%BC%89%E2%80%94%E2%80%94%E9%AA%8C%E8%AF%81%E9%87%8F%E5%8C%96%E5%92%8C%E8%A6%86%E7%9B%96%E7%8E%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SV系统验证（9）——验证量化和覆盖率
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-05-19 18:34:58" itemprop="dateCreated datePublished" datetime="2021-05-19T18:34:58+08:00">2021-05-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">笔记篇</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/%E6%95%B0%E5%AD%97%E9%AA%8C%E8%AF%81/" itemprop="url" rel="index"><span itemprop="name">数字验证</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><blockquote>
+<p>“验证如果没有量化，那么就意味着没有尽头。”<br>伴随着复杂SoC系统的验证难度系数成倍增加，无论是定向测试还是随机测试，我们在验证的过程中终究需要回答两个问题：</p>
+<ul>
+<li>是否所有设计的功能在验证计划中都已经验证？</li>
+<li>代码中的某些部分是否从未执行过？</li>
+</ul>
+</blockquote>
+<p><strong>覆盖率</strong>就是用来帮助我们在仿真中回答以上问题的指标，已经被广泛采用，作为衡量验证过程中的重要数据<br>一旦通过覆盖率来量化验证，我们可以在更复杂的情况下捕捉一些功能特性是否被覆盖：</p>
+<ul>
+<li>当我们在测试X特性的时候，Y特性是否也在同一时刻被使能和测试？</li>
+<li>是否可以精简我们已有的测试来加速仿真，并且取得同样的覆盖率？</li>
+<li>覆盖率在达到一定的数值的时候，是否停滞，不再继续上升？</li>
+</ul>
+<p>简单而言，覆盖率就是用来衡量验证<strong>精度</strong>和<strong>完备性</strong>的数据指标，可以告诉我们在仿真时设计的哪些结构被触发，当然，它也可以告诉我们设计在仿真时的哪些结构从未被触发过<br>只有满足以下三个条件，才可以在仿真中实现高质量的验证：</p>
+<ul>
+<li>测试平台必须产生合适的激励来触发一个设计错误</li>
+<li>测试平台仍然需要产生合适的激励使得被触发的错误可以进一步传导到输出端口</li>
+<li>测试平台需要包含一个监测器（monitor）用来监测被激活的设计错误，以及在它传播的某个节点（内部或者外部）可以捕捉到它</li>
+</ul>
+<h2 id="覆盖率种类"><a href="#覆盖率种类" class="headerlink" title="覆盖率种类"></a>覆盖率种类</h2><p><strong>没有任何一种单一的覆盖率</strong>可以完备地去衡量验证过程即使我们可以达到100%的代码覆盖率，但这并不意味着100%<br>的功能覆盖率。原因在于代码覆盖率并<strong>不是</strong>用来衡量设计内部的功能运转，或者模块之间的互动，或者功能时序的触发等。<br>类似地，我们即便达到了100%功能覆盖率，也可能只达到了90%的代码覆盖率。原因可能在于我们疏漏了去测试某些功能，或者一些实现的功能并没有被描述。<br>从上述关于代码覆盖率和功能覆盖率简单的论述就可以证明，如果想要得到全面的验证精度，我们就需要多个覆盖率种类的指标<br><strong>最常见的划分覆盖率的两种方法</strong></p>
+<ul>
+<li>按照覆盖率生成的方法，即隐性生成还是显性生成。</li>
+<li>按照覆盖率溯源，即它们从功能描述而来还是从设计实现而来。<blockquote>
+<p>例如功能覆盖率是显性的需要人为定义的覆盖率，而代码覆盖率则是隐性覆盖率这是因为仿真工具可以自动从RTL代码来生成。</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="代码覆盖率"><a href="#代码覆盖率" class="headerlink" title="代码覆盖率"></a>代码覆盖率</h2><p>代码覆盖率的一个优势在于它可以由仿真工具<strong>自动收集</strong>，继而用来指出在测试程序中设计源代码哪些被激活触发，而哪些则一直处于非激活的状态。由于代码覆盖率自动的特性，在仿真过程中使能它变得很简单，它不需要修改设计或者验证环境。</p>
+<h3 id="局限"><a href="#局限" class="headerlink" title="局限"></a>局限</h3><ul>
+<li><strong>代码覆盖率100%并不意味着足够的功能覆盖率</strong></li>
+<li>研究发现，在回归测试实现了90%的代码覆盖率时，平均只有54%的代码会被监测，这意味着即便代码覆盖率的完备性满足，但依然可能在这些代码中存在漏洞</li>
+<li>上述的推断是因为不是所有被覆盖的代码都会得到足够的监测，也由于没有得到足够的监测，因此一些即便被触发的漏洞也在传播的过程中没有到达监测点上——漏洞便从眼皮底下“逃逸”了</li>
+<li>另外，代码覆盖率的数据无法直接映射到哪些设计功能被测试了所以从这一点来看，代码覆盖率和功能覆盖率之间又是相互独立的。</li>
+</ul>
+<h3 id="跳转覆盖率（toggle）"><a href="#跳转覆盖率（toggle）" class="headerlink" title="跳转覆盖率（toggle）"></a>跳转覆盖率（toggle）</h3><ul>
+<li>用来衡量寄存器跳转的次数（0-&gt;1，1-&gt;0）</li>
+<li>一般项目会要求模块的端口实现至少1次0到1，以及1次1到0的跳转来<strong>保证模块的集成和模块之间的互动</strong>，也有的项目会要求所有的寄存器都应该同端口一样<strong>满足跳转的最少次数</strong></li>
+<li>端口跳转覆盖率<strong>经常用来测试IP模块之间的基本连接性</strong>，例如检查一些输入端口是否没有连接，或者已经连接的两个端口的比特位数是否不匹配，又或者一些已经连接的输入是否被给定的固定值等，都可以通过跳转覆盖率来发现问题</li>
+</ul>
+<h3 id="行覆盖率（statement-line）"><a href="#行覆盖率（statement-line）" class="headerlink" title="行覆盖率（statement/line）"></a>行覆盖率（statement/line）</h3><ul>
+<li>用来<strong>衡量源代码哪些代码行被执行过</strong>，以此来指出哪些代码行没有被执行过</li>
+<li>从每一行执行的次数，如果设置最小的执行次数，也可以用来做充足代码测试的一项指标</li>
+<li>代码覆盖率可以指出在一些缺乏输入激励的情况下，<strong>某些赋值的代码行没有被执行的情况</strong>，它也可以指出在一些漏洞影响或者无用代码的影响下，一些代码行也无法被执行的情况对于那些无用的代码，也就是永远不会被执行的代码，在代码分析时，我们可以将它们从覆盖率数据中过滤掉</li>
+</ul>
+<h3 id="分支覆盖率（branch）"><a href="#分支覆盖率（branch）" class="headerlink" title="分支覆盖率（branch）"></a>分支覆盖率（branch）</h3><ul>
+<li>分支覆盖率是用来对条件语句<strong>（if/else，case，?：）</strong>，<strong>指出其执行的分支轨迹</strong>。</li>
+<li>例如判断下列分支的布尔表达式为<strong>true或者false</strong></li>
+</ul>
+<p><code> if(parity==ODD || parity==EVEN)begin</code></p>
+<h3 id="条件覆盖率（condition-expression）"><a href="#条件覆盖率（condition-expression）" class="headerlink" title="条件覆盖率（condition/expression）"></a>条件覆盖率（condition/expression）</h3><ul>
+<li>条件覆盖率是用来衡量一些布尔表达式中各个条件真伪判断的执行轨迹。</li>
+<li>例如下列if条件语句中的两个条件是否各自衡量为true/false <figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(parity==ODD || parity==EVEN)<span class="keyword">begin</span></span><br><span class="line">parity==ODD 或者 parity !=ODD</span><br><span class="line">paraity==EVEN 或者parity !=EVEN</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="状态机覆盖率（FSM）"><a href="#状态机覆盖率（FSM）" class="headerlink" title="状态机覆盖率（FSM）"></a>状态机覆盖率（FSM）</h3><ul>
+<li>仿真工具由于可以自动识别状态机，因此在收集覆盖率时，也可以将覆盖率状态的执行情况监测到。</li>
+<li>每个状态的进入次数，状态之间的跳转次数，以及多个状态的跳转顺序都可以由仿真工具记录下来。</li>
+</ul>
+<h2 id="功能覆盖率"><a href="#功能覆盖率" class="headerlink" title="功能覆盖率"></a>功能覆盖率</h2><h3 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h3><p><strong>这一检查中可能会存在一些不期望的情况</strong>：</p>
+<ul>
+<li>一些功能没有被实现</li>
+<li>一些功能被错误地实现了</li>
+<li>一些没有被要求的功能也被实现了</li>
+</ul>
+<blockquote>
+<p>我们无法通过代码覆盖率得知要求的功能是否被实现了，而需要<strong>显性地通过功能覆盖率</strong>与设计功能描述做映射，继而量化功能验证的进程。<br>在约束随机测试流行于验证时，由于随机测试在仿真时会自动产生上千条测试激励，但我们却无法知道随机产生的激励究竟测试了什么功能。<br>功能覆盖率是最好地可以协助在回归测试时自动监测哪些功能被激活的方法。</p>
+</blockquote>
+<p><strong>创建功能覆盖率模型需要完成以下两个步骤</strong>：</p>
+<ul>
+<li>从功能描述文档提取拆分需要测试的功能点</li>
+<li>将功能点量化为与设计实现对应的SV功能覆盖代码</li>
+</ul>
+<h3 id="覆盖组（covergroup）"><a href="#覆盖组（covergroup）" class="headerlink" title="覆盖组（covergroup）"></a>覆盖组（covergroup）</h3><ul>
+<li>覆盖组与类相似，在一次定义以后便可以多次进行例化。</li>
+<li>覆盖组含有覆盖点（coverpoint）、选项（option）、形式参数（argument）和可选触发（trigger event）。</li>
+<li><strong>一个覆盖组包含了一个或者多个数据点</strong> 。</li>
+<li>覆盖组可以定义在类里，也可以定义在模块或者程序（program）中。</li>
+<li>覆盖组可以采集任何可见的变量，比如程序或模块变量、接口信号或者设计中的任何信号</li>
+<li>在类中的覆盖组也可以采集类的成员变量</li>
+<li>覆盖组应该定义在<strong>适当的抽象层次</strong>上</li>
+<li>对任何事务的采样都必须等到数据被待测设计接收到以后</li>
+<li><strong>一个类也可以包含多个覆盖组</strong>，每个覆盖组可以根据需要将它们使能或者禁止<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> &#123; red, green, blue&#125;color; </span><br><span class="line"><span class="keyword">bit</span> [<span class="number">3</span>:<span class="number">0</span>] pixel_adr, pixel_offset, pixel_hue; </span><br><span class="line"><span class="keyword">covergroup</span> g2 @(<span class="keyword">posedge</span> clk);        <span class="comment">//每个时钟上升沿都采样</span></span><br><span class="line">  Hue:<span class="keyword">coverpoint</span> pixel_hue;        <span class="comment">//采样 Hue为采样任务的名称</span></span><br><span class="line">  Offset:<span class="keyword">coverpoint</span> pixel_offset;</span><br><span class="line">  AxC:<span class="keyword">cross</span> color,pixel_adr;<span class="comment">// cross 2 variables    3*16种全部</span></span><br><span class="line">  all:<span class="keyword">cross</span> color,Hue,Offset;<span class="comment">// cross 1 VARs and 2 CPs </span></span><br><span class="line"><span class="keyword">endgroup</span> </span><br><span class="line">g2 cg_inst=<span class="keyword">new</span>();</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="仓（bin）"><a href="#仓（bin）" class="headerlink" title="仓（bin）"></a>仓（bin）</h3><ul>
+<li><p>关键词bins可以用来将每个感兴趣的数值均对一个独立的bin上或者将所有值对应到一个共同的bin </p>
+</li>
+<li><p>iff语句也可以用在bin的定义，它表示条件为false，那么右集该bin的时候，该bin的采样数自不会增长</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bit</span> [<span class="number">9</span>:<span class="number">0</span>] v_a;</span><br><span class="line"><span class="keyword">covergroup</span> cg @(<span class="keyword">posedge</span> clk);</span><br><span class="line">  <span class="keyword">coverpoint</span> v_a&#123;</span><br><span class="line">    <span class="keyword">bins</span> a=&#123;[<span class="number">0</span>:<span class="number">63</span>],<span class="number">65</span>&#125;;</span><br><span class="line">    <span class="keyword">bins</span> b[]=&#123;[<span class="number">127</span>:<span class="number">150</span>],[<span class="number">148</span>:<span class="number">191</span>]&#125;;</span><br><span class="line">    <span class="keyword">bins</span> c[]=&#123;<span class="number">200</span>,<span class="number">201</span>,<span class="number">202</span>&#125;;</span><br><span class="line">    <span class="keyword">bins</span> d=&#123;[<span class="number">1000</span>:$]&#125;;</span><br><span class="line">    <span class="keyword">bins</span> others[]=<span class="keyword">default</span>;  <span class="comment">//除了上面定义的合法值都属于default</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">endgroup</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//covergroup的参数也可以被传递到bin的定义中,做数值覆盖</span></span><br><span class="line"><span class="keyword">covergroup</span> cg (<span class="keyword">ref</span> <span class="keyword">int</span> ra, <span class="keyword">input</span> <span class="keyword">int</span> low, <span class="keyword">int</span> high)</span><br><span class="line">    @(<span class="keyword">posedge</span> clk)；</span><br></pre></td></tr></table></figure></li>
+<li><p>除了可以覆盖数值，还可以覆盖数值的变化</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">valuel =&gt; value2</span><br><span class="line">valuel =&gt; value3 =&gt; value4 =&gt; value5</span><br><span class="line">range_list1 =&gt; range_list21,<span class="number">5</span>=&gt;<span class="number">6</span>，<span class="number">7</span></span><br><span class="line">trans_item[* repeat_range ]</span><br><span class="line"><span class="number">3</span>[* <span class="number">5</span>]     <span class="comment">//表示3=&gt;3=&gt;3=&gt;3=&gt;3</span></span><br><span class="line"><span class="number">3</span>[* <span class="number">3</span>:<span class="number">5</span>]  <span class="comment">//表示（3=&gt;3=&gt;3）,（3=&gt;3=&gt;3=&gt;3）或（3=&gt;3=&gt;3=&gt;3=&gt;3）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//除了使用=&gt;来表示相邻采样点的变化，也可以使用-&gt;来表示非相邻采样点的数值变化，</span></span><br><span class="line"><span class="comment">//在=&gt;序列后的下一个时序*必须紧跟*=&gt;序列的最后一个事件</span></span><br><span class="line"><span class="number">3</span>[-&gt;<span class="number">3</span>]</span><br><span class="line">表示...=&gt;<span class="number">3</span>...=&gt;<span class="number">3</span>...=&gt;<span class="number">3</span></span><br><span class="line"><span class="number">1</span>=&gt;<span class="number">3</span>[-&gt;<span class="number">3</span>]=&gt;<span class="number">5</span></span><br><span class="line">表示<span class="number">1</span>...=&gt;<span class="number">3</span>...=&gt;<span class="number">3</span>...=&gt;<span class="number">3</span>=&gt;<span class="number">5</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//与[-&gt;repeat range]类似的有[=repeat range]也表示非连续的循环</span></span><br><span class="line"><span class="comment">//只是与-&gt;有区别的在于，跟随-&gt;序列的下一次值变化可以发生在-&gt;结束后的*任何时刻*。</span></span><br><span class="line"><span class="number">3</span>[= <span class="number">2</span>]</span><br><span class="line">表示..=&gt;<span class="number">3</span>...=&gt;<span class="number">3</span></span><br><span class="line"><span class="number">1</span>=&gt;<span class="number">3</span>[=<span class="number">2</span>]=&gt;<span class="number">6</span></span><br><span class="line">表示<span class="number">1</span>...=&gt;<span class="number">3</span>...=&gt;<span class="number">3</span>...=&gt;<span class="number">6</span></span><br></pre></td></tr></table></figure></li>
+<li><p>如果coverpoint没有指定任何bin，那么SV将会为其自动生成bin，遵循的原则是：</p>
+<ul>
+<li>如果变量是枚举类型，那么bin的数量是枚举类型的基数（所有枚举数值的合）</li>
+<li>如果变量是整形（M位宽），那么bin的类型将是2^M和auto_bin_max选项的较小值</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>默认情况下，数值的变化可以针对四值类型变量进行覆盖，例如bin如果包含x或者z，则表示只有该变量对应位也为x或者z的时候，bin也才可以被采样到。</p>
+</li>
+<li><p><strong>wildcard修饰符</strong>可以使得bin中包含x，z和？的数值都将用来表示0或者1，也就是通配符的意思</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">wildcard</span> <span class="keyword">bins</span> g12_15=&#123;<span class="number">4</span>b&#x27;<span class="number">11</span>??&#125;;</span><br><span class="line"><span class="comment">//g12_15可以用来表示12到15之间的值，即1100，1101，1110，1111</span></span><br></pre></td></tr></table></figure></li>
+<li><p>ignore_bins用来将其排除在有效统计的bin集合之外</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">covergroup</span> cg23; </span><br><span class="line">  <span class="keyword">coverpoint</span> a&#123;</span><br><span class="line">    <span class="keyword">ignore_bins</span> ignore_vals=&#123;<span class="number">7</span>,<span class="number">8</span>&#125;; </span><br><span class="line">    <span class="keyword">ignore_bins</span> ignore_trans=(<span class="number">1</span>=&gt;<span class="number">3</span>=&gt;<span class="number">5</span>); </span><br><span class="line"><span class="keyword">endgroup</span></span><br></pre></td></tr></table></figure></li>
+<li><p>illegal_bins用来指出采样到的数值为非法制，如果illegal_bins被采样到，那么仿真将报错</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">covergroup</span> cg3; </span><br><span class="line">  <span class="keyword">coverpoint</span> b&#123;</span><br><span class="line">    <span class="keyword">illegal_bins</span> bad_vals=&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;; </span><br><span class="line">    <span class="keyword">illegal_bins</span> bad_trans=(<span class="number">4</span>=&gt;<span class="number">5</span>=&gt;<span class="number">6</span>);     <span class="comment">//illegal_bins被采样到，那么仿真将报错</span></span><br><span class="line"><span class="keyword">endgroup</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="覆盖点（coverpoint）"><a href="#覆盖点（coverpoint）" class="headerlink" title="覆盖点（coverpoint）"></a>覆盖点（coverpoint）</h3><ul>
+<li>在定义coverpoint时可以不给名字或者给名字，我们建议给不同的coverpoint以不同的名字</li>
+<li>这些有名字的coverpoint可以用来做更进一步的处理，例如在交叉覆盖率中使用某个coverpoint</li>
+<li>可以通过iff在一些情况下禁止coverpoint的采集<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">covergroup</span> g4; </span><br><span class="line">  <span class="keyword">coverpoint</span> s0 <span class="keyword">iff</span>(!reset); </span><br><span class="line"><span class="keyword">endgroup</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="交叉覆盖率（cross）"><a href="#交叉覆盖率（cross）" class="headerlink" title="交叉覆盖率（cross）"></a>交叉覆盖率（cross）</h3><ul>
+<li>covergroup可以在两个或者更多的coverpoint或者变量之间定义交叉覆盖率（cross coverage）</li>
+<li>在对a和b产生交叉覆盖率之前，系统会先为它们隐性产生对应的coverpoint和bin，每个coverpoint都有16个自动产生的bin，两个coverpoint交叉以后将生成256个交叉的bin</li>
+<li>除了系统会自动为交叉覆盖率生成bin以外，用户还可以自己定义交叉覆盖率的</li>
+<li>bin binsof（）的参数可以是coverpoint或者变量，表示对应的bin总和，可以<strong>利用binsof（）对其结果做进一步的过滤。</strong><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> i,j; </span><br><span class="line"><span class="keyword">covergroup</span> ct; </span><br><span class="line">  <span class="keyword">coverpoint</span> i &#123; <span class="keyword">bins</span> i[]=&#123;[<span class="number">0</span>:<span class="number">1</span>]&#125;;&#125;</span><br><span class="line">  <span class="keyword">coverpoint</span> j &#123; <span class="keyword">bins</span> j[]=&#123;[<span class="number">0</span>:<span class="number">1</span>]&#125;;&#125; </span><br><span class="line">  x1: <span class="keyword">cross</span> i,j;     <span class="comment">//因为两个变量都是32bits，所以交叉覆盖计算32*32位</span></span><br><span class="line">  x2: <span class="keyword">cross</span> i,j&#123; </span><br><span class="line">    <span class="keyword">bins</span> i_zero=<span class="keyword">binsof</span>(i)<span class="variable">.intersect</span> &#123;<span class="number">0</span>&#125;; </span><br><span class="line">  &#125; </span><br><span class="line"><span class="keyword">endgroup</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="指定覆盖率选项"><a href="#指定覆盖率选项" class="headerlink" title="指定覆盖率选项"></a>指定覆盖率选项</h3><ul>
+<li>覆盖率选项按照在covergroup、coverpoint和cross不同的域中是否具备，下表做了归纳：</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1621067444892-a3380911-1fff-4196-9a68-a8c809479812.png#align=left&display=inline&height=337&margin=%5Bobject%20Object%5D&name=image.png&originHeight=570&originWidth=1162&size=192006&status=done&style=none&width=687" alt="image.png"></p>
+<h3 id="预定义覆盖率方法"><a href="#预定义覆盖率方法" class="headerlink" title="预定义覆盖率方法"></a>预定义覆盖率方法</h3><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1621067486566-4f67133a-62a8-46a6-9fb6-5e183b770aea.png#align=left&display=inline&height=351&margin=%5Bobject%20Object%5D&name=image.png&originHeight=621&originWidth=1248&size=327143&status=done&style=none&width=706" alt="image.png"></p>
+<h2 id="从功能描述到覆盖率"><a href="#从功能描述到覆盖率" class="headerlink" title="从功能描述到覆盖率"></a>从功能描述到覆盖率</h2><ul>
+<li>功能覆盖率应该基于对DUT端口或者内部信号的监测</li>
+<li>功能覆盖率的有效性应该首先建立在测试通过的情况下，这还需要测试平台有自动检查（scoreboard/reference model）来保证对应的功能得到检验</li>
+<li>在创建覆盖率模型时，同创建property（assertion）一样，不要贪大求全，而应该对每一个covergroup、coverpoint、bin和cross都做到简明扼要，尽量将逻辑和时序都拆分开，便于后期的覆盖率分析</li>
+<li>选取一个适当的范围进行覆盖率收集，例如一个32位的整形变量，在收集数值时可以结合其与设计功能的特点，找到边界值、分段范围，再在合适的抽象层次上进行收集</li>
+<li>采用统一的覆盖率编码风格，例如covergroup的名字，采样的方式，是否填写comment，覆盖率模型置干何处等。</li>
+<li>要实现功能覆盖率的收敛，就需要按照以下步骤考虑：<ul>
+<li>哪些功能需要测试</li>
+<li>明白在什么条件下需要测试对应的功能</li>
+<li>为了测试这些功能，需要提供什么样的测试平台组件以便提供激励和监测</li>
+<li>测试平台如何检查这些功能正常工作</li>
+</ul>
+</li>
+<li>由于功能覆盖率不是自动的过程，因此它需要将功能描述同设计实现对应起来</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2021/05/19/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%889%EF%BC%89%E2%80%94%E2%80%94%E9%AA%8C%E8%AF%81%E9%87%8F%E5%8C%96%E5%92%8C%E8%A6%86%E7%9B%96%E7%8E%87/" title="SV系统验证（9）——验证量化和覆盖率">https://github.nanfeng.ink/2021/05/19/SV系统验证（9）——验证量化和覆盖率/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SystemVerilog/" rel="tag"><i class="fa fa-tag"></i> SystemVerilog</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/05/09/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%888%EF%BC%89%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5%E3%80%81%E9%80%9A%E4%BF%A1%E5%92%8C%E8%99%9A%E6%96%B9%E6%B3%95/" rel="prev" title="SV系统验证（8）——线程同步、通信和虚方法">
+      <i class="fa fa-chevron-left"></i> SV系统验证（8）——线程同步、通信和虚方法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/05/26/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%8810%EF%BC%89%E2%80%94%E2%80%94TCL%E8%84%9A%E6%9C%AC%E5%92%8C%E5%9B%9E%E5%BD%92%E6%B5%8B%E8%AF%95/" rel="next" title="SV系统验证（10）——TCL脚本和回归测试">
+      SV系统验证（10）——TCL脚本和回归测试 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A6%86%E7%9B%96%E7%8E%87%E7%A7%8D%E7%B1%BB"><span class="nav-number">2.</span> <span class="nav-text">覆盖率种类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E8%A6%86%E7%9B%96%E7%8E%87"><span class="nav-number">3.</span> <span class="nav-text">代码覆盖率</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%80%E9%99%90"><span class="nav-number">3.1.</span> <span class="nav-text">局限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%B3%E8%BD%AC%E8%A6%86%E7%9B%96%E7%8E%87%EF%BC%88toggle%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">跳转覆盖率（toggle）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%8C%E8%A6%86%E7%9B%96%E7%8E%87%EF%BC%88statement-line%EF%BC%89"><span class="nav-number">3.3.</span> <span class="nav-text">行覆盖率（statement&#x2F;line）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%94%AF%E8%A6%86%E7%9B%96%E7%8E%87%EF%BC%88branch%EF%BC%89"><span class="nav-number">3.4.</span> <span class="nav-text">分支覆盖率（branch）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%A1%E4%BB%B6%E8%A6%86%E7%9B%96%E7%8E%87%EF%BC%88condition-expression%EF%BC%89"><span class="nav-number">3.5.</span> <span class="nav-text">条件覆盖率（condition&#x2F;expression）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E6%9C%BA%E8%A6%86%E7%9B%96%E7%8E%87%EF%BC%88FSM%EF%BC%89"><span class="nav-number">3.6.</span> <span class="nav-text">状态机覆盖率（FSM）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E8%A6%86%E7%9B%96%E7%8E%87"><span class="nav-number">4.</span> <span class="nav-text">功能覆盖率</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0-1"><span class="nav-number">4.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%86%E7%9B%96%E7%BB%84%EF%BC%88covergroup%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">覆盖组（covergroup）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%93%EF%BC%88bin%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">仓（bin）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%86%E7%9B%96%E7%82%B9%EF%BC%88coverpoint%EF%BC%89"><span class="nav-number">4.4.</span> <span class="nav-text">覆盖点（coverpoint）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%A4%E5%8F%89%E8%A6%86%E7%9B%96%E7%8E%87%EF%BC%88cross%EF%BC%89"><span class="nav-number">4.5.</span> <span class="nav-text">交叉覆盖率（cross）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E8%A6%86%E7%9B%96%E7%8E%87%E9%80%89%E9%A1%B9"><span class="nav-number">4.6.</span> <span class="nav-text">指定覆盖率选项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E5%AE%9A%E4%B9%89%E8%A6%86%E7%9B%96%E7%8E%87%E6%96%B9%E6%B3%95"><span class="nav-number">4.7.</span> <span class="nav-text">预定义覆盖率方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E5%8A%9F%E8%83%BD%E6%8F%8F%E8%BF%B0%E5%88%B0%E8%A6%86%E7%9B%96%E7%8E%87"><span class="nav-number">5.</span> <span class="nav-text">从功能描述到覆盖率</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

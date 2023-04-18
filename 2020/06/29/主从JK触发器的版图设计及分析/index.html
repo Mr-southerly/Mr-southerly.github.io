@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="摘要 集成电路中的版图设计衔接了电路原理图和制造工艺，因此一张好的版图设计不仅会对器件的实际效果造成影响，还会影响芯片的寿命，画版图之前首先要对电路软件有一定的了解，通过对电路知识的运用，以及版图设计规则的了解，完成JK触发器的版图设计，并进行合理的布局，并对布局布线进行优化，最后在对电路提出一些改进意见来增加电路的灵敏度以及合理性。 关键词：版图设计、JK触发器、版图优化L-Edit软件、集成电">
+<meta property="og:type" content="article">
+<meta property="og:title" content="主从JK触发器设计及分析">
+<meta property="og:url" content="https://github.nanfeng.ink/2020/06/29/%E4%B8%BB%E4%BB%8EJK%E8%A7%A6%E5%8F%91%E5%99%A8%E7%9A%84%E7%89%88%E5%9B%BE%E8%AE%BE%E8%AE%A1%E5%8F%8A%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="摘要 集成电路中的版图设计衔接了电路原理图和制造工艺，因此一张好的版图设计不仅会对器件的实际效果造成影响，还会影响芯片的寿命，画版图之前首先要对电路软件有一定的了解，通过对电路知识的运用，以及版图设计规则的了解，完成JK触发器的版图设计，并进行合理的布局，并对布局布线进行优化，最后在对电路提出一些改进意见来增加电路的灵敏度以及合理性。 关键词：版图设计、JK触发器、版图优化L-Edit软件、集成电">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619073946857-39478761-f4ff-4b6d-94c0-7c43721cba08.png#clientId=u6ece1c38-457f-4&from=paste&height=671&id=ube3dac36&margin=%5Bobject%20Object%5D&name=image.png&originHeight=671&originWidth=459&originalType=binary&size=31670&status=done&style=none&taskId=u2209ac82-e167-48d0-8c4f-0a3d50a2ff3&width=459">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074039268-cd44e035-e0a1-4932-bcb0-0bef8d712e26.png#clientId=u6ece1c38-457f-4&from=paste&height=165&id=u9e1dcf5f&margin=%5Bobject%20Object%5D&name=image.png&originHeight=165&originWidth=537&originalType=binary&size=39731&status=done&style=none&taskId=u7726ed27-a619-46c0-9bda-0565abace7f&width=537">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074083937-ef53c5a5-3f04-4d09-831b-259ee284f15a.png#clientId=u6ece1c38-457f-4&from=paste&height=193&id=ud525a8cc&margin=%5Bobject%20Object%5D&name=image.png&originHeight=193&originWidth=591&originalType=binary&size=66762&status=done&style=none&taskId=u2a184a30-2606-4347-bb6b-8f701d457a8&width=591">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074170341-9ee351a1-aa27-433b-8399-f7f6af2bc8a5.png#clientId=u6ece1c38-457f-4&from=paste&height=368&id=ud9c5394e&margin=%5Bobject%20Object%5D&name=image.png&originHeight=368&originWidth=681&originalType=binary&size=253867&status=done&style=none&taskId=uf084335f-5b09-4922-b849-e12bcbdffe0&width=681">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074223250-76873a9d-a9fa-47d8-899d-bd5fd1cf294a.png#clientId=u6ece1c38-457f-4&from=paste&height=309&id=uc9afedec&margin=%5Bobject%20Object%5D&name=image.png&originHeight=309&originWidth=588&originalType=binary&size=92111&status=done&style=none&taskId=ude67ebc5-d0f3-4232-8e69-737337e8b6c&width=588">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074272602-fecd8576-9788-4ec0-97ae-5caa9d3a8a6b.png#clientId=u6ece1c38-457f-4&from=paste&height=255&id=ubeb3088d&margin=%5Bobject%20Object%5D&name=image.png&originHeight=255&originWidth=653&originalType=binary&size=16479&status=done&style=none&taskId=u3f95f66f-9658-4a16-9ee6-618114b0e7d&width=653">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074500271-b2aaf220-4042-45d1-8560-26a216a6efe9.png#clientId=u6ece1c38-457f-4&from=paste&height=300&id=u68d411e0&margin=%5Bobject%20Object%5D&name=image.png&originHeight=300&originWidth=537&originalType=binary&size=31962&status=done&style=none&taskId=ud8769c03-5608-437c-893a-9f635d02fc1&width=537">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074528642-0e5e2247-183e-4288-b837-8d5361d1f296.png#clientId=u6ece1c38-457f-4&from=paste&height=527&id=u351dfd6f&margin=%5Bobject%20Object%5D&name=image.png&originHeight=527&originWidth=463&originalType=binary&size=131810&status=done&style=none&taskId=u85b5a57d-8480-465d-9242-ba0b5dcae84&width=463">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074563623-f2ee9cc8-e81b-4fce-ae6d-121073eccd8c.png#clientId=u6ece1c38-457f-4&from=paste&height=352&id=uc0ef4633&margin=%5Bobject%20Object%5D&name=image.png&originHeight=352&originWidth=572&originalType=binary&size=43545&status=done&style=none&taskId=u9ebb1445-9352-41f3-9ac8-ef3996cce95&width=572">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074574551-03f97380-1d58-4d34-aa7c-5f2dbd9e14c5.png#clientId=u6ece1c38-457f-4&from=paste&height=481&id=u748a8258&margin=%5Bobject%20Object%5D&name=image.png&originHeight=481&originWidth=499&originalType=binary&size=226248&status=done&style=none&taskId=u79511bd1-25c8-4a71-b2cd-76093529519&width=499">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074611224-67ab552d-e9a7-4f07-b78b-be24e0c17741.png#clientId=u6ece1c38-457f-4&from=paste&height=487&id=ubcd27926&margin=%5Bobject%20Object%5D&name=image.png&originHeight=487&originWidth=693&originalType=binary&size=134738&status=done&style=none&taskId=u5944cbfb-1a4b-4de6-9300-9f67f210e66&width=693">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074641561-21dd3cc7-dbd5-4263-8b34-5cd2a6c76195.png#clientId=u6ece1c38-457f-4&from=paste&height=636&id=u30b47999&margin=%5Bobject%20Object%5D&name=image.png&originHeight=636&originWidth=551&originalType=binary&size=296976&status=done&style=none&taskId=u1577bec4-2ca6-4c97-a850-03ac0c3f0a3&width=551">
+<meta property="article:published_time" content="2020-06-29T07:01:05.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="版图">
+<meta property="article:tag" content="数字">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619073946857-39478761-f4ff-4b6d-94c0-7c43721cba08.png#clientId=u6ece1c38-457f-4&from=paste&height=671&id=ube3dac36&margin=%5Bobject%20Object%5D&name=image.png&originHeight=671&originWidth=459&originalType=binary&size=31670&status=done&style=none&taskId=u2209ac82-e167-48d0-8c4f-0a3d50a2ff3&width=459">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2020/06/29/%E4%B8%BB%E4%BB%8EJK%E8%A7%A6%E5%8F%91%E5%99%A8%E7%9A%84%E7%89%88%E5%9B%BE%E8%AE%BE%E8%AE%A1%E5%8F%8A%E5%88%86%E6%9E%90/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>主从JK触发器设计及分析 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2020/06/29/%E4%B8%BB%E4%BB%8EJK%E8%A7%A6%E5%8F%91%E5%99%A8%E7%9A%84%E7%89%88%E5%9B%BE%E8%AE%BE%E8%AE%A1%E5%8F%8A%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          主从JK触发器设计及分析
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-06-29 15:01:05" itemprop="dateCreated datePublished" datetime="2020-06-29T15:01:05+08:00">2020-06-29</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E9%A1%B9%E7%9B%AE%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">项目篇</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>集成电路中的版图设计衔接了电路原理图和制造工艺，因此一张好的版图设计不仅会对器件的实际效果造成影响，还会影响芯片的寿命，画版图之前首先要对电路软件有一定的了解，通过对电路知识的运用，以及版图设计规则的了解，完成JK触发器的版图设计，并进行合理的布局，并对布局布线进行优化，最后在对电路提出一些改进意见来增加电路的灵敏度以及合理性。<br><strong>关键词</strong>：版图设计、JK触发器、版图优化L-Edit软件、集成电路</p>
+<h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>随着科技的进步，近几个世纪集成电路技术不断成熟，在数字电路中，触发器已经是一个经常被提出的概念，JK触发器是数字电路触发器中的一种基本电路单元。JK触发器具有置0、置1、保持和翻转功能，在各类集成触发器中，JK触发器的功能最为齐全。在实际应用中，它不仅有很强的通用性，而且能灵活地转换其他类型的触发器。由JK触发器可以构成D触发器和T触发器</p>
+<h1 id="主从JK触发器设计"><a href="#主从JK触发器设计" class="headerlink" title="主从JK触发器设计"></a>主从JK触发器设计</h1><p>目前，基于Tanner EDA 技术的电路设计已经在该领域中取得了较为突破的发展，主要是借助了L-Edit 等软件的强大功能以及传统的数学及电路知识，在软件平台上成功实现 JK触发器的电路设计以及版图实现。<br>Tanner EDA对电路进行设计一般遵从以下几个步骤，首先把设计的电路在S-Edit中编辑出来，然后输出Spice文件，然后在进行模拟分析，其中还必须时刻进行DRC检查，保证电路没有任何违反设计规则的错误，确保布局图无误后，利用软件将文件和版图进行对比，若结果吻合，那么就输出设计好的版图。具体流程如下图（图1）所示：<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619073946857-39478761-f4ff-4b6d-94c0-7c43721cba08.png#clientId=u6ece1c38-457f-4&from=paste&height=671&id=ube3dac36&margin=%5Bobject%20Object%5D&name=image.png&originHeight=671&originWidth=459&originalType=binary&size=31670&status=done&style=none&taskId=u2209ac82-e167-48d0-8c4f-0a3d50a2ff3&width=459" alt="image.png"></p>
+<h2 id="基本MOS管版图设计"><a href="#基本MOS管版图设计" class="headerlink" title="基本MOS管版图设计"></a>基本MOS管版图设计</h2><h3 id="NMOS基本版图设计"><a href="#NMOS基本版图设计" class="headerlink" title="NMOS基本版图设计"></a>NMOS基本版图设计</h3><p>首先根据NMOS器件的特性设计衬底，然后向其中加入源漏栅极，确定源级和漏极之后，进行DRC检查，保证版图的设计没有不符合规则的地方，铺设金属和各级接触孔，最后在进行检查。一个基础的NMOS版图就基本设计完成。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074039268-cd44e035-e0a1-4932-bcb0-0bef8d712e26.png#clientId=u6ece1c38-457f-4&from=paste&height=165&id=u9e1dcf5f&margin=%5Bobject%20Object%5D&name=image.png&originHeight=165&originWidth=537&originalType=binary&size=39731&status=done&style=none&taskId=u7726ed27-a619-46c0-9bda-0565abace7f&width=537" alt="image.png"></p>
+<h3 id="PMOS基本版图设计"><a href="#PMOS基本版图设计" class="headerlink" title="PMOS基本版图设计"></a>PMOS基本版图设计</h3><p>基本的PMOS和NMOS版图步骤基本差不多，但制备NMOS的衬底是P衬底，PMOS的衬底是N型，因此要先设计n阱然后在进行管子的设计。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074083937-ef53c5a5-3f04-4d09-831b-259ee284f15a.png#clientId=u6ece1c38-457f-4&from=paste&height=193&id=ud525a8cc&margin=%5Bobject%20Object%5D&name=image.png&originHeight=193&originWidth=591&originalType=binary&size=66762&status=done&style=none&taskId=u2a184a30-2606-4347-bb6b-8f701d457a8&width=591" alt="image.png"><br>设计基本元器件的版图，不仅需要知道 L-Edit 软件的使用，还要掌握各个元的基本结构原理与工作原理以及对器件的剖面图、左视图、正面图识别，这样，图设计的时候心里就有一个大致的方向，画起来就比较的容易。在这张节中，画基本元器件的某些版图时，出现了多个金属接触孔，这是因为让金属线条和有源区能够充分的接触，能够进行高速率的导电，同时可以防止在工艺加工时某个接触孔接触不良而发生的断路现象。不是说画的孔越多越好，也需要进行综合考虑，比如器件的版图设计大小对于材料成本是否划算等，这些通常需要厂家的准确预算。对于简单的版图设计，可以画出器件版图后进行 DRC 检查，但是对于复杂的器件，必须画一步进行一步 DRC 检查，不能画完后进行检查，因为大规模电路版图是成千上万个元件和几何图形的有机组合，设计过程中有成千上万次操作，如果某个器件的版图因为 DRC 检查出错，而修改，则许多器件的版图需要做出相应的调整，不然制作出来的器件将达不到厂家预想的目的。</p>
+<h2 id="主从JK触发器原理图设计"><a href="#主从JK触发器原理图设计" class="headerlink" title="主从JK触发器原理图设计"></a>主从JK触发器原理图设计</h2><p>主从 JK触发器是在主从RS触发器的基础上组成的，如图6所示。在主从RS 触发器的R端和S端分别增加一个两输入端的与门U1和U2，将Q(out1) 端和输入端经与门输出为原S端，输入端称为J端，将Q(out)端与输入端经与门输出为原R端，输入端称为K端。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074170341-9ee351a1-aa27-433b-8399-f7f6af2bc8a5.png#clientId=u6ece1c38-457f-4&from=paste&height=368&id=ud9c5394e&margin=%5Bobject%20Object%5D&name=image.png&originHeight=368&originWidth=681&originalType=binary&size=253867&status=done&style=none&taskId=uf084335f-5b09-4922-b849-e12bcbdffe0&width=681" alt="image.png"></p>
+<h2 id="主从JK触发器逻辑分析"><a href="#主从JK触发器逻辑分析" class="headerlink" title="主从JK触发器逻辑分析"></a>主从JK触发器逻辑分析</h2><p>从以上电路原理图我们可以知道主从JK触发器没有约束条件。在J=K=1时，每输入一个时钟脉冲，触发器就翻转一次。触发器期的这种状态称为计数状态，由触发器翻转的次数可以计算出输入时钟的脉冲的个数。其状态转移真值表（图7）和仿真波形图（图8）如下所示<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074223250-76873a9d-a9fa-47d8-899d-bd5fd1cf294a.png#clientId=u6ece1c38-457f-4&from=paste&height=309&id=uc9afedec&margin=%5Bobject%20Object%5D&name=image.png&originHeight=309&originWidth=588&originalType=binary&size=92111&status=done&style=none&taskId=ude67ebc5-d0f3-4232-8e69-737337e8b6c&width=588" alt="image.png"><br>在J=K=1时输入CP时钟信号</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074272602-fecd8576-9788-4ec0-97ae-5caa9d3a8a6b.png#clientId=u6ece1c38-457f-4&from=paste&height=255&id=ubeb3088d&margin=%5Bobject%20Object%5D&name=image.png&originHeight=255&originWidth=653&originalType=binary&size=16479&status=done&style=none&taskId=u3f95f66f-9658-4a16-9ee6-618114b0e7d&width=653" alt="image.png"></p>
+<h2 id="主从JK触发器版图设计"><a href="#主从JK触发器版图设计" class="headerlink" title="主从JK触发器版图设计"></a>主从JK触发器版图设计</h2><h3 id="非门电路"><a href="#非门电路" class="headerlink" title="非门电路"></a>非门电路</h3><p>非门又称反相器，因CMOS反相器功耗低，耐用等优点而使之得到广泛的应用， CMOS 反相器是组成集成电路最基本的单元之一。它是由一个增强型 PMOS 管为负载和一个增强型 NMOS 管为驱动管串接而成，图9为orcad 软件中非门电路符号，图10为其 CMOS反相器电路图。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074500271-b2aaf220-4042-45d1-8560-26a216a6efe9.png#clientId=u6ece1c38-457f-4&from=paste&height=300&id=u68d411e0&margin=%5Bobject%20Object%5D&name=image.png&originHeight=300&originWidth=537&originalType=binary&size=31962&status=done&style=none&taskId=ud8769c03-5608-437c-893a-9f635d02fc1&width=537" alt="image.png"><br>根据上一节的基础MOS管的版图设计，我们可以很容易设计出反相器的版图（图11）<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074528642-0e5e2247-183e-4288-b837-8d5361d1f296.png#clientId=u6ece1c38-457f-4&from=paste&height=527&id=u351dfd6f&margin=%5Bobject%20Object%5D&name=image.png&originHeight=527&originWidth=463&originalType=binary&size=131810&status=done&style=none&taskId=u85b5a57d-8480-465d-9242-ba0b5dcae84&width=463" alt="image.png"></p>
+<h3 id="与非门电路"><a href="#与非门电路" class="headerlink" title="与非门电路"></a>与非门电路</h3><p>与非门（图12）的设计和非门相似，首先根据与非门的电路图（图13）设计版图（图14），然后在进行简单的DRC检查，在调整布局，使其对称就可以得出电路实现与非的功能。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074563623-f2ee9cc8-e81b-4fce-ae6d-121073eccd8c.png#clientId=u6ece1c38-457f-4&from=paste&height=352&id=uc0ef4633&margin=%5Bobject%20Object%5D&name=image.png&originHeight=352&originWidth=572&originalType=binary&size=43545&status=done&style=none&taskId=u9ebb1445-9352-41f3-9ac8-ef3996cce95&width=572" alt="image.png"><br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074574551-03f97380-1d58-4d34-aa7c-5f2dbd9e14c5.png#clientId=u6ece1c38-457f-4&from=paste&height=481&id=u748a8258&margin=%5Bobject%20Object%5D&name=image.png&originHeight=481&originWidth=499&originalType=binary&size=226248&status=done&style=none&taskId=u79511bd1-25c8-4a71-b2cd-76093529519&width=499" alt="image.png"></p>
+<h3 id="JK触发器电路"><a href="#JK触发器电路" class="headerlink" title="JK触发器电路"></a>JK触发器电路</h3><p>从图15 主从 JK 触发器的原理图可知， 该触发器由 10 个与非门电路和一个非门电路组成，将10个与非门电路和1个非门电路用orcad软件中的MOS管代替，并绘制出来，并且对其进行仿真，将得到如图16所示的电路原理图。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074611224-67ab552d-e9a7-4f07-b78b-be24e0c17741.png#clientId=u6ece1c38-457f-4&from=paste&height=487&id=ubcd27926&margin=%5Bobject%20Object%5D&name=image.png&originHeight=487&originWidth=693&originalType=binary&size=134738&status=done&style=none&taskId=u5944cbfb-1a4b-4de6-9300-9f67f210e66&width=693" alt="image.png"><br>通过 图15的原理图， 我们将10个与非门电路的版图和一个非门电路的版图进行合理布局、连线，再进行 DRC 验证，将可初步完成版图的设计。值得注意的是，在绘制每一个 MOS 管的时候，都要知道 MOS 管的各个参数，特别是栅长和栅宽，用以确定 poly 层的面积大小。最初绘制的主从 JK 触发器版图电路如下图16所示</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619074641561-21dd3cc7-dbd5-4263-8b34-5cd2a6c76195.png#clientId=u6ece1c38-457f-4&from=paste&height=636&id=u30b47999&margin=%5Bobject%20Object%5D&name=image.png&originHeight=636&originWidth=551&originalType=binary&size=296976&status=done&style=none&taskId=u1577bec4-2ca6-4c97-a850-03ac0c3f0a3&width=551" alt="image.png"></p>
+<h1 id="版图设计参数分析"><a href="#版图设计参数分析" class="headerlink" title="版图设计参数分析"></a>版图设计参数分析</h1><p>因为版图设计受工艺水平的限制，因此首先要遵从DRC规则：<strong>最小宽度为3um即封闭几何图形的内边与外边的最小距离；最小间距3um即几何图形外边界之间的最小距离</strong>。另外在设计PMOS和NMOS时，由于电子和空穴的迁移率不同，因此要加大PMOS的尺寸以及掺杂浓度，以保证器件的速率以及电气属性达到一个平衡，在本次版图设计中选取PMOS的集电极尺寸是NMOS的两倍左右，接触孔的位置也应带在器件的中间，以达到对称的效果，否则会因为接触孔的位置而改变，对称元器件尺寸相同，方向一致，否则会有横向效应引起期间的不匹配。</p>
+<h1 id="电路布局问题及改进"><a href="#电路布局问题及改进" class="headerlink" title="电路布局问题及改进"></a>电路布局问题及改进</h1><p>版图最开始画的时候，只是在理论上完成了电气连接的功能，版图设计十分松散，衔接距离过大，器件摆放随意，对此问题肯定要重新布局，尽量将等电位点从新连接，为此首先应该梳理器件的种类，将其对称摆布，以抵消信号的延迟、散热不均、电场干扰等问题，在理论上还应该考虑大功率器件散热问题，因此大功率散热器件分布一定要对称，以免局部过热。布局对称后，然后将电位相等的部分尽量减小衔接距离，这样可以尽可能减少电阻的存在，让器件的运行速度更快。<br>本次版图的设计较为基础所用的版图也十分普通，在灵敏度上表现不是那么良好，因此，在此提出改进意见，在电路埋层部分可以加深，解决低温灵敏度不高的问题，另外也可以将普通三极管用肖特基钳位三极管来代替，这样三极管通断的速率将会更快，尤其是对于高频率时钟信号可以有更出色的表现。<br>对于电路中的气驱动作用的三极管来说，可以将原本的结构改成梳状结构，这样可以提高管子的额定功率，减小烧毁的概率，提高管子的可靠性，另外明显增大开关瞬间的电流增益，大大改善了电路的带负载能力。CMOS中的PMOS管子虽然不带负载，但是作为图腾柱结构的一部分，在基极和地之间增加一个二极管可以有效的保护电路，同时在泄放的时候也可以加快速率。<br>在改进的过程中也应该不断进行DRC检查，以免布局布线发生错误，尤其是在金属连接处，好多接触孔无法看到，容易发生混淆，因此实时DRC检查是十分必要的。</p>
+<h1 id="总结及心得"><a href="#总结及心得" class="headerlink" title="总结及心得"></a>总结及心得</h1><p>通过对JK触发器的版图设计，不仅对软件的流程熟悉了许多，更重要的是对电路以及版图和电路之间的联系有了深刻的认识，基本器件的绘制已经掌握，集成电路中，元器件都比较抽象，设计一定要仔细，随意的一个掺杂就可能多一两个PN结，是将电路原理图和工艺相结合的纽带，版图的布局布线也是设计中的难点，合理的布线不仅能够提升器件的速度，还能延长器件的寿命，总之，从本次的设计中学习到了许多。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2020/06/29/%E4%B8%BB%E4%BB%8EJK%E8%A7%A6%E5%8F%91%E5%99%A8%E7%9A%84%E7%89%88%E5%9B%BE%E8%AE%BE%E8%AE%A1%E5%8F%8A%E5%88%86%E6%9E%90/" title="主从JK触发器设计及分析">https://github.nanfeng.ink/2020/06/29/主从JK触发器的版图设计及分析/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%89%88%E5%9B%BE/" rel="tag"><i class="fa fa-tag"></i> 版图</a>
+              <a href="/tags/%E6%95%B0%E5%AD%97/" rel="tag"><i class="fa fa-tag"></i> 数字</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/21/%E8%81%AA%E6%98%8E%E7%9A%84%E5%AD%A6%E4%B9%A0Vim%EF%BC%88%E4%B8%8B%EF%BC%89/" rel="prev" title="聪明的学习Vim（下）">
+      <i class="fa fa-chevron-left"></i> 聪明的学习Vim（下）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/15/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="next" title="正则表达式">
+      正则表达式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%91%98%E8%A6%81"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%95%E8%A8%80"><span class="nav-number">2.</span> <span class="nav-text">引言</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BB%E4%BB%8EJK%E8%A7%A6%E5%8F%91%E5%99%A8%E8%AE%BE%E8%AE%A1"><span class="nav-number"></span> <span class="nav-text">主从JK触发器设计</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%ACMOS%E7%AE%A1%E7%89%88%E5%9B%BE%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.</span> <span class="nav-text">基本MOS管版图设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#NMOS%E5%9F%BA%E6%9C%AC%E7%89%88%E5%9B%BE%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.1.</span> <span class="nav-text">NMOS基本版图设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PMOS%E5%9F%BA%E6%9C%AC%E7%89%88%E5%9B%BE%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.2.</span> <span class="nav-text">PMOS基本版图设计</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BB%E4%BB%8EJK%E8%A7%A6%E5%8F%91%E5%99%A8%E5%8E%9F%E7%90%86%E5%9B%BE%E8%AE%BE%E8%AE%A1"><span class="nav-number">2.</span> <span class="nav-text">主从JK触发器原理图设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BB%E4%BB%8EJK%E8%A7%A6%E5%8F%91%E5%99%A8%E9%80%BB%E8%BE%91%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">主从JK触发器逻辑分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BB%E4%BB%8EJK%E8%A7%A6%E5%8F%91%E5%99%A8%E7%89%88%E5%9B%BE%E8%AE%BE%E8%AE%A1"><span class="nav-number">4.</span> <span class="nav-text">主从JK触发器版图设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%9E%E9%97%A8%E7%94%B5%E8%B7%AF"><span class="nav-number">4.1.</span> <span class="nav-text">非门电路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8E%E9%9D%9E%E9%97%A8%E7%94%B5%E8%B7%AF"><span class="nav-number">4.2.</span> <span class="nav-text">与非门电路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JK%E8%A7%A6%E5%8F%91%E5%99%A8%E7%94%B5%E8%B7%AF"><span class="nav-number">4.3.</span> <span class="nav-text">JK触发器电路</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%89%88%E5%9B%BE%E8%AE%BE%E8%AE%A1%E5%8F%82%E6%95%B0%E5%88%86%E6%9E%90"><span class="nav-number"></span> <span class="nav-text">版图设计参数分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%94%B5%E8%B7%AF%E5%B8%83%E5%B1%80%E9%97%AE%E9%A2%98%E5%8F%8A%E6%94%B9%E8%BF%9B"><span class="nav-number"></span> <span class="nav-text">电路布局问题及改进</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%E5%8F%8A%E5%BF%83%E5%BE%97"><span class="nav-number"></span> <span class="nav-text">总结及心得</span></a></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

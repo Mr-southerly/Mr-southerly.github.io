@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言 我们以前看的电视上那些聪明人掐指一算，惊叹不已，其实，起卦是一件非常容易地事，入门的有小六壬、梅花易数，其实操作起来都是简单的加加减减。天下掐指算法很多，不过基本上都是用时间来计算。今天介绍的小六壬时课又叫诸葛马前课，其算法是月份加日子加时辰。哦对了，不保证一定可以能算的准，但是对于选择困难症来说，也许是一种福音。  原则 不急不占，无事不占，不动不占。 入卦：按阴历算，顺时针向，从大安起，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="小六壬预测快速上手">
+<meta property="og:url" content="https://github.nanfeng.ink/2020/09/22/%E5%B0%8F%E5%85%AD%E5%A3%AC%E9%A2%84%E6%B5%8B%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="前言 我们以前看的电视上那些聪明人掐指一算，惊叹不已，其实，起卦是一件非常容易地事，入门的有小六壬、梅花易数，其实操作起来都是简单的加加减减。天下掐指算法很多，不过基本上都是用时间来计算。今天介绍的小六壬时课又叫诸葛马前课，其算法是月份加日子加时辰。哦对了，不保证一定可以能算的准，但是对于选择困难症来说，也许是一种福音。  原则 不急不占，无事不占，不动不占。 入卦：按阴历算，顺时针向，从大安起，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619002405248-e8ba84a7-a0a7-4f27-9539-416a802be50f.png#align=left&display=inline&height=515&id=ueccded20&margin=%5Bobject%20Object%5D&name=image.png&originHeight=836&originWidth=446&size=431142&status=done&style=none&width=274.9895935058594">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619699870624-77ddc0f0-65b9-406b-8916-5c0cfd2a8d07.png#align=left&display=inline&height=913&margin=%5Bobject%20Object%5D&name=image.png&originHeight=913&originWidth=935&size=138967&status=done&style=none&width=935">
+<meta property="article:published_time" content="2020-09-22T11:09:05.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="占卜">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619002405248-e8ba84a7-a0a7-4f27-9539-416a802be50f.png#align=left&display=inline&height=515&id=ueccded20&margin=%5Bobject%20Object%5D&name=image.png&originHeight=836&originWidth=446&size=431142&status=done&style=none&width=274.9895935058594">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2020/09/22/%E5%B0%8F%E5%85%AD%E5%A3%AC%E9%A2%84%E6%B5%8B%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>小六壬预测快速上手 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2020/09/22/%E5%B0%8F%E5%85%AD%E5%A3%AC%E9%A2%84%E6%B5%8B%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          小六壬预测快速上手
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-09-22 19:09:05" itemprop="dateCreated datePublished" datetime="2020-09-22T19:09:05+08:00">2020-09-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9D%82%E5%AD%A6%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">杂学篇</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>我们以前看的电视上那些聪明人掐指一算，惊叹不已，其实，起卦是一件非常容易地事，入门的有小六壬、梅花易数，其实操作起来都是简单的加加减减。天下掐指算法很多，不过基本上都是用时间来计算。今天介绍的小六壬时课又叫诸葛马前课，其算法是月份加日子加时辰。哦对了，不保证一定可以能算的准，但是对于选择困难症来说，也许是一种福音。</p>
+<h2 id="原则"><a href="#原则" class="headerlink" title="原则"></a>原则</h2><p><strong>不急不占</strong>，<strong>无事不占</strong>，<strong>不动不占</strong>。<br>入卦：按<strong>阴历</strong>算，<strong>顺时针</strong>向，从<strong>大安</strong>起，<strong>月上起日</strong>，<strong>日上起时</strong>。<br>占时应按地方时辰。即“北京时间”以东经120度为准，西移1度，减去4分钟，经度相差15度时，地方时相差1个小时。如武汉相差23分钟，成都相差64分钟。若不换算，推算结果就不准确。</p>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><h3 id="简单算法"><a href="#简单算法" class="headerlink" title="简单算法"></a>简单算法</h3><p>小六壬预测方法十分简单，预测时只须提取当时的月、日、时信息，用左拇指在六个掌诀位上按顺时针方向依次掐算即知结果。其法以大安起正月，<strong>月上起日，日上起时</strong>。注意：这句话意思就是从月上开始计算日子，从日上开始计算时辰。如：占三月初五辰时吉凶。大安起数，三（月）是速喜，速喜起日（开始计算日子），五是大安。大安起时（开始计算时辰），辰时是小吉。</p>
+<ul>
+<li>第一步，先确定月份在掌诀上的起点(定位)，以起点推算月份落点。不管是第几个月，均以“大安”为正月起点，然后按顺时针在六个掌诀定位上按六神次序依次往下数。</li>
+<li>第二步，以月份落(终)点为日辰起点，然后推算日辰落点。从月份落点上起初一，同样按顺时针在六个掌诀定位上按六神顺序依次柱下数，一直数到天数为止，此掌诀定位即为日辰之落点。</li>
+<li>第三步，以日辰落点为时辰起点，推算时辰落点。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619002405248-e8ba84a7-a0a7-4f27-9539-416a802be50f.png#align=left&display=inline&height=515&id=ueccded20&margin=%5Bobject%20Object%5D&name=image.png&originHeight=836&originWidth=446&size=431142&status=done&style=none&width=274.9895935058594" alt="image.png"></p>
+<blockquote>
+<p>举例：<br>如你农历2010年六月初五上午九点半。要和男朋友（女友）初次相会，可以算一下吉凶如何。<br>前面说了凡事都从大安起卦，大安为一月，留连为二月，速喜为三月，赤口为四月，小吉为五月，空亡为六月；下面再算日子，月份算到空亡了，接着日子从空亡开始，空亡是初一，大安是初二，留连初三，速喜初四，赤口初五；同理接着时辰算，赤口是子时，小吉是丑时，空亡是寅时，大安是卯时，留连是辰时，速喜是巳时（9：00-11：00）。所以最终得了个速喜卦。是好事，可能一见钟情。</p>
+</blockquote>
+<h3 id="算法补充"><a href="#算法补充" class="headerlink" title="算法补充"></a>算法补充</h3><blockquote>
+<p>以今天农历八月十七日辰时为例。</p>
+</blockquote>
+<p>(一)首先照上图<strong>顺时针</strong>方向由大安开始计为正月，则留连便是二月，如此类推，八月就是<strong>留连</strong>了。<br>(二)再由八月这个留连开始计为初一，速喜为初二，如此类推，十七日就是<strong>空亡</strong>了。<br>(三)由十七日这个空亡开始计为子时，大安就是丑时，如此类推，顺时针数下去，辰时就落在<strong>赤口</strong>上了。<br>(四)如果使用月日时法起课，那<strong>月上起日之宫位</strong>为空亡，<strong>日上起时之宫位</strong>为赤口，根据两个宫位断结果。<br><strong>时辰次序与换算</strong><br>子 11:00am-01:00am (1)     午 11:00am-01:00pm (7)<br>丑 01:00am-03:00am (2)     未 01:00pm-03:00pm (8)<br>寅 03:00am-05:00am (3)     申 03:00pm-05:00pm (9)<br>卯 05:00am-07:00am (4)     酉 05:00pm-07:00pm (10)<br>辰 07:00am-09:00am (5)     戌 07:00pm-09:00pm (11)<br>巳 09:00am-11:00am (6)     亥 09:00pm-11:00pm (12)</p>
+<h2 id="解说"><a href="#解说" class="headerlink" title="解说"></a>解说</h2><h3 id="大安"><a href="#大安" class="headerlink" title="大安"></a>大安</h3><blockquote>
+<p>身未动时，属木青龙．谋事一五七，贵人西南，冲犯东方，大人青面阴神，小孩婆祖六畜惊。</p>
+</blockquote>
+<p>解曰：<strong>大安事事昌，求财在坤方，失物去不远，宅舍保安康，行人身未动，病者主无妨，将军回田野，仔细更推详</strong>。</p>
+<h4 id="日加时断语"><a href="#日加时断语" class="headerlink" title="日加时断语"></a>日加时断语</h4><p>大安加留连，办事不周全，失物西北去，婚姻晚几天。<br>大安加速喜，事事自己起，失物当日见，婚姻自己提。<br>大安加赤口，办事不顺手，失物不用找，婚姻两分手。<br>大安加小吉，事事从己及，失物不出门，婚姻成就地。<br>大安加空亡，病人要上床，失物无踪影，事事不顺情。</p>
+<h4 id="玥沣解"><a href="#玥沣解" class="headerlink" title="玥沣解"></a>玥沣解</h4><p>卜到大安，属吉卦，凡事都可以得到安康，但是此为静卦，宜静不宜动。<br>问运势：目前运势还不错，有稳定成长的情况，但不宜躁进。<br>问财富：求财可，但是目前不宜扩张，只能够守住旧业。<br>问感情：若为女子问则好，感情顺遂。若为男子问则较差，感情虽稳，但是以无新鲜感，会出现点小问题。<br>问事业：目前工作稳定，可得上司赏识，但切勿锋芒太露。<br>问身体：身体没有大病，但须注意病由口入，或因过度操劳而得病。<br>问神鬼：大安为解灾之神，鬼神之事问题不大，若是小孩为自身惊吓所致，若是大人则为冲犯东方之煞神或犯土煞。<br>问行人：人平安，但目前不愿与自身连络。</p>
+<h3 id="留连"><a href="#留连" class="headerlink" title="留连"></a>留连</h3><blockquote>
+<p>卒未归时，属水元武，谋事二八十，贵人南方，冲犯北方，大人乌面夫人，小孩游路亡魂。</p>
+</blockquote>
+<p>解曰：<strong>留连事难成，求谋日未明，官事凡宜缓，去者未回程，失物南方见，急讨方心称，更须防口舌，人口且平平。</strong></p>
+<h4 id="日加时断语-1"><a href="#日加时断语-1" class="headerlink" title="日加时断语"></a>日加时断语</h4><p>留连加大安，办事两分张，婚姻有喜事，先苦后来甜。<br>留连加速喜，事事由自己，婚姻有成意，失物三天里。<br>留连加赤口，病者死人口，失物准丢失，婚姻两分手。<br>留连加小吉，事事不用提，失物东南去，病者出人齐。<br>留连加空亡，病人准死亡，失物不见面，婚姻两分张。</p>
+<h4 id="玥沣解-1"><a href="#玥沣解-1" class="headerlink" title="玥沣解"></a>玥沣解</h4><p>卜到留连，属凶卦，代表凡事阻碍、迟滞，此卦更不宜有过大动作，凡事宜守。<br>问运势：目前运势低迷，心情不开朗，凡事受阻。<br>问财富：求财不可得，此为破财之卦，且有被人影响破财之现象。<br>问感情：双方沟通不良、冷战、或者一方过于强势，感情不得平衡。<br>问事业：被上司盯或者被人扯后腿，小人之卦。<br>问身体：肠胃不舒服或者精神压力太大所得之病。<br>问神鬼：小孩子主要被过路游魂所煞到，大人为冲犯女性鬼神。<br>问行人：人平安，但目前仍流连忘返。</p>
+<h3 id="速喜"><a href="#速喜" class="headerlink" title="速喜"></a>速喜</h3><blockquote>
+<p>人便至时，属火未雀，谋事三六九，贵人西南，冲犯南方，大心火箭将军，小孩婆祖动物惊。</p>
+</blockquote>
+<p>解曰：<strong>速喜喜来临，求财向南行，失物申未午，逢人路上寻，官事有福德，病者无祸侵，田宅六畜吉，行人有信音。</strong></p>
+<h4 id="日加时断语-2"><a href="#日加时断语-2" class="headerlink" title="日加时断语"></a>日加时断语</h4><p>速喜加赤口，自己往外走，失物往正北，婚姻得勤走。<br>速喜加小吉，婚姻有人提，病人当天好，时物在家里。<br>速喜加空亡，婚姻有分张，病者积极治，失物不久见。<br>速喜加大安，事事都平安，姻姻成全了，占病都相安。<br>速喜加留连，婚姻不可言，失物无信息，病人有仙缘。</p>
+<h4 id="玥沣解-2"><a href="#玥沣解-2" class="headerlink" title="玥沣解"></a>玥沣解</h4><p>卜到速喜为吉卦，代表凡事皆有喜讯，而且很快就会到来。<br>问运势：目前运势渐开，要积极的行动就可以如愿。<br>问财富：求财可得，但有先破财而后得财或者先得财后破财之兆，若得到钱财就必须赶快脱身。<br>问感情：若是刚开始的感情，则为热恋。若是已经持续一段时间，则为口舌。<br>问事业：工作得利，但须注意文件上的疏失。<br>问身体：心脏、血液循环有问题或者头部、脑压的问题，但是问题不大。<br>问神鬼：小孩子被动物吓到或者被女性阴神冲犯，大人为冲犯男性鬼神。<br>问行人：人已经快到了。</p>
+<h3 id="赤口"><a href="#赤口" class="headerlink" title="赤口"></a>赤口</h3><blockquote>
+<p>官事凶时，属金白虎，谋事四七十，贵人东方，冲犯西方，大人金神七煞，小孩迷魂童子。</p>
+</blockquote>
+<p>解曰：<strong>赤口主口舌，官非切宜防，失物速速讨，行人有惊慌，六畜多作怪，病者出西方，更须防咀咒，诚恐染瘟</strong></p>
+<h4 id="日加时断语-3"><a href="#日加时断语-3" class="headerlink" title="日加时断语"></a>日加时断语</h4><p>赤口加小吉，办事自己提，婚姻不能成，失物无信息。<br>赤口加空亡，无病也上床，失物不用找，婚姻不能成。<br>赤口加大安，办事险和难，失物东北找，婚姻指定难。<br>赤口加留连，办事有困难，行人在外走，失物不回还。<br>赤口加速喜，婚姻在自己，失物有着落，办事官事起。</p>
+<h4 id="玥沣解-3"><a href="#玥沣解-3" class="headerlink" title="玥沣解"></a>玥沣解</h4><p>卜到赤口为凶卦，代表运势多舛，而且诸多纷争亦有口舌之祸。<br>问运势：目前运势不明，若有大计划就要赶快实施、不要拖延，则可成功。若卜小事则不成。<br>问财富：大起大落之财，求财不易。<br>问感情：感情纷争多，或女方身体有疾病。<br>问事业：若为武职或者粗重行业则顺，若为文职则不顺。<br>问身体：胸口、支气管，或者有血光之灾，且赤口也有流行疾病的意义。<br>问神鬼：犯到择日凶神，或者被人诅咒索害。<br>问行人：所问之人目前有困难或者有事情纠缠。</p>
+<h3 id="小吉"><a href="#小吉" class="headerlink" title="小吉"></a>小吉</h3><blockquote>
+<p>人来喜时，属水六合，谋事一五七，贵人西南，冲犯东方，大人无主家神，小孩婆祖六畜惊。</p>
+</blockquote>
+<p>解曰：<strong>小吉最吉昌，路上好商量，阴人来报喜，失物在坤方，行人即便至，交关甚是强，凡事皆和合，病者叩穹苍。</strong></p>
+<h4 id="日加时断语-4"><a href="#日加时断语-4" class="headerlink" title="日加时断语"></a>日加时断语</h4><p>小吉加空亡，病人不妥当，失物正东找，婚姻再想想。<br>小吉加大安，事事两周全，婚姻当日定，失物自己损。<br>小吉加留连，事事有反还，婚姻有人破，失物上西南。<br>小吉加速喜，事事从头起，婚姻能成就，失物在院里。<br>小吉加赤口，办事往外走，婚姻有难处，失物丢了手。</p>
+<h4 id="玥沣解-4"><a href="#玥沣解-4" class="headerlink" title="玥沣解"></a>玥沣解</h4><p>卜到小吉为吉卦，代表凡事皆吉，但是不如大安的安稳也不如速喜快速，而是介于两者中间。<br>问运势：目前运势不错，保持目前状况就会越来越好。<br>问财富：求财可得，而且有因人得财之兆。<br>问感情：若没有感情，则可因他人介绍而得。若有感情，则恋情顺利。<br>问事业：工作不错，但须注意处理公司财务之事，以及与下属沟通之事。<br>问身体：肝胆之疾病和消化系统，但是问题不大。<br>问神鬼：小孩子被动物吓到或者被女性阴神冲犯，大人为冲犯家中祖先。<br>问行人：人已经快到了。</p>
+<h3 id="空亡"><a href="#空亡" class="headerlink" title="空亡"></a>空亡</h3><blockquote>
+<p>音信稀时，属土勾陈，主事三六九，贵人北方，冲犯厝地，大人土压夫人，小孩土瘟神煞。</p>
+</blockquote>
+<p>解曰：<strong>空亡事不详，阴人多乖张，求财无利益，行人有灾殃，失物寻不见，官事有刑伤，病人逢暗鬼，解禳保安康。</strong></p>
+<h4 id="日加时断语-5"><a href="#日加时断语-5" class="headerlink" title="日加时断语"></a>日加时断语</h4><p>空亡加大安，事事不周全，婚姻从和好，失物反复间。<br>空亡加留连，办事处处难，婚姻重新定，失物永不还。<br>空亡加速喜，事事怨自己，婚姻有一定，失物在家里。<br>空亡加赤口，办事官非有，婚姻难定准，失物往远走。<br>空亡加小吉，事事有猜疑，婚姻有喜事，失物回家里。</p>
+<h4 id="玥沣解-5"><a href="#玥沣解-5" class="headerlink" title="玥沣解"></a>玥沣解</h4><p>卜到空亡为凶卦，代表凡事秽暗不明，内心不安，运途起伏。<br>问运势：目前运势不佳，自身拿不定主意，无所适从，可多听取他人之意见，切莫随意就做判断。<br>问财富：求财难得，保守为要。<br>问感情：双方争执多，且有因他人问题或者介入而争执之事。<br>问事业：工作失利，容易被人陷害或者暗中耳语，或者因他人问题而让自己工作失利。<br>问身体：脾胃出毛病，或者神经系统出问题，也有因灵界而生病之兆。<br>问神鬼：家中阳宅或者阴宅出问题，导致冲犯。<br>问行人：人在途中遇到困难或灾厄而难到。</p>
+<h2 id="上宫掌诀"><a href="#上宫掌诀" class="headerlink" title="上宫掌诀"></a>上宫掌诀</h2><p>除上述所示口诀外，另有上宫掌诀合用：<br>子午日在大安，曰：子午皇恩并大赦。<br>丑未日在留连，曰：丑未双熊入青室。<br>寅申日在速喜，曰：寅申登程催之马。<br>卯酉日在赤口，曰：卯酉麻绳自缠身。<br>辰戌日在小吉，曰：辰戌披枷自带锁。<br>巳亥日在空亡，曰：巳亥宫中半折明。</p>
+<h2 id="八卦方位图"><a href="#八卦方位图" class="headerlink" title="八卦方位图"></a>八卦方位图</h2><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619699870624-77ddc0f0-65b9-406b-8916-5c0cfd2a8d07.png#align=left&display=inline&height=913&margin=%5Bobject%20Object%5D&name=image.png&originHeight=913&originWidth=935&size=138967&status=done&style=none&width=935" alt="image.png"></p>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><ol>
+<li><strong>遇事即刻起卦，无事勿占，凡事只占一次，再占不验</strong>。</li>
+<li>同样一件事，也可以以临时起卦，如上个事件，也可以按在接到朋友之约时的具体时间起卦。但同一个事件，只能算一次，比如按接约时算了，就不能再按约会的时间算了。</li>
+<li>任何占卜都不是绝对准的，大的方向对就算准了。一般来说，平时生活中能算对个总事件的8成。如被盗了，算出了能否找到罪犯、人数、方向、破案时间，但没算对追回来的数额，这也算是成功了。</li>
+<li>冥冥中藏有玄机，所以对于六壬等掐指一算不能心中大不敬，否则不妙。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2020/09/22/%E5%B0%8F%E5%85%AD%E5%A3%AC%E9%A2%84%E6%B5%8B%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B/" title="小六壬预测快速上手">https://github.nanfeng.ink/2020/09/22/小六壬预测快速上手/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag"><i class="fa fa-tag"></i> 占卜</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/09/21/Spice%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A8/" rel="prev" title="Spice语法基础入门">
+      <i class="fa fa-chevron-left"></i> Spice语法基础入门
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/11/%E4%BD%BF%E7%94%A8Cadence%E8%AE%BE%E8%AE%A1%E5%8F%8D%E7%9B%B8%E5%99%A8/" rel="next" title="使用Cadence设计反相器">
+      使用Cadence设计反相器 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E5%88%99"><span class="nav-number">2.</span> <span class="nav-text">原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%97%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E7%AE%97%E6%B3%95"><span class="nav-number">3.1.</span> <span class="nav-text">简单算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E8%A1%A5%E5%85%85"><span class="nav-number">3.2.</span> <span class="nav-text">算法补充</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E8%AF%B4"><span class="nav-number">4.</span> <span class="nav-text">解说</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%A7%E5%AE%89"><span class="nav-number">4.1.</span> <span class="nav-text">大安</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A5%E5%8A%A0%E6%97%B6%E6%96%AD%E8%AF%AD"><span class="nav-number">4.1.1.</span> <span class="nav-text">日加时断语</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8E%A5%E6%B2%A3%E8%A7%A3"><span class="nav-number">4.1.2.</span> <span class="nav-text">玥沣解</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%95%99%E8%BF%9E"><span class="nav-number">4.2.</span> <span class="nav-text">留连</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A5%E5%8A%A0%E6%97%B6%E6%96%AD%E8%AF%AD-1"><span class="nav-number">4.2.1.</span> <span class="nav-text">日加时断语</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8E%A5%E6%B2%A3%E8%A7%A3-1"><span class="nav-number">4.2.2.</span> <span class="nav-text">玥沣解</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9F%E5%96%9C"><span class="nav-number">4.3.</span> <span class="nav-text">速喜</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A5%E5%8A%A0%E6%97%B6%E6%96%AD%E8%AF%AD-2"><span class="nav-number">4.3.1.</span> <span class="nav-text">日加时断语</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8E%A5%E6%B2%A3%E8%A7%A3-2"><span class="nav-number">4.3.2.</span> <span class="nav-text">玥沣解</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B5%A4%E5%8F%A3"><span class="nav-number">4.4.</span> <span class="nav-text">赤口</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A5%E5%8A%A0%E6%97%B6%E6%96%AD%E8%AF%AD-3"><span class="nav-number">4.4.1.</span> <span class="nav-text">日加时断语</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8E%A5%E6%B2%A3%E8%A7%A3-3"><span class="nav-number">4.4.2.</span> <span class="nav-text">玥沣解</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E5%90%89"><span class="nav-number">4.5.</span> <span class="nav-text">小吉</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A5%E5%8A%A0%E6%97%B6%E6%96%AD%E8%AF%AD-4"><span class="nav-number">4.5.1.</span> <span class="nav-text">日加时断语</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8E%A5%E6%B2%A3%E8%A7%A3-4"><span class="nav-number">4.5.2.</span> <span class="nav-text">玥沣解</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A9%BA%E4%BA%A1"><span class="nav-number">4.6.</span> <span class="nav-text">空亡</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A5%E5%8A%A0%E6%97%B6%E6%96%AD%E8%AF%AD-5"><span class="nav-number">4.6.1.</span> <span class="nav-text">日加时断语</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8E%A5%E6%B2%A3%E8%A7%A3-5"><span class="nav-number">4.6.2.</span> <span class="nav-text">玥沣解</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8A%E5%AE%AB%E6%8E%8C%E8%AF%80"><span class="nav-number">5.</span> <span class="nav-text">上宫掌诀</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E5%8D%A6%E6%96%B9%E4%BD%8D%E5%9B%BE"><span class="nav-number">6.</span> <span class="nav-text">八卦方位图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">7.</span> <span class="nav-text">注意事项</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

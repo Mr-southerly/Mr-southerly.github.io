@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="类的概述 类的三要素：类的封装、类的继承、类的多态   * 类是一种可以包含数据和方法（function，task）的类型。  * 例如一个数据包，可能被定义为一个类，类中可以包含指令、地址、队列ID、时间戳和数据等成员。  * packet这个类可以在其中对这些数据做初始化，设置指令，读取该类的状态以及检查队列ID。  * 每一个packet类例化的具体对象其数据成员都可能不相同，然而packe">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SV系统验证（6）——类的封装、继承和包">
+<meta property="og:url" content="https://github.nanfeng.ink/2021/04/18/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%886%EF%BC%89%E2%80%94%E2%80%94%E7%B1%BB%E7%9A%84%E5%B0%81%E8%A3%85%E3%80%81%E7%BB%A7%E6%89%BF%E5%92%8C%E5%8C%85/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="类的概述 类的三要素：类的封装、类的继承、类的多态   * 类是一种可以包含数据和方法（function，task）的类型。  * 例如一个数据包，可能被定义为一个类，类中可以包含指令、地址、队列ID、时间戳和数据等成员。  * packet这个类可以在其中对这些数据做初始化，设置指令，读取该类的状态以及检查队列ID。  * 每一个packet类例化的具体对象其数据成员都可能不相同，然而packe">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618731781400-3617096b-9fa6-47aa-a69c-f48cd15d809e.png#align=left&display=inline&height=258&id=u708b33c7&margin=%5Bobject%20Object%5D&originHeight=258&originWidth=758&size=358879&status=done&style=none&width=758">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618731917155-ff7aa856-17f4-44b5-91d2-5b0f5e036886.png#align=left&display=inline&height=151&id=u892a3702&margin=%5Bobject%20Object%5D&originHeight=151&originWidth=508&size=153332&status=done&style=none&width=508">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619320909037-d36f5ec2-5e18-449f-a67c-d800288cf971.png#align=left&display=inline&height=169&id=BkyE6&margin=%5Bobject%20Object%5D&name=image.png&originHeight=457&originWidth=910&size=120923&status=done&style=none&width=336">
+<meta property="article:published_time" content="2021-04-18T08:58:58.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="SystemVerilog">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618731781400-3617096b-9fa6-47aa-a69c-f48cd15d809e.png#align=left&display=inline&height=258&id=u708b33c7&margin=%5Bobject%20Object%5D&originHeight=258&originWidth=758&size=358879&status=done&style=none&width=758">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2021/04/18/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%886%EF%BC%89%E2%80%94%E2%80%94%E7%B1%BB%E7%9A%84%E5%B0%81%E8%A3%85%E3%80%81%E7%BB%A7%E6%89%BF%E5%92%8C%E5%8C%85/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SV系统验证（6）——类的封装、继承和包 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2021/04/18/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%886%EF%BC%89%E2%80%94%E2%80%94%E7%B1%BB%E7%9A%84%E5%B0%81%E8%A3%85%E3%80%81%E7%BB%A7%E6%89%BF%E5%92%8C%E5%8C%85/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SV系统验证（6）——类的封装、继承和包
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-04-18 16:58:58" itemprop="dateCreated datePublished" datetime="2021-04-18T16:58:58+08:00">2021-04-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">笔记篇</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/%E6%95%B0%E5%AD%97%E9%AA%8C%E8%AF%81/" itemprop="url" rel="index"><span itemprop="name">数字验证</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="类的概述"><a href="#类的概述" class="headerlink" title="类的概述"></a>类的概述</h2><blockquote>
+<p>类的三要素：类的封装、类的继承、类的多态</p>
+</blockquote>
+<ul>
+<li>类是一种可以包含<strong>数据</strong>和<strong>方法</strong>（function，task）的类型。</li>
+<li>例如一个数据包，可能被定义为一个类，类中可以包含指令、地址、队列ID、时间戳和数据等成员。</li>
+<li><strong>packet</strong>这个类可以在其中对这些数据做<strong>初始化</strong>，设置指令，读取该类的状态以及检查队列ID。</li>
+<li>每一个packet类例化的具体对象其数据成员都可能不相同，然而<strong>packet类作为描述这些数据的抽象类型</strong>，<strong>将其对应的数据成员和操作这些数据成员的方法都定义在其中</strong>。</li>
+</ul>
+<h2 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h2><ul>
+<li>类（class）：包含成员变量和成员方法。</li>
+<li>对象（object）：类在例化后的实例。</li>
+<li>句柄（handle）：指向对象的<strong>指针</strong>。</li>
+<li>原型（prototype）：程序的声明部分，包含程序名、返回类型和参数列表。</li>
+</ul>
+<h2 id="构建函数"><a href="#构建函数" class="headerlink" title="构建函数"></a>构建函数</h2><ul>
+<li>SV并不像C++语言一样要求复杂的存储空间开辟和销毁的而是采用了像Java一样空间自动开辟和回收的手段。</li>
+<li>因此SV的类在定义时，只需要定义构建函数（constructor）而不需要定义析构函数（destructor）。当全局没有任何一个句柄指向它时类的空间就<strong>自动释放</strong>了</li>
+<li>类在定义时，需要定义构建函数，如果未定义，则系统会自助定义一个空的构建函数new（）（没有形式参数，函数体亦为空）</li>
+<li>对象在创建时（对象天然是动态的，仿真之后才有值），需要先声明再例化，同时进行亦可。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> packet_c;      <span class="comment">//类的声明</span></span><br><span class="line">  <span class="keyword">integer</span> command;</span><br><span class="line">  <span class="keyword">function</span> <span class="keyword">new</span>(<span class="keyword">int</span> inival);</span><br><span class="line">    command = inival;    <span class="comment">//new函数没有返回值，默认每个类中都有new函数，主要为了开辟空间和初始化句柄</span></span><br><span class="line">  <span class="keyword">endfunction</span></span><br><span class="line"><span class="keyword">endclass</span> </span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> packet_m;      <span class="comment">//模块声明</span></span><br><span class="line">  <span class="keyword">integer</span> command;</span><br><span class="line"><span class="keyword">endmodule</span> </span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span>&#123;         <span class="comment">//结构体声明</span></span><br><span class="line">  <span class="keyword">integer</span> command;</span><br><span class="line">&#125;packet_s;</span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> tb;</span><br><span class="line">  packet_m ml();      <span class="comment">//模块例化，只能在模块中，不能再initial中</span></span><br><span class="line">  packet_m m2();</span><br><span class="line">  packet_s s1=&#x27;&#123;<span class="number">1</span>&#125;;         <span class="comment">//结构体例化，可以在外部也可以在initial中</span></span><br><span class="line">  packet_c c1 = <span class="keyword">new</span>(<span class="number">2</span>);     <span class="comment">//开辟空间，句柄指向创建对象的头部</span></span><br><span class="line">  <span class="keyword">initial</span> <span class="keyword">begin</span>:ini_pro1</span><br><span class="line">    packet_s s2 = &#x27;&#123;<span class="number">1</span>&#125;;        <span class="comment">//结构体是静态的，在仿真之前就已经有值</span></span><br><span class="line">    packet_c c2 = <span class="keyword">new</span>(<span class="number">3</span>);    <span class="comment">//类例化，可以在外部也可以在initial中</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"> <span class="keyword">end</span> <span class="keyword">endmodule</span>           <span class="comment">//对象天然是动态的，仿真之后才有值，除非类中有静态变量，否则创建对象前不开辟空间</span></span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="静态成员（变量-方法）"><a href="#静态成员（变量-方法）" class="headerlink" title="静态成员（变量/方法）"></a>静态成员（变量/方法）</h2><ul>
+<li>类的成员（变量/方法）<strong>默认都是动态</strong>（automatic）生命周期，即每一个对象的变量和方法都会为其开辟新的空间。</li>
+<li>如果多个对象为了共享一个成员（变量/方法），那么可以为其添加关键字<strong>static</strong>。</li>
+<li>多个对象因此可以<strong>共享同一个成员</strong>变最或者方法。</li>
+<li>访问该成员时，无需进行对象的例化。</li>
+<li>成员方法也可以声明为静态</li>
+<li><strong>静态的方法无法访问非静态成员</strong>（变量/方法）否则会发生编译错误。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> packet_c;      <span class="comment">//类的声明</span></span><br><span class="line">  <span class="keyword">integer</span> command;</span><br><span class="line">  <span class="keyword">static</span> data;      <span class="comment">//静态变量声明，静态变量在仿真前就开辟了空间</span></span><br><span class="line">  <span class="keyword">function</span> <span class="keyword">new</span>(<span class="keyword">int</span> inival);</span><br><span class="line">    command = inival;    </span><br><span class="line">  <span class="keyword">endfunction</span></span><br><span class="line"><span class="keyword">endclass</span> </span><br><span class="line"></span><br><span class="line">moduletb3; </span><br><span class="line">packet_c cl, c2; </span><br><span class="line"><span class="keyword">initial</span> <span class="keyword">begin</span>: ini_proc</span><br><span class="line">  <span class="built_in">$display</span>(<span class="string">&quot;packet_c static data is 80d&quot;</span>, packet_c::data); </span><br><span class="line">  c1=<span class="keyword">new</span>(<span class="number">10</span>); </span><br><span class="line">  <span class="built_in">$display</span>(<span class="string">&quot;cl. command=80d, cl. data=80d&quot;</span>, cl<span class="variable">.command</span>, cl<span class="variable">.data</span>); </span><br><span class="line">  c2=c1;      <span class="comment">//</span></span><br><span class="line">  <span class="built_in">$display</span>(<span class="string">&quot;c2. command=80d,c2. data=80d&quot;</span>,c2<span class="variable">.command</span>,c2<span class="variable">.data</span>); </span><br><span class="line"><span class="keyword">end</span> <span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="this语句"><a href="#this语句" class="headerlink" title="this语句"></a>this语句</h2><ul>
+<li>this是用明确索引<strong>当前所在对象</strong>的成员（变量/参数/方法）</li>
+<li>this<strong>只可以用来在类的集静态成员、约束和覆盖组中使用</strong>。</li>
+<li>this的使用可以<strong>明确</strong>所指向变量的作用域。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> Demo; </span><br><span class="line"><span class="keyword">integer</span> x; </span><br><span class="line">  <span class="keyword">function</span> <span class="keyword">new</span>(<span class="keyword">integer</span> x); </span><br><span class="line">    <span class="keyword">int</span> x=<span class="number">3</span>;</span><br><span class="line">    <span class="keyword">this</span><span class="variable">.x</span>=x;         <span class="comment">//若是没有使用this，则默认采用就近原则，寻找最近的成员变量（最好使用this）</span></span><br><span class="line">  <span class="keyword">endfunction</span> </span><br><span class="line"><span class="keyword">endclass</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="类的赋值和拷贝"><a href="#类的赋值和拷贝" class="headerlink" title="类的赋值和拷贝"></a>类的赋值和拷贝</h2><ul>
+<li><p><strong>声明变量</strong>和<strong>创建对象</strong>是两个过程，也可以一步完成。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Packet p1;</span><br><span class="line">p1=<span class="keyword">new</span>;</span><br></pre></td></tr></table></figure></li>
+<li><p>如果将p1赋值给另外一个变量p2，那么依然<strong>只有一个对象</strong>，是指向这个对象的句柄有p1和p2.</p>
+</li>
+<li><p>以下这种方式表示p1和p2代表两个不同的对象。在创建p2时，将从p1拷贝其成员变量例如integer、string和句柄等种拷贝方式称为<strong>浅拷贝</strong>（shallow copy）。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Packet pl；</span><br><span class="line">Packet p2;</span><br><span class="line">Packet p3;</span><br><span class="line">p1 = <span class="keyword">new</span>();      <span class="comment">//只有经历过new函数才算生成一个对象</span></span><br><span class="line">p3 = p1;         <span class="comment">//句柄赋值，只有一个对象，但是有两条路寻找到（一个对象，两个句柄）</span></span><br><span class="line">p2 = <span class="keyword">new</span> p1;     <span class="comment">//浅拷贝，两个对象，但只能拷贝对象的内容，如果里面有嵌套的对象内容无法复制（下层对象句柄可以）</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="深拷贝和浅拷贝的区别"><a href="#深拷贝和浅拷贝的区别" class="headerlink" title="深拷贝和浅拷贝的区别"></a>深拷贝和浅拷贝的区别</h3><ul>
+<li><strong>shadow copy</strong>，是一种简易复制，类似于原对象的影印本，<strong>只拷贝原对象的内容</strong>，<strong>不拷贝对象</strong>（用new操作符）</li>
+<li>如果类中包含一个指向另一个类的句柄，<strong>那么只有高一级的对象（变量和句柄）被new复制</strong>，下层的对象的内容不会被复制（但是下层对象的句柄可以被复制，即复制后，两个对象指向同一个低一级的对象！）</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618731781400-3617096b-9fa6-47aa-a69c-f48cd15d809e.png#align=left&display=inline&height=258&id=u708b33c7&margin=%5Bobject%20Object%5D&originHeight=258&originWidth=758&size=358879&status=done&style=none&width=758"></p>
+<ul>
+<li><strong>deep copy</strong>可将拷贝对象中所包含的对象拷贝过来（只能自定义copy函数，copy中需要调用new函数）<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> Transaction;</span><br><span class="line">      <span class="keyword">bit</span> [<span class="number">31</span>:<span class="number">0</span>] addr,crc,data[<span class="number">8</span>];</span><br><span class="line">      statistics stats;             <span class="comment">//子对象</span></span><br><span class="line">      <span class="keyword">static</span> <span class="keyword">int</span> count=<span class="number">0</span>;</span><br><span class="line">      <span class="keyword">int</span> id;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">function</span> <span class="keyword">new</span>;</span><br><span class="line">           stats=<span class="keyword">new</span>();</span><br><span class="line">           id=count++;</span><br><span class="line">      <span class="keyword">endfunction</span></span><br><span class="line"></span><br><span class="line">      <span class="keyword">function</span> copy;   <span class="comment">//深拷贝函数</span></span><br><span class="line">          copy=<span class="keyword">new</span>();</span><br><span class="line">          copy<span class="variable">.addr</span>=addr;</span><br><span class="line">          copy<span class="variable">.data</span>=data;</span><br><span class="line">          copy<span class="variable">.crc</span>=crc;</span><br><span class="line">          copy<span class="variable">.stats</span>=stats<span class="variable">.copy</span>();</span><br><span class="line">          id=count++;</span><br><span class="line">      <span class="keyword">endfunction</span>               <span class="comment">//将每一个量都拷贝一遍</span></span><br><span class="line"><span class="keyword">endclass</span> </span><br><span class="line"></span><br><span class="line">Transaction src, dst;</span><br><span class="line">   <span class="keyword">initial</span> <span class="keyword">begin</span></span><br><span class="line">     src=<span class="keyword">new</span>();</span><br><span class="line">     src<span class="variable">.stats</span><span class="variable">.startT</span>=<span class="number">42</span>;</span><br><span class="line">     dst=src<span class="variable">.copy</span>();</span><br><span class="line">     dst<span class="variable">.stats</span><span class="variable">.startT</span>=<span class="number">96</span>;</span><br><span class="line">     <span class="built_in">$display</span>(src<span class="variable">.stats</span><span class="variable">.startT</span>);</span><br><span class="line">   <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618731917155-ff7aa856-17f4-44b5-91d2-5b0f5e036886.png#align=left&display=inline&height=151&id=u892a3702&margin=%5Bobject%20Object%5D&originHeight=151&originWidth=508&size=153332&status=done&style=none&width=508"><br>参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/yu1216338826/article/details/86551128">SV中shadow copy和deep copy的区别</a></li>
+</ul>
+<h2 id="数据的隐藏和封装"><a href="#数据的隐藏和封装" class="headerlink" title="数据的隐藏和封装"></a>数据的隐藏和封装</h2><ul>
+<li>类的成员（变量/方法）默认情况下，即是<strong>公共属性</strong>的。这表示对于类自身和外部均可以访问该成员。</li>
+<li>对于商业开发，类的提供方会<strong>限制一些类成员的外部访问权限</strong>，继而隐藏类成员的更多细节。</li>
+<li>这种方式也使得类的外部访问接口更为<strong>精简</strong>，减轻了类的维护工作量，也使得类在修改时便于与旧版本保持兼容。</li>
+<li>数据隐藏的方式使得类的测试和维护都变得更为简单。</li>
+<li>对于成员的限定，如果使用<strong>local</strong>，则只有<strong>该类可以访问此成员，而子类或者外部均无法访问</strong>。</li>
+<li>对于成员的限定，如果使用<strong>protected</strong>，则表示<strong>该类和其子类均可以访问此成员，而外部无法访问</strong>。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> Packet; </span><br><span class="line">  <span class="keyword">local</span> <span class="keyword">integer</span> i; <span class="comment">//只有该类可以访问此成员，而子类或者外部均无法访问  本地成员</span></span><br><span class="line">  <span class="keyword">protected</span> <span class="keyword">integer</span> j;<span class="comment">//该类和其子类均可以访问此成员，而外部无法访问   内部成员</span></span><br><span class="line">  <span class="keyword">function</span> <span class="keyword">integer</span> compare (Packet other);</span><br><span class="line">    compare=(<span class="keyword">this</span><span class="variable">.i</span> == other<span class="variable">.i</span>); </span><br><span class="line">  <span class="keyword">endfunction</span> </span><br><span class="line"><span class="keyword">endclass</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="类的继承和子类"><a href="#类的继承和子类" class="headerlink" title="类的继承和子类"></a>类的继承和子类</h2><ul>
+<li><p>之前定义过的类Packet， 通过<strong>extends</strong>，LinkedPacket继承于其父类Packet，包括继承其<strong>所有的成员</strong>（变量/方法）</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> packet;</span><br><span class="line">  <span class="keyword">integer</span> i=<span class="number">1</span>;      <span class="comment">//例化对象时首先在这里开辟空间顺便赋初值（如果new中赋值，这里最好只声明）</span></span><br><span class="line">  <span class="keyword">function</span> <span class="keyword">new</span>(<span class="keyword">int</span> val);</span><br><span class="line">    i=<span class="number">2</span>;           <span class="comment">//然后再运行new函数，覆盖初值</span></span><br><span class="line">  <span class="keyword">endfunction</span> </span><br><span class="line">  </span><br><span class="line">  <span class="keyword">function</span> shift()</span><br><span class="line">    i=i&lt;&lt;<span class="number">2</span>;</span><br><span class="line">  <span class="keyword">endfunction</span></span><br><span class="line"><span class="keyword">endclass</span> </span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> linkedpacked <span class="keyword">extends</span> packet;   <span class="comment">//子类可以继承父类所有的变量&amp;方法，并可以进行增补</span></span><br><span class="line">  <span class="comment">//integer i=3;      //如果子类声明了i那优先索引的是子类的i</span></span><br><span class="line">  <span class="keyword">function</span> <span class="keyword">new</span>();    <span class="comment">//不管子类有没有new函数，都会先默认调用父类的new函数，如果子类有再执行自己的new函数</span></span><br><span class="line">    <span class="keyword">super</span><span class="variable">.new</span>(val)   <span class="comment">//如果父类new有参数，那么必须在子类的new中通过super.new(val)完成继承，如果父类没有参数，系统默认调用继承</span></span><br><span class="line">    i=<span class="number">3</span>;</span><br><span class="line">  <span class="keyword">endfunction</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">function</span> shift()</span><br><span class="line">    i=i&lt;&lt;<span class="number">2</span>;</span><br><span class="line">  <span class="keyword">endfunction</span></span><br><span class="line"><span class="keyword">endclass</span> </span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> tb;</span><br><span class="line">  <span class="keyword">initial</span> <span class="keyword">begin</span> </span><br><span class="line">    packetp=<span class="keyword">new</span>(<span class="number">3</span>);</span><br><span class="line">    linkedpacked lp;            </span><br><span class="line">    <span class="built_in">$display</span>（<span class="string">&quot;p.i=%0d&quot;</span>，p<span class="variable">.i</span>）;</span><br><span class="line">    <span class="built_in">$display</span>（<span class="string">&quot;lp.i=%0d&quot;</span>，lp<span class="variable">.i</span>）;</span><br><span class="line">    p<span class="variable">.shift</span>();</span><br><span class="line">    <span class="built_in">$display</span>（<span class="string">&quot;after shift p.i=%0d&quot;</span>，p<span class="variable">.i</span>）;</span><br><span class="line">    lp<span class="variable">.shift</span>();</span><br><span class="line">    <span class="built_in">$display</span>（<span class="string">&quot;after shift ,lp.i=%0d&quot;</span>，lp<span class="variable">.i</span>）;</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure></li>
+<li><p>子类和父类存在重名变量或者函数，那调用子类的函数（如果没有使用<code>super</code>），子类如果没有才会调用父类的。</p>
+</li>
+<li><p>子类执行new函数，必须先调用父类的new完成继承，如果父类new没参数，则可以自动完成调用，如果父类new函数有参数必须在子类的new中通过<code>super.new(val)</code>完成继承</p>
+</li>
+<li><p>子类如果有相应的变量或函数那就调用自己的，没有的话就去父类找找。</p>
+</li>
+<li><p><strong>子类成员优先级高于父类</strong>，调用<strong>this、super</strong>则是明确调用域。但子类<strong>必须通过new函数</strong>继承父类。</p>
+</li>
+<li><p>子类句柄赋值给父类句柄，<strong>访问权限只有子类从父类继承的那一部分</strong>。</p>
+</li>
+<li><p><strong>父类的句柄不能赋值给子类的句柄</strong>，因为父类较小，会有非法空间出现。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">packet p=<span class="keyword">new</span>(<span class="number">3</span>); </span><br><span class="line">linkedpacked lp=<span class="keyword">new</span>(<span class="number">1</span>); </span><br><span class="line">packet tmp; </span><br><span class="line">tmp=lp;   <span class="comment">//子类句柄可以赋值给父类句柄，但句柄访问受限</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619320909037-d36f5ec2-5e18-449f-a67c-d800288cf971.png#align=left&display=inline&height=169&id=BkyE6&margin=%5Bobject%20Object%5D&name=image.png&originHeight=457&originWidth=910&size=120923&status=done&style=none&width=336" alt="image.png"></p>
+</li>
+</ul>
+<blockquote>
+<p>写代码的好习惯：<br>1、所有的类都要写new函数（哪怕为空）<br>2、子类的new函数中，第一行先写上super.new()完成继承<br>3、子类的变量不要和父类重名，方法可以<br>4、在类中调用函数的时候最好写上this、super提高可读性<br>5、在包、类等初始化的时候加上后缀如pkt_a</p>
+</blockquote>
+<h2 id="包的使用"><a href="#包的使用" class="headerlink" title="包的使用"></a>包的使用</h2><ul>
+<li>为了便得可以在多个模块（硬件）或者类（软件）之间<strong>共享用户定义的类型</strong>，SV添加了包（package）Verilog没有包的概念。</li>
+<li>包的概念参考于VHDL，用户自定义的类型譬如<strong>类、方法、变量、结构体、枚举类</strong>等都可以在package…..endpackage中定义。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> pkg a;           <span class="comment">//声明包a</span></span><br><span class="line">  <span class="keyword">class</span> packet_a; </span><br><span class="line">  <span class="keyword">endclass</span> </span><br><span class="line">  <span class="keyword">typedef</span> <span class="keyword">struct</span>&#123;</span><br><span class="line">    <span class="keyword">int</span> data; </span><br><span class="line">    <span class="keyword">int</span> command;</span><br><span class="line">  &#125;<span class="keyword">struct</span> a;</span><br><span class="line">  <span class="keyword">int</span> va=<span class="number">2</span>;</span><br><span class="line"><span class="keyword">endpackage</span> </span><br><span class="line"></span><br><span class="line"><span class="keyword">package</span> pkg_b;           <span class="comment">//声明包b</span></span><br><span class="line">  <span class="keyword">class</span> packet_b; </span><br><span class="line">  <span class="keyword">endclass</span> </span><br><span class="line">  <span class="keyword">typedef</span> <span class="keyword">struct</span>&#123;</span><br><span class="line">    <span class="keyword">int</span> data;  </span><br><span class="line">    <span class="keyword">int</span> command;</span><br><span class="line">  &#125;<span class="keyword">struct</span> b;</span><br><span class="line">  <span class="keyword">int</span> vb=<span class="number">3</span>;</span><br><span class="line"><span class="keyword">endpackage</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> tb; </span><br><span class="line">  <span class="keyword">import</span> pkg_a::packet_a;   <span class="comment">//  导入包内的类</span></span><br><span class="line">  <span class="keyword">import</span> pkg_a::packet_a;</span><br><span class="line">  <span class="keyword">import</span> pkg_a::va;         <span class="comment">//  导入包内的变量</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">class</span> packet_tb; </span><br><span class="line">  <span class="keyword">endclass</span> </span><br><span class="line">  <span class="keyword">typedef</span> <span class="keyword">struct</span>&#123;</span><br><span class="line">    <span class="keyword">int</span> data; </span><br><span class="line">    <span class="keyword">int</span> command;</span><br><span class="line">  &#125; struct_tb; </span><br><span class="line">  </span><br><span class="line">  <span class="keyword">initial</span> <span class="keyword">begin</span> </span><br><span class="line">    pkg_a::packet_a pa=<span class="keyword">new</span>(); </span><br><span class="line">    pkg_b::packet_b pb=<span class="keyword">new</span>();   <span class="comment">//  初始化一个包，和例化类的对象不同需要声明域pkg_b::</span></span><br><span class="line">    packet_tb  ptb=<span class="keyword">new</span>();</span><br><span class="line">    <span class="built_in">$display</span>(pkg_b::vb)         <span class="comment">//  直接通过域索引包内变量</span></span><br><span class="line">  <span class="keyword">end</span> <span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="包的索引"><a href="#包的索引" class="headerlink" title="包的索引"></a>包的索引</h2><ul>
+<li><p>方法一，直接通过域索引</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pkg_a::packet_a pa=<span class="keyword">new</span>(); </span><br><span class="line">pkg_b::packet_b pb=<span class="keyword">new</span>();    <span class="comment">// 声明域pkg_b::索引包内的类</span></span><br><span class="line">packet_tb  ptb=<span class="keyword">new</span>();</span><br><span class="line"><span class="built_in">$display</span>(pkg_b::vb);         <span class="comment">//  直接通过域索引包内变量</span></span><br></pre></td></tr></table></figure></li>
+<li><p>方法二，导入包中内容</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pkg_a::packet_a;   <span class="comment">//  导入包内的类</span></span><br><span class="line"><span class="keyword">import</span> pkg_a::packet_a;</span><br><span class="line"><span class="keyword">import</span> pkg_a::va;          <span class="comment">//  导入包内的变量</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> pkg_a::*;       <span class="comment">//导入包内全部内容，编译器自己找</span></span><br><span class="line"><span class="keyword">import</span> pkg_a::*;       <span class="comment">//但这这种 非精确查找优先级会很低，在编译器找不到的时候，才会考虑这两个包</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="思考问题"><a href="#思考问题" class="headerlink" title="思考问题"></a>思考问题</h2><ul>
+<li><p>类和结构体的联系和差别有哪些？</p>
+<blockquote>
+<p>联系：<br>1.定义属性用来存储值，并进行了封装;<br>2.定义下标脚本用来允许使用下标语法访问值；<br>区别：<br>1.类里面可以有函数方法，可以继承，结构体不行<br>2.类的成员默认动态，而结构体默认静态<br>3.类的成员权限默认public但是可以限定，结构体只能是public</p>
+</blockquote>
+</li>
+<li><p>类和模块（module）的联系和差别有哪些？</p>
+</li>
+</ul>
+<ul>
+<li>为什么类的静态方法不能访问类的非静态（动态）成员变量？</li>
+</ul>
+<ul>
+<li>如果有同名的模块，那么在编译过程中应该怎么解决“同名”问题？</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2021/04/18/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%886%EF%BC%89%E2%80%94%E2%80%94%E7%B1%BB%E7%9A%84%E5%B0%81%E8%A3%85%E3%80%81%E7%BB%A7%E6%89%BF%E5%92%8C%E5%8C%85/" title="SV系统验证（6）——类的封装、继承和包">https://github.nanfeng.ink/2021/04/18/SV系统验证（6）——类的封装、继承和包/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SystemVerilog/" rel="tag"><i class="fa fa-tag"></i> SystemVerilog</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/04/16/%E4%BD%BF%E7%94%A8SystemVerilog%E5%AF%B9Router%E8%BF%9B%E8%A1%8C%E9%AA%8C%E8%AF%81/" rel="prev" title="使用SystemVerilog对Router进行验证">
+      <i class="fa fa-chevron-left"></i> 使用SystemVerilog对Router进行验证
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/05/02/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%887%EF%BC%89%E2%80%94%E2%80%94%E9%9A%8F%E6%9C%BA%E7%BA%A6%E6%9D%9F/" rel="next" title="SV系统验证（7）——随机约束">
+      SV系统验证（7）——随机约束 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B1%BB%E7%9A%84%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">类的概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AF%E8%AF%AD"><span class="nav-number">2.</span> <span class="nav-text">术语</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E5%87%BD%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">构建函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E6%88%90%E5%91%98%EF%BC%88%E5%8F%98%E9%87%8F-%E6%96%B9%E6%B3%95%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">静态成员（变量&#x2F;方法）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#this%E8%AF%AD%E5%8F%A5"><span class="nav-number">5.</span> <span class="nav-text">this语句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B1%BB%E7%9A%84%E8%B5%8B%E5%80%BC%E5%92%8C%E6%8B%B7%E8%B4%9D"><span class="nav-number">6.</span> <span class="nav-text">类的赋值和拷贝</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%B1%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B5%85%E6%8B%B7%E8%B4%9D%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">6.1.</span> <span class="nav-text">深拷贝和浅拷贝的区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%9A%84%E9%9A%90%E8%97%8F%E5%92%8C%E5%B0%81%E8%A3%85"><span class="nav-number">7.</span> <span class="nav-text">数据的隐藏和封装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B1%BB%E7%9A%84%E7%BB%A7%E6%89%BF%E5%92%8C%E5%AD%90%E7%B1%BB"><span class="nav-number">8.</span> <span class="nav-text">类的继承和子类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8C%85%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">9.</span> <span class="nav-text">包的使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8C%85%E7%9A%84%E7%B4%A2%E5%BC%95"><span class="nav-number">10.</span> <span class="nav-text">包的索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%9D%E8%80%83%E9%97%AE%E9%A2%98"><span class="nav-number">11.</span> <span class="nav-text">思考问题</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

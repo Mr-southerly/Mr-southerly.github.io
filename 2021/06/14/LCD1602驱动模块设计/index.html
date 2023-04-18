@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="LCD驱动模块前端设计流程 需求分析  1. 使用Verilog代码完成LCD1602型号的液晶显示屏驱动设计   * LCD驱动模块的上位机为主控系统，下位机为LCD1602液晶显示屏；  * 要求LCD驱动模块与主控系统交互时使用APB接口（APB时钟采用64MHz) ；   * 该驱动模块工作时钟使用外部时钟（工作时钟采用50MHz) ；  * 该模块初始化完成后，它所驱动的LCD1602液">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LCD1602驱动模块设计">
+<meta property="og:url" content="https://github.nanfeng.ink/2021/06/14/LCD1602%E9%A9%B1%E5%8A%A8%E6%A8%A1%E5%9D%97%E8%AE%BE%E8%AE%A1/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="LCD驱动模块前端设计流程 需求分析  1. 使用Verilog代码完成LCD1602型号的液晶显示屏驱动设计   * LCD驱动模块的上位机为主控系统，下位机为LCD1602液晶显示屏；  * 要求LCD驱动模块与主控系统交互时使用APB接口（APB时钟采用64MHz) ；   * 该驱动模块工作时钟使用外部时钟（工作时钟采用50MHz) ；  * 该模块初始化完成后，它所驱动的LCD1602液">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723647525-e2d14a47-58fe-4ec1-a4a8-b6f240fe1a1e.png#align=left&display=inline&height=213&id=pTsd4&margin=%5Bobject%20Object%5D&originHeight=213&originWidth=639&status=done&style=none&width=639">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723648005-7ccc5404-7528-43f0-b92b-dee5bc003158.png#align=left&display=inline&height=327&id=VpNct&margin=%5Bobject%20Object%5D&originHeight=327&originWidth=768&status=done&style=none&width=768">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723648513-671755c8-5a33-4b51-92e9-1ba3931f2d2f.png#align=left&display=inline&height=318&id=KpNKE&margin=%5Bobject%20Object%5D&originHeight=318&originWidth=513&status=done&style=none&width=513">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723649029-4d50b1db-ff34-4fe8-8e63-0b6c4ac2f7b0.png#align=left&display=inline&height=324&id=mc2Pj&margin=%5Bobject%20Object%5D&originHeight=324&originWidth=521&status=done&style=none&width=521">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723649327-13d478d1-5026-433f-b4c0-47db1109d677.png#align=left&display=inline&height=346&id=o9fCa&margin=%5Bobject%20Object%5D&originHeight=346&originWidth=675&status=done&style=none&width=675">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723649715-53f21345-1f35-4036-8a2d-8cc905257d48.png#align=left&display=inline&height=352&id=hjmB2&margin=%5Bobject%20Object%5D&originHeight=352&originWidth=679&status=done&style=none&width=679">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723650095-5fe5c9a6-9784-445f-ba68-b37b562b4cd2.png#align=left&display=inline&height=344&id=ekFir&margin=%5Bobject%20Object%5D&originHeight=344&originWidth=971&status=done&style=none&width=971">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623724874546-0dea39a2-6d35-46b2-acd0-0c8a04dc85b4.png#align=left&display=inline&height=327&margin=%5Bobject%20Object%5D&name=image.png&originHeight=327&originWidth=1110&size=41040&status=done&style=none&width=1110">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623724894879-e2b40361-ef7c-463c-b43c-1091ad2ed791.png#align=left&display=inline&height=661&margin=%5Bobject%20Object%5D&name=image.png&originHeight=661&originWidth=327&size=20584&status=done&style=none&width=327">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723651129-f07a780c-89d3-4462-9098-60e8338b93b1.png#align=left&display=inline&height=356&id=cuUWr&margin=%5Bobject%20Object%5D&originHeight=619&originWidth=817&status=done&style=none&width=470">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723651892-88a77e48-5777-4f18-946d-c2e8c8365ce1.png#align=left&display=inline&height=258&id=DeaKC&margin=%5Bobject%20Object%5D&originHeight=1017&originWidth=1920&status=done&style=none&width=488">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723652394-a2ac84d3-3f65-4d4d-8fab-3cdf7da8d879.png#align=left&display=inline&height=274&id=qenQM&margin=%5Bobject%20Object%5D&originHeight=1017&originWidth=1920&status=done&style=none&width=518">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723652926-daea04f0-0333-4cfa-aabc-afeeda640a7a.png#align=left&display=inline&height=270&id=jMpHY&margin=%5Bobject%20Object%5D&originHeight=1017&originWidth=1920&status=done&style=none&width=510">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723653456-cb84357b-eae9-4372-84b1-38801fc7ba71.png#align=left&display=inline&height=269&id=b8CaN&margin=%5Bobject%20Object%5D&originHeight=1017&originWidth=1920&status=done&style=none&width=507">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723653922-dbb12eca-c3b9-4bad-a1a7-39639503f754.png#align=left&display=inline&height=256&id=Xtr6V&margin=%5Bobject%20Object%5D&originHeight=1017&originWidth=1920&status=done&style=none&width=483">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723654412-6fffe270-54a8-4c9e-ba3e-afc44665eded.png#align=left&display=inline&height=272&id=CfrrN&margin=%5Bobject%20Object%5D&originHeight=1009&originWidth=1912&status=done&style=none&width=516">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723654797-c9101c5d-4ec2-480c-806b-c6076658f8e6.png#align=left&display=inline&height=265&id=fRy0m&margin=%5Bobject%20Object%5D&originHeight=1009&originWidth=1912&status=done&style=none&width=503">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723655366-01ddd6d1-f064-4533-90c0-99c322c02efa.png#align=left&display=inline&height=175&id=sgWzy&margin=%5Bobject%20Object%5D&originHeight=175&originWidth=490&status=done&style=none&width=490">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723655797-f05c5a59-f8a7-46b8-aa8c-5da2264a349c.png#align=left&display=inline&height=313&id=Ndiml&margin=%5Bobject%20Object%5D&originHeight=508&originWidth=885&status=done&style=none&width=546">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723656506-62e2d47d-f3d4-4d13-ad1c-12e1a688b769.png#align=left&display=inline&height=344&id=sC4os&margin=%5Bobject%20Object%5D&originHeight=502&originWidth=885&status=done&style=none&width=606.991455078125">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723656883-99fead1a-ec03-46b0-9446-77d8d04fd434.png#align=left&display=inline&height=619&id=amtPu&margin=%5Bobject%20Object%5D&originHeight=827&originWidth=817&status=done&style=none&width=611.9971313476562">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723657457-5c1aa8c0-82bb-42dc-8ac6-47b7abc873fb.png#align=left&display=inline&height=174&id=HX9me&margin=%5Bobject%20Object%5D&originHeight=225&originWidth=813&status=done&style=none&width=626.9971313476562">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723657927-0670724e-30c4-413e-9a19-dfaa3dc63da5.png#align=left&display=inline&height=366&id=xAHmE&margin=%5Bobject%20Object%5D&originHeight=509&originWidth=855&status=done&style=none&width=613.9971313476562">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723658462-aeaad3e2-f9e5-4dc6-a61f-1876d96a98f6.png#align=left&display=inline&height=630&id=Gpiwq&margin=%5Bobject%20Object%5D&originHeight=855&originWidth=808&status=done&style=none&width=594.9971313476562">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723658723-a86996fb-0331-4295-b24f-98625b940103.png#align=left&display=inline&height=132&id=JD8IF&margin=%5Bobject%20Object%5D&originHeight=132&originWidth=815&status=done&style=none&width=815">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723659002-d41d9d67-c464-4e65-bbd7-0cf649b79ca3.png#align=left&display=inline&height=421&id=ONu93&margin=%5Bobject%20Object%5D&originHeight=421&originWidth=452&status=done&style=none&width=452">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723659542-2ea85737-7e83-4395-9b78-922bab74a511.png#align=left&display=inline&height=559&id=L8Kmd&margin=%5Bobject%20Object%5D&originHeight=559&originWidth=479&status=done&style=none&width=479">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723660194-dd728d9b-7e65-4b8e-9d4a-25f9b26ed846.png#align=left&display=inline&height=392&id=DPRbd&margin=%5Bobject%20Object%5D&originHeight=525&originWidth=666&status=done&style=none&width=496.99432373046875">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723660753-adc11f0d-65b1-4eac-8b9f-33a247dcca95.png#align=left&display=inline&height=305&id=wKI31&margin=%5Bobject%20Object%5D&originHeight=709&originWidth=1176&status=done&style=none&width=505.99713134765625">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723661366-8dacecdc-39a4-41e8-8850-80c08c3bf6bd.png#align=left&display=inline&height=291&id=PKrDb&margin=%5Bobject%20Object%5D&originHeight=666&originWidth=1316&status=done&style=none&width=574.9971313476562">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723661798-26619d78-30f8-4db9-bd90-54bbcc3eca0e.png#align=left&display=inline&height=589&id=jUiag&margin=%5Bobject%20Object%5D&originHeight=891&originWidth=790&status=done&style=none&width=521.9971313476562">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723662311-aea2eed1-b69e-44fa-9d45-0b48501ac73c.png#align=left&display=inline&height=567&id=UpUQO&margin=%5Bobject%20Object%5D&originHeight=851&originWidth=812&status=done&style=none&width=540.9971313476562">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723662843-3bc4ebfa-358a-4073-b343-677035e630a1.png#align=left&display=inline&height=579&id=QmJJM&margin=%5Bobject%20Object%5D&originHeight=853&originWidth=812&status=done&style=none&width=550.9971313476562">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723664071-0aa8b881-d498-4828-9776-34cb21ea9bb0.png#align=left&display=inline&height=319&id=RW0Yp&margin=%5Bobject%20Object%5D&originHeight=1017&originWidth=1920&status=done&style=none&width=601.9971313476562">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723664476-518c0459-96b3-4826-967c-7bde583a83b0.png#align=left&display=inline&height=563&id=HqZaC&margin=%5Bobject%20Object%5D&originHeight=854&originWidth=820&status=done&style=none&width=540.991455078125">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723664901-79a2e710-eafd-474e-9ec5-59b6f1bf47ed.png#align=left&display=inline&height=478&id=Mr5Lv&margin=%5Bobject%20Object%5D&originHeight=857&originWidth=816&status=done&style=none&width=454.99713134765625">
+<meta property="article:published_time" content="2021-06-14T02:29:05.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="数字">
+<meta property="article:tag" content="Verilog">
+<meta property="article:tag" content="SoC">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723647525-e2d14a47-58fe-4ec1-a4a8-b6f240fe1a1e.png#align=left&display=inline&height=213&id=pTsd4&margin=%5Bobject%20Object%5D&originHeight=213&originWidth=639&status=done&style=none&width=639">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2021/06/14/LCD1602%E9%A9%B1%E5%8A%A8%E6%A8%A1%E5%9D%97%E8%AE%BE%E8%AE%A1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>LCD1602驱动模块设计 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2021/06/14/LCD1602%E9%A9%B1%E5%8A%A8%E6%A8%A1%E5%9D%97%E8%AE%BE%E8%AE%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LCD1602驱动模块设计
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-06-14 10:29:05" itemprop="dateCreated datePublished" datetime="2021-06-14T10:29:05+08:00">2021-06-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E9%A1%B9%E7%9B%AE%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">项目篇</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="LCD驱动模块前端设计流程"><a href="#LCD驱动模块前端设计流程" class="headerlink" title="LCD驱动模块前端设计流程"></a>LCD驱动模块前端设计流程</h1><h2 id="需求分析"><a href="#需求分析" class="headerlink" title="需求分析"></a>需求分析</h2><ol>
+<li>使用Verilog代码完成LCD1602型号的液晶显示屏驱动设计</li>
+</ol>
+<ul>
+<li>LCD驱动模块的上位机为主控系统，下位机为LCD1602液晶显示屏；</li>
+<li>要求LCD驱动模块与主控系统交互时使用APB接口（APB时钟采用64MHz) ；     </li>
+<li>该驱动模块工作时钟使用外部时钟（工作时钟采用50MHz) ；</li>
+<li>该模块初始化完成后，它所驱动的LCD1602液晶显示屏默认输出“ABCD至MNOP abcd至mnop”共16*2个英文字符，主控系统可通过APB总线控制液晶显示屏输出的字符；</li>
+<li>该模块内部需要设计使能寄存器，模块每次向LCD1602液晶显示屏输出新的字符时，均需要通过APB总线配置使能寄存器；</li>
+<li>该模块内部需要设计BUSY寄存器，主控系统可以通过APB总线读取驱动模块的忙或不忙状态（16*2个字符正在向显示屏输出，则模块处于忙状态，否则处于不忙状态)﹔</li>
+<li>本设计只向LCD液晶显示屏写入数据，不对其进行读操作。</li>
+</ul>
+<ol start="2">
+<li>字符型的显示原理</li>
+</ol>
+<ul>
+<li>用LCD显示一个字符时比较复杂，因为一个字符由6×8或8×8点阵组成，既要找到和显示屏幕上某几个位置对应的显示RAM区的8字节，还要使每字节的不同位为”1”，其它的为”0”，为”1”的点亮，为”0”的不亮。这样一来就组成某个字符。</li>
+<li>内带字符发生器的控制器来说，显示字符就比较简单了，可以让控制器工作在文本方式，根据在LCD上开始显示的行列号及每行的列数找出显示RAM对应的地址，设立光标，在此送上该字符对应的代码即可。</li>
+</ul>
+<ol start="3">
+<li>RAM形式的标准字库</li>
+</ol>
+<p>液晶显示模块是一个慢显示器件，所以在执行每条指令之前一定要确认模块的忙标志为低电平，表示不忙，否则此指令失效（通过LCD读时序发送指令9)。要显示字符时要先输入显示字符地址，也就是告诉模块在哪里显示字符，如图是1602的内部显示地址<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723647525-e2d14a47-58fe-4ec1-a4a8-b6f240fe1a1e.png#align=left&display=inline&height=213&id=pTsd4&margin=%5Bobject%20Object%5D&originHeight=213&originWidth=639&status=done&style=none&width=639"></p>
+<h2 id="功能架构"><a href="#功能架构" class="headerlink" title="功能架构"></a>功能架构</h2><p>LCD驱动模块的上位机为主控系统，下位机为LCD1602液晶显示屏<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723648005-7ccc5404-7528-43f0-b92b-dee5bc003158.png#align=left&display=inline&height=327&id=VpNct&margin=%5Bobject%20Object%5D&originHeight=327&originWidth=768&status=done&style=none&width=768"></p>
+<h2 id="功能划分"><a href="#功能划分" class="headerlink" title="功能划分"></a>功能划分</h2><h3 id="硬件实现"><a href="#硬件实现" class="headerlink" title="硬件实现"></a>硬件实现</h3><p>该模块初始化完成后，它所驱动的LCD1602液晶显示屏默认输出“ABCD至MNOP abcd至mnop”共16*2个英文字符，主控系统可通过APB总线控制液晶显示屏输出的字符；</p>
+<h3 id="软件实现"><a href="#软件实现" class="headerlink" title="软件实现"></a>软件实现</h3><ol>
+<li>该模块内部需要设计使能寄存器，模块每次向LCD1602液晶显示屏输出新的字符时，均需要通过APB总线配置使能寄存器；</li>
+<li>该模块内部需要设计BUSY寄存器，主控系统可以通过APB总线读取驱动模块的忙或不忙状态（16*2个字符正在向显示屏输出，则模块处于忙状态，否则处于不忙状态)；</li>
+</ol>
+<h2 id="接口协议"><a href="#接口协议" class="headerlink" title="接口协议"></a>接口协议</h2><p>LCD1602液晶模块内部的控制器共有11条控制指令，如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>指令</th>
+<th>RS</th>
+<th>R/W</th>
+<th>D7</th>
+<th>D6</th>
+<th>D5</th>
+<th>D4</th>
+<th>D3</th>
+<th>D2</th>
+<th>D1</th>
+<th>D0</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>清显示</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>光标返回</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>*</td>
+</tr>
+<tr>
+<td>3</td>
+<td>置输入模式</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>I/D</td>
+<td>S</td>
+</tr>
+<tr>
+<td>4</td>
+<td>显示开/关控制</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>D</td>
+<td>C</td>
+<td>B</td>
+</tr>
+<tr>
+<td>5</td>
+<td>光标或字符移位</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>S/C</td>
+<td>R/L</td>
+<td>*</td>
+<td>*</td>
+</tr>
+<tr>
+<td>6</td>
+<td>置功能</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>DL</td>
+<td>N</td>
+<td>F</td>
+<td>*</td>
+<td>*</td>
+</tr>
+<tr>
+<td>7</td>
+<td>置字符发生存储器地址</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>字符发生存储器地址</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td>置数据存储器地址</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>显示数据存储器地址</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>9</td>
+<td>读忙标志或地址</td>
+<td>0</td>
+<td>1</td>
+<td>BF</td>
+<td>计数器地址</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>10</td>
+<td>写数到CGRAM或DDRAM</td>
+<td>1</td>
+<td>0</td>
+<td>要写的数据内容</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>11</td>
+<td>从CGRAM或DDRAM读数</td>
+<td>1</td>
+<td>1</td>
+<td>读出的数据内容</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>指令1：清显示，指令码01H,光标复位到地址00H位置。<br>指令2：光标复位，光标返回到地址00H。<br>指令3：光标和显示模式设置VD:光标移动方向，高电平右移，低电平左移S：屏幕所有文字是否左移或者右移。高电平表示有效，低电平则无效。<br>指令4：显示开关控制。D：控制整体显示的开与关，高电平表示开显示，低电平表示关显示C：控制光标的开与关，高电平表示有光标，低电平表示无光标B：控制光标是否闪烁，高电平闪烁，低电平不闪烁。<br>指令5：光标或显示移位S/C：高电平时移动显示的文字，低电平时移动光标。<br>指令6：功能设置命令DL；高电平时为4位总线，低电平时为8位总线N；低电平时为单行显示，高电平时双行显示F：低电平时显示5<em>7的点阵字符，高电平时显示5</em>10的点阵字符。<br>指令7：字符发生器RAM地址设置。<br>指令8：DDRAM地址设置。<br>指令9：读忙信号和光标地址BF：为忙标志位，高电平表示忙，此时模块不能接收命令或者数据，如果为低电平表示不忙。<br>指令10：写数据。<br>指令11：读数据。</p>
+<h2 id="接口时序"><a href="#接口时序" class="headerlink" title="接口时序"></a>接口时序</h2><h3 id="APB写时序"><a href="#APB写时序" class="headerlink" title="APB写时序"></a>APB写时序</h3><p>如图所示，地址（PADDR)、写信号（PWRITE)、选择信号（PSEL)、写数据（PWDATA)在时钟上升沿到来时有效。表明一次写传输的开始，传输的第一个时钟周期称为SETUP周期。在第二个时钟上升沿使能信号（PENABLE）有效，进入ENABLE周期。而地址、写数据和控制信号需要在此期间保持有效。传输在ENABLE周期结束时完成，此时PENABLE变为低电平，PSEL也变为低电平。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723648513-671755c8-5a33-4b51-92e9-1ba3931f2d2f.png#align=left&display=inline&height=318&id=KpNKE&margin=%5Bobject%20Object%5D&originHeight=318&originWidth=513&status=done&style=none&width=513"></p>
+<h3 id="APB读时序"><a href="#APB读时序" class="headerlink" title="APB读时序"></a>APB读时序</h3><p>由图所示，地址（PADDR)、写信号（PWRITE)、选择信号（PSEL)、写数据（PWDATA)在时钟上升沿到来时有效。在读传输时，从设备必须在ENABLE周期提供数据，读数据在ENABLE周期结束的时钟上升沿被主设备采样。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723649029-4d50b1db-ff34-4fe8-8e63-0b6c4ac2f7b0.png#align=left&display=inline&height=324&id=mc2Pj&margin=%5Bobject%20Object%5D&originHeight=324&originWidth=521&status=done&style=none&width=521"></p>
+<h3 id="LCD写操作时序"><a href="#LCD写操作时序" class="headerlink" title="LCD写操作时序"></a>LCD写操作时序</h3><p>如图所示，在LCD写操作时序中，RS引脚和R/W引脚先变化，其中R/W引脚先置高，变化了tAS时间后使能引脚E从低电平变为高电平，然后上位机写入DB数据，写完之后，使能信号E从高变低。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723649327-13d478d1-5026-433f-b4c0-47db1109d677.png#align=left&display=inline&height=346&id=o9fCa&margin=%5Bobject%20Object%5D&originHeight=346&originWidth=675&status=done&style=none&width=675"></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Symbol</th>
+<th>Min</th>
+<th>Typ</th>
+<th>Max</th>
+<th>Unit</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Enable cycle time</td>
+<td>tcycE</td>
+<td>500</td>
+<td>-</td>
+<td>-</td>
+<td>ns</td>
+</tr>
+<tr>
+<td>Enable pulse width(high level)</td>
+<td>PWEH</td>
+<td>230</td>
+<td>-</td>
+<td>-</td>
+<td>ns</td>
+</tr>
+<tr>
+<td>Enable rise/fall time</td>
+<td>tEr,tEf</td>
+<td>-</td>
+<td>-</td>
+<td>20</td>
+<td>ns</td>
+</tr>
+<tr>
+<td>Address set-up time(RS,R/W to E)</td>
+<td>tAS</td>
+<td>40</td>
+<td>-</td>
+<td>-</td>
+<td>ns</td>
+</tr>
+<tr>
+<td>Address hold time</td>
+<td>tAH</td>
+<td>10</td>
+<td>-</td>
+<td>-</td>
+<td>ns</td>
+</tr>
+<tr>
+<td>Data set-up time</td>
+<td>tDSW</td>
+<td>80</td>
+<td>-</td>
+<td>-</td>
+<td>ns</td>
+</tr>
+<tr>
+<td>Data hold time</td>
+<td>tH</td>
+<td>10</td>
+<td>-</td>
+<td>-</td>
+<td>ns</td>
+</tr>
+</tbody></table>
+<h3 id="LCD读操作时序"><a href="#LCD读操作时序" class="headerlink" title="LCD读操作时序"></a>LCD读操作时序</h3><p>如图所示，RS和R/W引脚先变化，因为是读操作R/W引脚首先置为高电平经过tAS时间后，使能引脚E才从低电平变到高电平，经过tD时间后，我们进行数据读取，读取完成后，再把使能E拉低，经过一段时间后，可以继续下一次读写操作。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723649715-53f21345-1f35-4036-8a2d-8cc905257d48.png#align=left&display=inline&height=352&id=hjmB2&margin=%5Bobject%20Object%5D&originHeight=352&originWidth=679&status=done&style=none&width=679"><br>图6 LCD读操作时序</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Symbol</th>
+<th>Min</th>
+<th>Typ</th>
+<th>Max</th>
+<th>Unit</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Enable cycle time</td>
+<td>tcycE</td>
+<td>500</td>
+<td>-</td>
+<td>-</td>
+<td>ns</td>
+</tr>
+<tr>
+<td>Enable pulse width(high level)</td>
+<td>PWEH</td>
+<td>230</td>
+<td>-</td>
+<td>-</td>
+<td>ns</td>
+</tr>
+<tr>
+<td>Enable rise/fall time</td>
+<td>tEr,tEf</td>
+<td>-</td>
+<td>-</td>
+<td>20</td>
+<td>ns</td>
+</tr>
+<tr>
+<td>Address set-up time(RS,R/W to E)</td>
+<td>tAS</td>
+<td>40</td>
+<td>-</td>
+<td>-</td>
+<td>ns</td>
+</tr>
+<tr>
+<td>Address hold time</td>
+<td>tAH</td>
+<td>10</td>
+<td>-</td>
+<td>-</td>
+<td>ns</td>
+</tr>
+<tr>
+<td>Data delay time</td>
+<td>tDDR</td>
+<td>-</td>
+<td>-</td>
+<td>100</td>
+<td>ns</td>
+</tr>
+<tr>
+<td>Data hold time</td>
+<td>tDHR</td>
+<td>5</td>
+<td>-</td>
+<td>-</td>
+<td>ns</td>
+</tr>
+</tbody></table>
+<h2 id="功能分解"><a href="#功能分解" class="headerlink" title="功能分解"></a>功能分解</h2><h3 id="结构框架"><a href="#结构框架" class="headerlink" title="结构框架"></a>结构框架</h3><ul>
+<li>设计框架主要由APB、LCD接口，内部寄存器模块，LCD主状态机控制模块构成</li>
+<li>数据或命令内部寄存使用多组寄存器来设计，每组寄存器对应4个字符，一个字符8bit数据</li>
+<li>LCD主状态机控制可灵活设计，包括打开功能设置、关闭显示、清显示、设置为输入模式、打开显示、光标跳至1行1列、光标跳至2行1列命令以及显示数据等状态，要满足驱动模块通过控制HD44780芯片，来实现LCD显示的目的</li>
+<li>LCD驱动模块的复位通过外部复位信号控制</li>
+<li>LCD时序只需要设计写操作即可</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723650095-5fe5c9a6-9784-445f-ba68-b37b562b4cd2.png#align=left&display=inline&height=344&id=ekFir&margin=%5Bobject%20Object%5D&originHeight=344&originWidth=971&status=done&style=none&width=971"></p>
+<h3 id="APB接口和LCD接口"><a href="#APB接口和LCD接口" class="headerlink" title="APB接口和LCD接口"></a>APB接口和LCD接口</h3><ul>
+<li>APB接口模块要设计为从机接口，时钟采用64MHz，地址数据位宽均为32bit，此接口可以使用ready，也可以不使用。</li>
+<li>LCD接口模块要设计为主机接口，时钟采用50MHz，data7-0值包含数据和命令。<table>
+<thead>
+<tr>
+<th>读状态</th>
+<th>输入</th>
+<th>RS=L,R/W=H,E=H</th>
+<th>输出</th>
+<th>D0-D7=状态字</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>写指令</td>
+<td>输入</td>
+<td>RS=L,R/W=L,D0-D7=指令码,E=高脉冲</td>
+<td>输出</td>
+<td>无</td>
+</tr>
+<tr>
+<td>读数据</td>
+<td>输入</td>
+<td>RS=H,R/W=H,E=H</td>
+<td>输出</td>
+<td>D7-D0=数据</td>
+</tr>
+<tr>
+<td>写数据</td>
+<td>输入</td>
+<td>RS=H,R/W=L,D0-D7=数据,E=高脉冲</td>
+<td>输出</td>
+<td>无</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+<h3 id="寄存器功能"><a href="#寄存器功能" class="headerlink" title="寄存器功能"></a>寄存器功能</h3><ul>
+<li>字符显示寄存器：主控系统通过APB总线对LCD驱动模块的寄存器进行读写，将字符对应的十六进制码（可通过工具生成）写入字符寄存器</li>
+<li>使能寄存器：写入字符寄存器后，打开使能控制寄存器，LCD驱动对LCD1602液晶显示屏进行写字符操作</li>
+<li>BUSY寄存器：主控系统对整个驱动流程可通过APB总线来查询驱动模块是否处于忙状态</li>
+</ul>
+<h3 id="初始化（复位）过程"><a href="#初始化（复位）过程" class="headerlink" title="初始化（复位）过程"></a>初始化（复位）过程</h3><ul>
+<li><p>在LCD驱动初始化功能</p>
+<blockquote>
+<p>驱动上电完成后延时15ms<br>写指令38H（不检测忙信号)<br>延时5ms<br>写指令38H（不检测忙信号)<br>延时5ms<br>写指令38H（不检测忙信号)<br>以后每次写指令、读/写数据操作均需要检测忙信号（以下指令在每帧的LCD字符重新输出时，都要执行)<br>写指令38H：显示模式设置<br>写指令08H：显示关闭<br>写指令01H：显示清屏<br>写指令06H：显示光标移动设置<br>写指令0CH：显示开及光标设置</p>
+</blockquote>
+</li>
+<li><p>LCD驱动初始化完成驱动LCD液晶显示屏显示“ABCD至MNOP abcd至mnop”共16*2个英文字符</p>
+</li>
+</ul>
+<h3 id="主状态机功能"><a href="#主状态机功能" class="headerlink" title="主状态机功能"></a>主状态机功能</h3><ul>
+<li>主状态机主要实现向LCD1602内置的HD44780芯片发送命令，用于控制屏幕显示、关闭，控制光标的位置与移动字符显示。</li>
+<li>在字符显示状态时，首先要输出显示地址，即光标的位置，之后输出要显示字符的十六进制数据，此时LCD1602的光标会自动后移。</li>
+<li>在光标移动到每一行的最后位置时，需要通过命令调正光标回到下一行的首列。</li>
+</ul>
+<h2 id="功能设计"><a href="#功能设计" class="headerlink" title="功能设计"></a>功能设计</h2><h3 id="时钟、复位"><a href="#时钟、复位" class="headerlink" title="时钟、复位"></a>时钟、复位</h3><p>模块中使用一个外部50MHz工作时钟和64MHz的APB时钟，复位使用外部复位，低电平复位有效，高电平释放复位，采用异步复位同步释放。</p>
+<h3 id="字符写入过程"><a href="#字符写入过程" class="headerlink" title="字符写入过程"></a>字符写入过程</h3><ul>
+<li>写入显示地址时要求最高位D7恒定为高电平1，例如第二行第一个字符的地址是40H，实际写入的数据应该是01000000B (40H) +10000000B(80H) = 11000000B(C0H)。</li>
+<li>在液晶模块显示字符时光标是自动右移的，无需人工干预。</li>
+<li>1602液晶模块内部的字符发生存储器（CGROM）已经存储了160个不同的点阵字符图形，这些字符有：阿拉伯数字、英文字母的大小写、常用的符号、和日文假名等，每一个字符都有一个固定的代码，比如大写的英文字母“A”的代码是01000001B(41H)，显示时模块把地址41H中的点阵字符图形显示出来，我们就能看到字母“A”。</li>
+</ul>
+<h3 id="主状态机"><a href="#主状态机" class="headerlink" title="主状态机"></a>主状态机</h3><ul>
+<li>状态共分为打开功能设置（发送38H)、关闭显示（发送08H)、清显示（发送01H)、设置为输入模式（发送06H)、打开显示（发送OCH)、光标跳至1行1列（发送80H)、发送字符（发送数据)、光标跳至2行1列（发送COH)、发送字符（发送数据）命令。</li>
+<li>输出只和状态有关而与输入无关，故采用Moore状态机。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623724874546-0dea39a2-6d35-46b2-acd0-0c8a04dc85b4.png#align=left&display=inline&height=327&margin=%5Bobject%20Object%5D&name=image.png&originHeight=327&originWidth=1110&size=41040&status=done&style=none&width=1110" alt="image.png"></p>
+<h3 id="显示流程"><a href="#显示流程" class="headerlink" title="显示流程"></a>显示流程</h3><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623724894879-e2b40361-ef7c-463c-b43c-1091ad2ed791.png#align=left&display=inline&height=661&margin=%5Bobject%20Object%5D&name=image.png&originHeight=661&originWidth=327&size=20584&status=done&style=none&width=327" alt="image.png"></p>
+<h2 id="功能仿真"><a href="#功能仿真" class="headerlink" title="功能仿真"></a>功能仿真</h2><ol>
+<li>将写好的rtl代码使用make命令运行，其中Makefile文件中包含</li>
+</ol>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723651129-f07a780c-89d3-4462-9098-60e8338b93b1.png#align=left&display=inline&height=356&id=cuUWr&margin=%5Bobject%20Object%5D&originHeight=619&originWidth=817&status=done&style=none&width=470"></p>
+<ol start="2">
+<li>打开图形界面后，选中顶层点击Dump，然后进行仿真，并查看run.log。</li>
+</ol>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723651892-88a77e48-5777-4f18-946d-c2e8c8365ce1.png#align=left&display=inline&height=258&id=DeaKC&margin=%5Bobject%20Object%5D&originHeight=1017&originWidth=1920&status=done&style=none&width=488"><br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723652394-a2ac84d3-3f65-4d4d-8fab-3cdf7da8d879.png#align=left&display=inline&height=274&id=qenQM&margin=%5Bobject%20Object%5D&originHeight=1017&originWidth=1920&status=done&style=none&width=518"><br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723652926-daea04f0-0333-4cfa-aabc-afeeda640a7a.png#align=left&display=inline&height=270&id=jMpHY&margin=%5Bobject%20Object%5D&originHeight=1017&originWidth=1920&status=done&style=none&width=510"><br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723653456-cb84357b-eae9-4372-84b1-38801fc7ba71.png#align=left&display=inline&height=269&id=b8CaN&margin=%5Bobject%20Object%5D&originHeight=1017&originWidth=1920&status=done&style=none&width=507"></p>
+<ol start="3">
+<li>将顶层文件中的端口添加到波形窗口查看波形。</li>
+</ol>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723653922-dbb12eca-c3b9-4bad-a1a7-39639503f754.png#align=left&display=inline&height=256&id=Xtr6V&margin=%5Bobject%20Object%5D&originHeight=1017&originWidth=1920&status=done&style=none&width=483"><br>从上图我们可以看出LCD驱动模块初始化之后，会先对液晶显示屏输入命令做初始化设置，再驱动LCD液晶显示屏显示“ABCD至MNOP abcd至mnop”共16*2个英文字符。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723654412-6fffe270-54a8-4c9e-ba3e-afc44665eded.png#align=left&display=inline&height=272&id=CfrrN&margin=%5Bobject%20Object%5D&originHeight=1009&originWidth=1912&status=done&style=none&width=516"><br>上图为APB接口波形图，此时上位机通过APB接口先配置显示使能寄存器，再配置字符寄存器。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723654797-c9101c5d-4ec2-480c-806b-c6076658f8e6.png#align=left&display=inline&height=265&id=fRy0m&margin=%5Bobject%20Object%5D&originHeight=1009&originWidth=1912&status=done&style=none&width=503"><br>上图为上位机配置内部寄存器以后，LCD驱动模块驱动下位机重新显示字符的波形图，从波形图上来看，配置寄存器以后驱动模块依然能正常向下位机LCD1602液晶显示屏发送数据，符合功能设计需求。</p>
+<h1 id="LCD驱动模块后端流程"><a href="#LCD驱动模块后端流程" class="headerlink" title="LCD驱动模块后端流程"></a>LCD驱动模块后端流程</h1><h2 id="逻辑综合"><a href="#逻辑综合" class="headerlink" title="逻辑综合"></a>逻辑综合</h2><p>逻辑综合将 RTL 编码转换为特定时序约束下的门级网表和约束，具体操作使用DC软件完成。</p>
+<ol>
+<li>在工作空间target中建立目录树</li>
+</ol>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723655366-01ddd6d1-f064-4533-90c0-99c322c02efa.png#align=left&display=inline&height=175&id=sgWzy&margin=%5Bobject%20Object%5D&originHeight=175&originWidth=490&status=done&style=none&width=490"></p>
+<ol start="2">
+<li>创建.synopsys_dc.setup文件，此文件在启动DC初始化环境的时候自动调用，该文件配置库文件的搜索路径，指定target library和link library的工艺库文件。其中target library中包含了cell的库文件以生成网表，link library中包含了设计网表中的cell。</li>
+</ol>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723655797-f05c5a59-f8a7-46b8-aa8c-5da2264a349c.png#align=left&display=inline&height=313&id=Ndiml&margin=%5Bobject%20Object%5D&originHeight=508&originWidth=885&status=done&style=none&width=546"></p>
+<ol start="3">
+<li>启动DC</li>
+</ol>
+<ul>
+<li>在work目录中启动dc_shell</li>
+<li>使用source ../analyze_source_file.tcl读入需要综合的RTL代码文件</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723656506-62e2d47d-f3d4-4d13-ad1c-12e1a688b769.png#align=left&display=inline&height=344&id=sC4os&margin=%5Bobject%20Object%5D&originHeight=502&originWidth=885&status=done&style=none&width=606.991455078125"></p>
+<ul>
+<li>使用elaborate lcd1602声明顶层模块</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723656883-99fead1a-ec03-46b0-9446-77d8d04fd434.png#align=left&display=inline&height=619&id=amtPu&margin=%5Bobject%20Object%5D&originHeight=827&originWidth=817&status=done&style=none&width=611.9971313476562"></p>
+<ul>
+<li>使用link查看是否缺少子模块，返回值为1则说明文件完整</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723657457-5c1aa8c0-82bb-42dc-8ac6-47b7abc873fb.png#align=left&display=inline&height=174&id=HX9me&margin=%5Bobject%20Object%5D&originHeight=225&originWidth=813&status=done&style=none&width=626.9971313476562"></p>
+<ol start="4">
+<li>设计约束文件</li>
+</ol>
+<ul>
+<li>在clock部分我们创建端口时钟和一个虚拟时钟，设置周期和占空比以及建立保持时间。</li>
+<li>在con部分我们给所有的输入输出端口（除时钟外）设置输入输出延时。</li>
+<li>在DRC部分我们给当前设计设置了最大转换时间和最大扇出，始终设置最大转换时间</li>
+<li>在timing部分我们给输入输出端口设置建立保持时间约束。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723657927-0670724e-30c4-413e-9a19-dfaa3dc63da5.png#align=left&display=inline&height=366&id=xAHmE&margin=%5Bobject%20Object%5D&originHeight=509&originWidth=855&status=done&style=none&width=613.9971313476562"></p>
+<ol start="5">
+<li>编译并输出</li>
+</ol>
+<ul>
+<li>使用compile命令对当前的设计进行逻辑综合</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723658462-aeaad3e2-f9e5-4dc6-a61f-1876d96a98f6.png#align=left&display=inline&height=630&id=Gpiwq&margin=%5Bobject%20Object%5D&originHeight=855&originWidth=808&status=done&style=none&width=594.9971313476562"></p>
+<ul>
+<li>编译完成后我们需要输出后面的时序约束文件和网表文件，使用change_names -hierarchy -rules verilog更改变量名使之符合Verilog语法规则。</li>
+<li>使用write -format verilog -hierarchy -output ../output/lcd1602.v命令输出网表文件</li>
+<li>使用write_sdc ../output/lcd1602.sdc输出时序约束文件</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723658723-a86996fb-0331-4295-b24f-98625b940103.png#align=left&display=inline&height=132&id=JD8IF&margin=%5Bobject%20Object%5D&originHeight=132&originWidth=815&status=done&style=none&width=815"></p>
+<h2 id="布局布线"><a href="#布局布线" class="headerlink" title="布局布线"></a>布局布线</h2><p>布局布线将区域内的cell安置在相应的位置并用金属层进行连接，具体操作利用ICC完成。</p>
+<ol>
+<li>配置ICC环境并启动</li>
+</ol>
+<ul>
+<li>首先我们在target工作目录中新建PR文件夹，在PR文件夹中同样需要.sysnopsy_dc.setup配置文件，内容和SYM中的一致。</li>
+<li>使用icc_shell启动ICC。 </li>
+<li>使用create_mw_lib XXX（设计库名称） -open -technology XXX（工艺库路径+名称） - mw_reference_library XXX（参考库路径+名称）命令创建milkway设计库</li>
+<li>使用read_verilog ../SYM/output/lcd1602.v读入综合生成的网表文件。</li>
+<li>使用link命令将网表中的的单元和参考库中的单元连接起来，然后使用check_design。</li>
+<li>使用read_sdc ../SYM/output/lcd1602.sdc读入综合生成的约束文件。</li>
+<li>使用check_timing检查约束文件是否导入。</li>
+<li>使用set_tlu_plus_files -max_tluplus XXX（路径+max.tluplus） -min_tluplus XXX（路径+min.tluplus） -tech2itf_map XXX（路径+tluplus.map）命令导入寄生参数文件，然后使用check_tlu_plus_file检查tlu文件是否导入。</li>
+</ul>
+<ol start="2">
+<li>打开图形界面并进行布局布线</li>
+</ol>
+<ul>
+<li>使用start_gui命令打开ICC的图形界面，然后再工具栏点击creat floorplan创建平面图。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723659002-d41d9d67-c464-4e65-bbd7-0cf649b79ca3.png#align=left&display=inline&height=421&id=ONu93&margin=%5Bobject%20Object%5D&originHeight=421&originWidth=452&status=done&style=none&width=452"></p>
+<ul>
+<li>选择工具栏Preroute中Create Power Straps在进行引脚和网络的连接。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723659542-2ea85737-7e83-4395-9b78-922bab74a511.png#align=left&display=inline&height=559&id=L8Kmd&margin=%5Bobject%20Object%5D&originHeight=559&originWidth=479&status=done&style=none&width=479"></p>
+<ul>
+<li>选择工具栏Preroute中Create Power Straps在图形界面中画出六、五、四层金属电源线（VDD和VSS）。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723660194-dd728d9b-7e65-4b8e-9d4a-25f9b26ed846.png#align=left&display=inline&height=392&id=DPRbd&margin=%5Bobject%20Object%5D&originHeight=525&originWidth=666&status=done&style=none&width=496.99432373046875"><br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723660753-adc11f0d-65b1-4eac-8b9f-33a247dcca95.png#align=left&display=inline&height=305&id=wKI31&margin=%5Bobject%20Object%5D&originHeight=709&originWidth=1176&status=done&style=none&width=505.99713134765625"></p>
+<ul>
+<li>选择工具栏Preroute中Preoute standard cells中的fill empty rows，填充空行，并在DRC中布置M1-M4的power rail。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723661366-8dacecdc-39a4-41e8-8850-80c08c3bf6bd.png#align=left&display=inline&height=291&id=PKrDb&margin=%5Bobject%20Object%5D&originHeight=666&originWidth=1316&status=done&style=none&width=574.9971313476562"></p>
+<ul>
+<li>选择工具栏中Floorplan中的create placement blockage工具，遮住标准单元的第一行和最后一行，然后选择工具栏Finishing中的add tap cell array将标准单元N阱和衬底接电源和地，防止闩锁效应。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723661798-26619d78-30f8-4db9-bd90-54bbcc3eca0e.png#align=left&display=inline&height=589&id=jUiag&margin=%5Bobject%20Object%5D&originHeight=891&originWidth=790&status=done&style=none&width=521.9971313476562"></p>
+<ul>
+<li>在终端使用check_physical_design -stage pre_place_opt和check_physical_constraints命令检查设计和约束。</li>
+<li>在终端里使用place_opt命令进行自动布局，使用report_qor评估布局质量。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723662311-aea2eed1-b69e-44fa-9d45-0b48501ac73c.png#align=left&display=inline&height=567&id=UpUQO&margin=%5Bobject%20Object%5D&originHeight=851&originWidth=812&status=done&style=none&width=540.9971313476562"></p>
+<ul>
+<li>使用set_propagated_clock [all_clocks]命令进行设置时钟，使用clock_opt命令进行时钟树综合。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723662843-3bc4ebfa-358a-4073-b343-677035e630a1.png#align=left&display=inline&height=579&id=QmJJM&margin=%5Bobject%20Object%5D&originHeight=853&originWidth=812&status=done&style=none&width=550.9971313476562"></p>
+<ul>
+<li>使用route_opt进行自动布线。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723664071-0aa8b881-d498-4828-9776-34cb21ea9bb0.png#align=left&display=inline&height=319&id=RW0Yp&margin=%5Bobject%20Object%5D&originHeight=1017&originWidth=1920&status=done&style=none&width=601.9971313476562"></p>
+<ol start="3">
+<li>时序检查、DRC检查和违例修正</li>
+</ol>
+<ul>
+<li>使用reqort_qor查看时序报告，检查建立/保持时间的违例。使用verify_drc做DRC检查。</li>
+<li>使用report_timing -transition_time检查建立/保持时间的违例。</li>
+<li>使用size_cell u_apbif/U355 AND3_X2M_A7TULL命令修改对应建立时间违例。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723664476-518c0459-96b3-4826-967c-7bde583a83b0.png#align=left&display=inline&height=563&id=HqZaC&margin=%5Bobject%20Object%5D&originHeight=854&originWidth=820&status=done&style=none&width=540.991455078125"></p>
+<ul>
+<li>如果有保持时间违例，可以使用insert_buffer添加到路径中，直到时序正常。</li>
+<li>使用legalize_placement -incremental和route_zrt_eco命令重新进行布局布线。</li>
+<li>使用verify_zrt_route进行DRC检查。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1623723664901-79a2e710-eafd-474e-9ec5-59b6f1bf47ed.png#align=left&display=inline&height=478&id=Mr5Lv&margin=%5Bobject%20Object%5D&originHeight=857&originWidth=816&status=done&style=none&width=454.99713134765625"></p>
+<ul>
+<li>检查没有任何违例之后使用save_design命令保存设计并退出。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2021/06/14/LCD1602%E9%A9%B1%E5%8A%A8%E6%A8%A1%E5%9D%97%E8%AE%BE%E8%AE%A1/" title="LCD1602驱动模块设计">https://github.nanfeng.ink/2021/06/14/LCD1602驱动模块设计/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E5%AD%97/" rel="tag"><i class="fa fa-tag"></i> 数字</a>
+              <a href="/tags/Verilog/" rel="tag"><i class="fa fa-tag"></i> Verilog</a>
+              <a href="/tags/SoC/" rel="tag"><i class="fa fa-tag"></i> SoC</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/06/08/GaN%20HEMT%E5%B0%84%E9%A2%91%E5%99%A8%E4%BB%B6%E4%B8%AD%E8%AE%BE%E8%AE%A1%E5%8F%82%E6%95%B0%E7%9A%84%E5%BD%B1%E5%93%8D/" rel="prev" title="GaN HEMT射频器件中设计参数的影响">
+      <i class="fa fa-chevron-left"></i> GaN HEMT射频器件中设计参数的影响
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/07/15/%E5%85%89%E5%88%BB%E5%B7%A5%E8%89%BA%E6%B5%81%E7%A8%8B/" rel="next" title="光刻工艺流程">
+      光刻工艺流程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#LCD%E9%A9%B1%E5%8A%A8%E6%A8%A1%E5%9D%97%E5%89%8D%E7%AB%AF%E8%AE%BE%E8%AE%A1%E6%B5%81%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">LCD驱动模块前端设计流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90"><span class="nav-number">1.1.</span> <span class="nav-text">需求分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E6%9E%B6%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">功能架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E5%88%92%E5%88%86"><span class="nav-number">1.3.</span> <span class="nav-text">功能划分</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.3.1.</span> <span class="nav-text">硬件实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.3.2.</span> <span class="nav-text">软件实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.4.</span> <span class="nav-text">接口协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E6%97%B6%E5%BA%8F"><span class="nav-number">1.5.</span> <span class="nav-text">接口时序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#APB%E5%86%99%E6%97%B6%E5%BA%8F"><span class="nav-number">1.5.1.</span> <span class="nav-text">APB写时序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#APB%E8%AF%BB%E6%97%B6%E5%BA%8F"><span class="nav-number">1.5.2.</span> <span class="nav-text">APB读时序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LCD%E5%86%99%E6%93%8D%E4%BD%9C%E6%97%B6%E5%BA%8F"><span class="nav-number">1.5.3.</span> <span class="nav-text">LCD写操作时序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LCD%E8%AF%BB%E6%93%8D%E4%BD%9C%E6%97%B6%E5%BA%8F"><span class="nav-number">1.5.4.</span> <span class="nav-text">LCD读操作时序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E5%88%86%E8%A7%A3"><span class="nav-number">1.6.</span> <span class="nav-text">功能分解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E6%A1%86%E6%9E%B6"><span class="nav-number">1.6.1.</span> <span class="nav-text">结构框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#APB%E6%8E%A5%E5%8F%A3%E5%92%8CLCD%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.6.2.</span> <span class="nav-text">APB接口和LCD接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E5%8A%9F%E8%83%BD"><span class="nav-number">1.6.3.</span> <span class="nav-text">寄存器功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%EF%BC%88%E5%A4%8D%E4%BD%8D%EF%BC%89%E8%BF%87%E7%A8%8B"><span class="nav-number">1.6.4.</span> <span class="nav-text">初始化（复位）过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E7%8A%B6%E6%80%81%E6%9C%BA%E5%8A%9F%E8%83%BD"><span class="nav-number">1.6.5.</span> <span class="nav-text">主状态机功能</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.7.</span> <span class="nav-text">功能设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E9%92%9F%E3%80%81%E5%A4%8D%E4%BD%8D"><span class="nav-number">1.7.1.</span> <span class="nav-text">时钟、复位</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E5%86%99%E5%85%A5%E8%BF%87%E7%A8%8B"><span class="nav-number">1.7.2.</span> <span class="nav-text">字符写入过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E7%8A%B6%E6%80%81%E6%9C%BA"><span class="nav-number">1.7.3.</span> <span class="nav-text">主状态机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA%E6%B5%81%E7%A8%8B"><span class="nav-number">1.7.4.</span> <span class="nav-text">显示流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E4%BB%BF%E7%9C%9F"><span class="nav-number">1.8.</span> <span class="nav-text">功能仿真</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#LCD%E9%A9%B1%E5%8A%A8%E6%A8%A1%E5%9D%97%E5%90%8E%E7%AB%AF%E6%B5%81%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">LCD驱动模块后端流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E7%BB%BC%E5%90%88"><span class="nav-number">2.1.</span> <span class="nav-text">逻辑综合</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%83%E5%B1%80%E5%B8%83%E7%BA%BF"><span class="nav-number">2.2.</span> <span class="nav-text">布局布线</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

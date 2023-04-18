@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言 在学习了SystemVerilog之后，检验学习成果最有效的方式就是真正的去实验一个项目，以下就是我的一个关于Router的验证过程。实验代码我会上传到我的GitHub仓库中，有需要的可以下载。  设计模块介绍 实验中的待测试模块（DUT）是一个16输入，16输出的路由器，这个路由器的功能是把数据通过各个输入端（Input）发送到任意输出端（Output）。下面是最终完成的整个验证平台示意图">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用SystemVerilog对Router进行验证">
+<meta property="og:url" content="https://github.nanfeng.ink/2021/04/16/%E4%BD%BF%E7%94%A8SystemVerilog%E5%AF%B9Router%E8%BF%9B%E8%A1%8C%E9%AA%8C%E8%AF%81/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="前言 在学习了SystemVerilog之后，检验学习成果最有效的方式就是真正的去实验一个项目，以下就是我的一个关于Router的验证过程。实验代码我会上传到我的GitHub仓库中，有需要的可以下载。  设计模块介绍 实验中的待测试模块（DUT）是一个16输入，16输出的路由器，这个路由器的功能是把数据通过各个输入端（Input）发送到任意输出端（Output）。下面是最终完成的整个验证平台示意图">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618569459855-33d9f017-78cb-4662-9766-1f27c36d714d.png#align=left&display=inline&height=784&id=ud2ce8c99&margin=%5Bobject%20Object%5D&originHeight=784&originWidth=745&size=351768&status=done&style=none&width=745">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618571340146-eba8a833-d692-49f6-b7e2-241a755d7fc0.png#align=left&display=inline&height=651&id=ucbcdc276&margin=%5Bobject%20Object%5D&originHeight=651&originWidth=722&size=256202&status=done&style=none&width=722">
+<meta property="article:published_time" content="2021-04-16T01:58:05.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="SystemVerilog">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618569459855-33d9f017-78cb-4662-9766-1f27c36d714d.png#align=left&display=inline&height=784&id=ud2ce8c99&margin=%5Bobject%20Object%5D&originHeight=784&originWidth=745&size=351768&status=done&style=none&width=745">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2021/04/16/%E4%BD%BF%E7%94%A8SystemVerilog%E5%AF%B9Router%E8%BF%9B%E8%A1%8C%E9%AA%8C%E8%AF%81/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>使用SystemVerilog对Router进行验证 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2021/04/16/%E4%BD%BF%E7%94%A8SystemVerilog%E5%AF%B9Router%E8%BF%9B%E8%A1%8C%E9%AA%8C%E8%AF%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用SystemVerilog对Router进行验证
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-04-16 09:58:05" itemprop="dateCreated datePublished" datetime="2021-04-16T09:58:05+08:00">2021-04-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E9%A1%B9%E7%9B%AE%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">项目篇</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在学习了SystemVerilog之后，检验学习成果最有效的方式就是真正的去实验一个项目，以下就是我的一个关于Router的验证过程。实验代码我会上传到<a target="_blank" rel="noopener" href="https://github.com/Mr-southerly/router_verification">我的GitHub仓库</a>中，有需要的可以下载。</p>
+<h2 id="设计模块介绍"><a href="#设计模块介绍" class="headerlink" title="设计模块介绍"></a>设计模块介绍</h2><p>实验中的待测试模块（DUT）是一个16输入，16输出的路由器，这个路由器的功能是把数据通过各个输入端（Input）发送到任意输出端（Output）。下面是最终完成的整个验证平台示意图。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618569459855-33d9f017-78cb-4662-9766-1f27c36d714d.png#align=left&display=inline&height=784&id=ud2ce8c99&margin=%5Bobject%20Object%5D&originHeight=784&originWidth=745&size=351768&status=done&style=none&width=745"><br><strong>我们需要建立的几个文件：</strong></p>
+<ul>
+<li>顶层（Top）文件：router test top.sv</li>
+<li>接口（Interface)文件：router_io.sv</li>
+<li>待测试（DUT）文件：router.v</li>
+<li>测试（Test）文件：test.sv</li>
+</ul>
+<h2 id="Do文件实现调试"><a href="#Do文件实现调试" class="headerlink" title="Do文件实现调试"></a>Do文件实现调试</h2><p>在做验证的时候，每次修改完代码后都要经历一遍编译仿真，鼠标要点击数次，作为一个懒人，肯定是要想实现自动化实现这个流程了，网上一搜果真可以实现，只需要编译一个do文件，看了看参考的文章，动手写了一个</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">vlib work</span><br><span class="line">#创建一个lib名叫work</span><br><span class="line"></span><br><span class="line">vmap work  work</span><br><span class="line">#将新建的work映射到虚拟的空间</span><br><span class="line"></span><br><span class="line">vlog router.v test.sv router_test_top.sv</span><br><span class="line">#编译当前工程中的文件，注意被include的文件就不要放进来了</span><br><span class="line"></span><br><span class="line">vsim  work.router_test_top  -t 1ns -sv_seed random</span><br><span class="line">#开始设定仿真参数以及仿真work库中的顶层模型，顺便随机初始化随机种子</span><br><span class="line"></span><br><span class="line">add wave -position insertpoint  \</span><br><span class="line">sim:/router_test_top/intf_io/clock \</span><br><span class="line">sim:/router_test_top/intf_io/reset_n \</span><br><span class="line">sim:/router_test_top/intf_io/din \</span><br><span class="line">sim:/router_test_top/intf_io/frame_n \</span><br><span class="line">sim:/router_test_top/intf_io/valid_n \</span><br><span class="line">sim:/router_test_top/intf_io/dout \</span><br><span class="line">sim:/router_test_top/intf_io/valido_n \</span><br><span class="line">sim:/router_test_top/intf_io/busy_n \</span><br><span class="line">sim:/router_test_top/intf_io/frameo_n</span><br><span class="line">#添加波形查看器，并将需要查看的波形导入其中</span><br><span class="line"></span><br><span class="line">run -all</span><br><span class="line">#运行</span><br></pre></td></tr></table></figure>
+<h2 id="实验一"><a href="#实验一" class="headerlink" title="实验一"></a>实验一</h2><h3 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h3><ul>
+<li>自学关于V0实验指导视频（腾讯课堂）的Lab1/Lab2/Lab3指导内容，了解VO实验是如何构建测试平台、发送激励和完成数据监测的。</li>
+<li>完成第一次、第二次在线实验直播指导，学习实验的思路和培养目标，即在构建一个干净简洁的验证结构基础上，实现对DUT的激励和监测。</li>
+</ul>
+<h3 id="要求"><a href="#要求" class="headerlink" title="要求"></a>要求</h3><ul>
+<li>可自行根据VOLab1-3的实验代码内容，参考并且完成属于自己的验证环境（coding by yourself）。</li>
+<li>应该利用task/function来完成对DUT的激励和监测。</li>
+<li>利用struct作为激励的发送和监测数据类型。</li>
+<li>利用不同类型的数组来生成或者保存激励数据和监测数据。</li>
+<li>利用module和interface作为验证平台的层次结构以及与DUT之间的媒介。</li>
+<li>利用参数传递、或者函数调用等来完成接口（interface）从测试顶层（top）到验证组件的传递。</li>
+<li>利用$display函数来将每次激励的数据信息和监测的数据信息都打印出来。</li>
+<li>在所有的数据发送给DUT，并且由DUT全部发送完毕之后，调用$finish0来结束仿真。以上验证结构中，应该至少包括stimulator组件（module）、monitor组件（module）、接口和DUT，以及你认为需要的其它组件，并且利用结构绘制工具（Microsfot Visio，或者draw.io等结构框图绘制工具均可）绘制验证环境的结构框图，并且作为稍后第6周的打卡作业来提交。</li>
+</ul>
+<h3 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h3><h2 id="实验二"><a href="#实验二" class="headerlink" title="实验二"></a>实验二</h2><h3 id="准备-1"><a href="#准备-1" class="headerlink" title="准备"></a>准备</h3><ul>
+<li>提前学习V0的实验4-5，掌握如何转换这些类（数据包packet，验证环境组件generator、driver、monitor、checker/scoreboard）。</li>
+</ul>
+<h3 id="要求-1"><a href="#要求-1" class="headerlink" title="要求"></a>要求</h3><ul>
+<li>需要让整个验证环境结构变得完整（补充上checker），从module的硬件层次转为由类来构成的对象之间的软件层次，即完成验证环境中各个组件从module转为class。用任何一种办法，相继发送多个数据包，前后实现遍历所有的入口，以及所有的出口，组合次数、效率都不限制。</li>
+<li>（选做）实现一个测试场景，即同时给两个不同的channel（入口）发送数据至不同的目标端（出口），同时检查设计是否能够支持该激励，如果设计可以支持，那么验证环境的checker也应该支持相应的数据检查。</li>
+</ul>
+<h3 id="结果-1"><a href="#结果-1" class="headerlink" title="结果"></a>结果</h3><h2 id="实验三"><a href="#实验三" class="headerlink" title="实验三"></a>实验三</h2><h3 id="准备-2"><a href="#准备-2" class="headerlink" title="准备"></a>准备</h3><ul>
+<li>能够有完整的验证组件包括generator、stimulator、monitor、scoreboard</li>
+<li>验证环境能够将数据比对的信息及时打印出来，并且控制仿真的结束和最后的测试结果统计打印（例如比较数目、测试是否通过）</li>
+</ul>
+<h3 id="要求-2"><a href="#要求-2" class="headerlink" title="要求"></a>要求</h3><ul>
+<li>能够实现验证环境可以同时对router的16个输入端口进行激励输入。</li>
+<li>能够实现多个通道的随机输入（目标地址DA随机）。</li>
+<li>能够解释清楚scoreboard的执行逻辑。</li>
+<li>能够解释清楚测试代码结束测试的逻辑（仿真何时停止、如何停止）。</li>
+<li>能够绘制自己验证环境的结构（在接下来的第10周打卡作业中提交实验3的验证结构框图）</li>
+<li>（选做）根据自己的验证环境结构，独立实现你自己的scoreboard代码。</li>
+<li>（选做）避免从generator或stimulator将激励数据直接发往scoreboard，而创建独立的monitor监测router的输入端数据，并且将监测的数据发往scoreboard。</li>
+</ul>
+<h3 id="结果-2"><a href="#结果-2" class="headerlink" title="结果"></a>结果</h3><h2 id="实验四"><a href="#实验四" class="headerlink" title="实验四"></a>实验四</h2><h3 id="准备-3"><a href="#准备-3" class="headerlink" title="准备"></a>准备</h3><ul>
+<li>按照第4次实验的视频指导，能够使用手动编译的方式或者使用Tcl脚本命令完成单步编译和仿真执行，并且收集覆盖率。</li>
+<li>同样根据第4次实验的指导，能够理解提供的用来执行回归测试的脚本（从编译、仿真、覆盖率收集以及合并）。</li>
+</ul>
+<h3 id="要求-3"><a href="#要求-3" class="headerlink" title="要求"></a>要求</h3><ul>
+<li>将路桑提供的接口文件替换掉你环境中的接口文件，该接口文件具备收集功能覆盖率的功能呢。</li>
+<li>使用单步Tcl指令来收集覆盖率，或者提供的回归测试脚本来批量化收集覆盖率和测试结果。</li>
+<li>使用Questasim的verification management功能中的browser，来查看覆盖率数据文件（UCDB）、并且分析设计的代码覆盖率和验证环境的功能覆盖率，使其能够尽可能达到100%。</li>
+<li>对于没有达到100%的部分覆盖率，能够给出合理解释，为什么无法达到该覆盖率，是否激励不够需要更新测试（请继续更新测试用例，提升覆盖率），或者由于设计自身的原因，无法达到100%覆盖率，需要剔除该部分数据（exclude）。</li>
+<li>（选做）对于一些时序部分的检查和覆盖，我们还可以交给断言assertion或者任务task去实现（检查和覆盖），所以你还可以进一步分析断言的覆盖率，并且通过修改stimulator、test验证组件，继而提高断言覆盖率。请对以下设计的接口时序描述，采用SV property （属性）去描述，实现检查或者覆盖。</li>
+</ul>
+<p>注意：请在调试断言时，添加有关的仿真选项，即在vsim的命令选项中，添加-assertdebug -assertcounts<br>1.1.输入时序检查<br>1.1.1.framen拉低后，持续为低的第4拍，din应该保持为高持续5拍。<br>1.1.2.frame n拉低后，持续为低的第4拍，valid n应该保持为高5拍（不一定再拉低，如果下一拍可以发送无效数据的话）。<br>1.1.3.valid n保持为高超过5拍，接下来valid n应该保持为低，且持续的周期数应该是8的整数倍（有效字节周期，目前设计只支持接受byte即8-bits的整数倍）。<br>1.1.4.frame n拉高后的下1拍，valid应该拉高。<br>1.2.输入时序覆盖<br>1.2.1.frame_n拉低后，持续为低的前4拍，valid_n的取值可能为{0，1}（不关心valid_n信号的高低）。<br>1.3.输出时序检查<br>1.3.1.frameon拉低的下1拍，validon保持为高（下1拍不一定立即拉低，如果有无效数据的话）。<br>1.3.2.frameon拉高的下1拍，validon拉高。<br>1.3.3.当！validon&amp;&amp;！frameon第一次满足时（输出包的DO），到valido_n拉高且frameo_n为高时，中间经过valido_n为低的周期数，应为（8*N）。<br>1.4.输出时序覆盖<br>1.4.1.当！validon&amp;&amp;！frameon第一次满足时（输出包的DO），到valido_n拉高且frameon为高时，validon还可以拉高和拉低（输出数据包时，可以在frame有效期中，不连续发送数据，即valido_n可以为高）。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618571340146-eba8a833-d692-49f6-b7e2-241a755d7fc0.png#align=left&display=inline&height=651&id=ucbcdc276&margin=%5Bobject%20Object%5D&originHeight=651&originWidth=722&size=256202&status=done&style=none&width=722"></p>
+<h3 id="结果-3"><a href="#结果-3" class="headerlink" title="结果"></a>结果</h3><h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><p><a target="_blank" rel="noopener" href="https://shimo.im/docs/axk6MwD8D8IpFeqr/read">路科V0实验指导</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/u010301542/article/details/51501011">Modelsim之 DO文件简介</a></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2021/04/16/%E4%BD%BF%E7%94%A8SystemVerilog%E5%AF%B9Router%E8%BF%9B%E8%A1%8C%E9%AA%8C%E8%AF%81/" title="使用SystemVerilog对Router进行验证">https://github.nanfeng.ink/2021/04/16/使用SystemVerilog对Router进行验证/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SystemVerilog/" rel="tag"><i class="fa fa-tag"></i> SystemVerilog</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/04/10/%E6%B8%85%E6%98%8E%E8%B8%8F%E9%9D%92%E8%AE%B0%E2%80%94%E2%80%94%E5%A4%A9%E6%B4%A5/" rel="prev" title="清明踏青记——天津">
+      <i class="fa fa-chevron-left"></i> 清明踏青记——天津
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/04/18/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%886%EF%BC%89%E2%80%94%E2%80%94%E7%B1%BB%E7%9A%84%E5%B0%81%E8%A3%85%E3%80%81%E7%BB%A7%E6%89%BF%E5%92%8C%E5%8C%85/" rel="next" title="SV系统验证（6）——类的封装、继承和包">
+      SV系统验证（6）——类的封装、继承和包 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%9D%97%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.</span> <span class="nav-text">设计模块介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Do%E6%96%87%E4%BB%B6%E5%AE%9E%E7%8E%B0%E8%B0%83%E8%AF%95"><span class="nav-number">3.</span> <span class="nav-text">Do文件实现调试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E4%B8%80"><span class="nav-number">4.</span> <span class="nav-text">实验一</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%86%E5%A4%87"><span class="nav-number">4.1.</span> <span class="nav-text">准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%81%E6%B1%82"><span class="nav-number">4.2.</span> <span class="nav-text">要求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%9C"><span class="nav-number">4.3.</span> <span class="nav-text">结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E4%BA%8C"><span class="nav-number">5.</span> <span class="nav-text">实验二</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%86%E5%A4%87-1"><span class="nav-number">5.1.</span> <span class="nav-text">准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%81%E6%B1%82-1"><span class="nav-number">5.2.</span> <span class="nav-text">要求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%9C-1"><span class="nav-number">5.3.</span> <span class="nav-text">结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E4%B8%89"><span class="nav-number">6.</span> <span class="nav-text">实验三</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%86%E5%A4%87-2"><span class="nav-number">6.1.</span> <span class="nav-text">准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%81%E6%B1%82-2"><span class="nav-number">6.2.</span> <span class="nav-text">要求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%9C-2"><span class="nav-number">6.3.</span> <span class="nav-text">结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E5%9B%9B"><span class="nav-number">7.</span> <span class="nav-text">实验四</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%86%E5%A4%87-3"><span class="nav-number">7.1.</span> <span class="nav-text">准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%81%E6%B1%82-3"><span class="nav-number">7.2.</span> <span class="nav-text">要求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%9C-3"><span class="nav-number">7.3.</span> <span class="nav-text">结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="nav-number">8.</span> <span class="nav-text">参考文章</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

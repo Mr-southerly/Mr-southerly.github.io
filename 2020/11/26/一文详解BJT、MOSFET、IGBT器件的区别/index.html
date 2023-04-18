@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言 最近经常看一些mosfet的器件结构，分析信号模型，突然要用到三极管，由于思维有点惯性了，突然不会分析了，就想着花一点时间整理一下他们的区别，顺便加入IGBT，正好也加深一下对他们的理解。  三者关系 要搞清楚IGBT、BJT、MOSFET之间的关系，就必须对这三者的内部结构和工作原理有大致的了解。概括的的来说，BJT是流控型器件、MOSFET是压控型器件、而IGBT≈BJT+MOSFET">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一文详解BJT、MOSFET、IGBT器件的区别">
+<meta property="og:url" content="https://github.nanfeng.ink/2020/11/26/%E4%B8%80%E6%96%87%E8%AF%A6%E8%A7%A3BJT%E3%80%81MOSFET%E3%80%81IGBT%E5%99%A8%E4%BB%B6%E7%9A%84%E5%8C%BA%E5%88%AB/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="前言 最近经常看一些mosfet的器件结构，分析信号模型，突然要用到三极管，由于思维有点惯性了，突然不会分析了，就想着花一点时间整理一下他们的区别，顺便加入IGBT，正好也加深一下对他们的理解。  三者关系 要搞清楚IGBT、BJT、MOSFET之间的关系，就必须对这三者的内部结构和工作原理有大致的了解。概括的的来说，BJT是流控型器件、MOSFET是压控型器件、而IGBT≈BJT+MOSFET">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619416984830-b0d54be4-5978-4c23-92a8-52f687455afb.png#height=207&id=hjXbj&margin=%5Bobject%20Object%5D&name=image.png&originHeight=368&originWidth=779&originalType=binary&size=50409&status=done&style=none&width=438">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619402691618-2846b41b-0622-4c98-ae1b-5e491e0aabc7.png#height=189&id=i8c0Y&margin=%5Bobject%20Object%5D&name=image.png&originHeight=342&originWidth=736&originalType=binary&size=16187&status=done&style=none&width=406">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619403294792-d8fb60c7-d15d-4da7-8094-128f03d4e3b4.png#height=343&id=tLjOI&margin=%5Bobject%20Object%5D&name=image.png&originHeight=630&originWidth=649&originalType=binary&size=129591&status=done&style=none&width=353">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619403456538-f5e374af-1ce1-4977-9e51-e7bd51246ec6.png#height=264&id=iaUxy&originHeight=264&originWidth=331&originalType=binary&size=0&status=done&style=none&width=331">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619403847601-956178cd-3085-4f90-8ebe-9e6cf648a31b.png#height=227&id=KHC8w&margin=%5Bobject%20Object%5D&name=image.png&originHeight=312&originWidth=635&originalType=binary&size=158017&status=done&style=none&width=462">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619404866041-f7d2b5dc-8a4f-4a2d-ad27-a56dc416ddb3.png#height=254&id=xZeCl&margin=%5Bobject%20Object%5D&name=image.png&originHeight=313&originWidth=596&originalType=binary&size=127700&status=done&style=none&width=484">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619404875960-a56db505-167e-4440-91d1-2ebc678a0f01.png#height=241&id=irOo8&margin=%5Bobject%20Object%5D&name=image.png&originHeight=325&originWidth=640&originalType=binary&size=106262&status=done&style=none&width=475">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619404655641-e42810a8-bcb1-498a-a4d4-277677f83a0f.png#height=393&id=fBOKl&margin=%5Bobject%20Object%5D&name=image.png&originHeight=642&originWidth=683&originalType=binary&size=240781&status=done&style=none&width=418">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619417028243-4fe145f4-6920-49d6-ac17-345281469643.png#height=247&id=RQX96&margin=%5Bobject%20Object%5D&name=image.png&originHeight=322&originWidth=819&originalType=binary&size=230075&status=done&style=none&width=629">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619417053537-c533d60a-deb6-480d-a565-aa57ca8e7a29.png#height=267&id=cOQEL&margin=%5Bobject%20Object%5D&name=image.png&originHeight=405&originWidth=1153&originalType=binary&size=348141&status=done&style=none&width=760">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619417075038-64dd2709-d45c-46b5-9ff3-65782306447a.png#height=286&id=yfO80&margin=%5Bobject%20Object%5D&name=image.png&originHeight=413&originWidth=1097&originalType=binary&size=391800&status=done&style=none&width=759">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619417103617-c8acbc0a-1246-4388-bbcd-84c0beb57a1f.png#height=289&id=rYJwH&margin=%5Bobject%20Object%5D&name=image.png&originHeight=429&originWidth=900&originalType=binary&size=392716&status=done&style=none&width=606">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619412577554-210425e4-ae1d-4664-82c7-01c7427078b7.png#height=56&id=IANJS&margin=%5Bobject%20Object%5D&name=image.png&originHeight=56&originWidth=358&originalType=binary&size=5377&status=done&style=none&width=358">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619412590919-9c67123f-153c-48dd-a15a-cf1b2557a70f.png#height=54&id=BHFgX&margin=%5Bobject%20Object%5D&name=image.png&originHeight=54&originWidth=427&originalType=binary&size=6288&status=done&style=none&width=427">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619412560496-2b31e3cf-afc6-468c-ac78-8ea6e349494e.png#height=51&id=r9FIU&margin=%5Bobject%20Object%5D&name=image.png&originHeight=51&originWidth=187&originalType=binary&size=2515&status=done&style=none&width=187">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619417123279-38fd2f52-a014-4c05-91b8-31ac5f9886ea.png#height=362&id=Ner7m&margin=%5Bobject%20Object%5D&name=image.png&originHeight=534&originWidth=858&originalType=binary&size=318872&status=done&style=none&width=581">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619417150544-f76e5b3e-c3df-4494-8615-789a414689d6.png#height=366&id=fYdUy&margin=%5Bobject%20Object%5D&name=image.png&originHeight=629&originWidth=1240&originalType=binary&size=451127&status=done&style=none&width=721">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619417179303-35470c7a-8584-4395-982a-cdcbf97b63b9.png#height=582&id=CeFS1&margin=%5Bobject%20Object%5D&name=image.png&originHeight=836&originWidth=948&originalType=binary&size=238687&status=done&style=none&width=660">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619414678233-0f27ef54-0b35-4f68-bb67-08e5cf059ce8.png#height=337&id=qv0NI&margin=%5Bobject%20Object%5D&name=image.png&originHeight=439&originWidth=876&originalType=binary&size=93873&status=done&style=none&width=672">
+<meta property="article:published_time" content="2020-11-26T05:27:58.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="器件">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619416984830-b0d54be4-5978-4c23-92a8-52f687455afb.png#height=207&id=hjXbj&margin=%5Bobject%20Object%5D&name=image.png&originHeight=368&originWidth=779&originalType=binary&size=50409&status=done&style=none&width=438">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2020/11/26/%E4%B8%80%E6%96%87%E8%AF%A6%E8%A7%A3BJT%E3%80%81MOSFET%E3%80%81IGBT%E5%99%A8%E4%BB%B6%E7%9A%84%E5%8C%BA%E5%88%AB/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>一文详解BJT、MOSFET、IGBT器件的区别 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2020/11/26/%E4%B8%80%E6%96%87%E8%AF%A6%E8%A7%A3BJT%E3%80%81MOSFET%E3%80%81IGBT%E5%99%A8%E4%BB%B6%E7%9A%84%E5%8C%BA%E5%88%AB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          一文详解BJT、MOSFET、IGBT器件的区别
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-11-26 13:27:58" itemprop="dateCreated datePublished" datetime="2020-11-26T13:27:58+08:00">2020-11-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">笔记篇</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/%E5%99%A8%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">器件</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近经常看一些mosfet的器件结构，分析信号模型，突然要用到三极管，由于思维有点惯性了，突然不会分析了，就想着花一点时间整理一下他们的区别，顺便加入IGBT，正好也加深一下对他们的理解。</p>
+<h2 id="三者关系"><a href="#三者关系" class="headerlink" title="三者关系"></a>三者关系</h2><p>要搞清楚IGBT、BJT、MOSFET之间的关系，就必须对这三者的内部结构和工作原理有大致的了解。概括的的来说，BJT是流控型器件、MOSFET是压控型器件、而IGBT≈BJT+MOSFET</p>
+<h2 id="BJT"><a href="#BJT" class="headerlink" title="BJT"></a>BJT</h2><p>双极性即意味着器件内部有<strong>空穴和电子</strong>两种载流子参与导电，BJT既然叫双极性晶体管，那其内部也必然有空穴和载流子，理解这两种载流子的运动是理解BJT工作原理的关键。</p>
+<h3 id="结构特点"><a href="#结构特点" class="headerlink" title="结构特点"></a>结构特点</h3><p>图中e区（发射极）、b区（基极）、c区（集电极）</p>
+<ul>
+<li>发射极掺杂 &gt; 集电极掺杂&gt;基区掺杂</li>
+<li>基区厚度很薄一般在几微米，掺杂浓度最低</li>
+<li>集电区面积最大，掺杂浓度略低于发射区</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619416984830-b0d54be4-5978-4c23-92a8-52f687455afb.png#height=207&id=hjXbj&margin=%5Bobject%20Object%5D&name=image.png&originHeight=368&originWidth=779&originalType=binary&size=50409&status=done&style=none&width=438" alt="image.png"><br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619402691618-2846b41b-0622-4c98-ae1b-5e491e0aabc7.png#height=189&id=i8c0Y&margin=%5Bobject%20Object%5D&name=image.png&originHeight=342&originWidth=736&originalType=binary&size=16187&status=done&style=none&width=406" alt="image.png"></p>
+<h3 id="工作原理（NPN）"><a href="#工作原理（NPN）" class="headerlink" title="工作原理（NPN）"></a>工作原理（NPN）</h3><ul>
+<li>发射区：发射载流子</li>
+<li>集电区：收集载流子</li>
+<li>基区：传输和控制载流子</li>
+</ul>
+<p>三极管的放大作用：依靠发射极电流能够通过基区传输，然后到达集电极而实现的。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619403294792-d8fb60c7-d15d-4da7-8094-128f03d4e3b4.png#height=343&id=tLjOI&margin=%5Bobject%20Object%5D&name=image.png&originHeight=630&originWidth=649&originalType=binary&size=129591&status=done&style=none&width=353" alt="image.png"></p>
+<h3 id="工作状态"><a href="#工作状态" class="headerlink" title="工作状态"></a>工作状态</h3><p>双极性晶体管有四种工作状态：<strong>饱和区</strong>、<strong>放大区</strong>、<strong>截止区</strong>、<strong>反向放大区</strong>（不常用）</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619403456538-f5e374af-1ce1-4977-9e51-e7bd51246ec6.png#height=264&id=iaUxy&originHeight=264&originWidth=331&originalType=binary&size=0&status=done&style=none&width=331"></p>
+<ul>
+<li>放大区：发射结正偏，集电结反偏。VCE&gt;1V（硅管），iC基本平行于vCE轴的区域</li>
+<li>饱和区：发射结正偏，集电结正偏或反偏电压很小。VCE≈0.3V（硅管)，UCE&lt;UBE，βIB&gt;IC。</li>
+<li>截止区：发射结反偏，集电结反偏。IB≈0，IC=ICEO≈0</li>
+</ul>
+<h3 id="三种组态"><a href="#三种组态" class="headerlink" title="三种组态"></a>三种组态</h3><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619403847601-956178cd-3085-4f90-8ebe-9e6cf648a31b.png#height=227&id=KHC8w&margin=%5Bobject%20Object%5D&name=image.png&originHeight=312&originWidth=635&originalType=binary&size=158017&status=done&style=none&width=462" alt="image.png"></p>
+<h3 id="放大系数"><a href="#放大系数" class="headerlink" title="放大系数"></a>放大系数</h3><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619404866041-f7d2b5dc-8a4f-4a2d-ad27-a56dc416ddb3.png#height=254&id=xZeCl&margin=%5Bobject%20Object%5D&name=image.png&originHeight=313&originWidth=596&originalType=binary&size=127700&status=done&style=none&width=484" alt="image.png"><br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619404875960-a56db505-167e-4440-91d1-2ebc678a0f01.png#height=241&id=irOo8&margin=%5Bobject%20Object%5D&name=image.png&originHeight=325&originWidth=640&originalType=binary&size=106262&status=done&style=none&width=475" alt="image.png"></p>
+<h3 id="极限参数"><a href="#极限参数" class="headerlink" title="极限参数"></a>极限参数</h3><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619404655641-e42810a8-bcb1-498a-a4d4-277677f83a0f.png#height=393&id=fBOKl&margin=%5Bobject%20Object%5D&name=image.png&originHeight=642&originWidth=683&originalType=binary&size=240781&status=done&style=none&width=418" alt="image.png"></p>
+<h2 id="MOSFET"><a href="#MOSFET" class="headerlink" title="MOSFET"></a>MOSFET</h2><p>金属-氧化物半导体场效应晶体管，简称金属半场效应晶体管（Metal-Oxide-Semiconductor Field-Effect Transistor, MOSFET），是一种可以广泛使用在模拟电路与数字电路的场效应管。金属栅极与沟道之间有一层二氧化硅绝缘层，因此具有很高的输入电阻（最高可达1015Ω）。MOS场效应管分为N沟道和P沟道，通常将衬底（基板）与源极接在一起。</p>
+<h3 id="结构特点-1"><a href="#结构特点-1" class="headerlink" title="结构特点"></a>结构特点</h3><p>MOSFET 的种类：<br>按导电沟道可分为： <strong>P 沟道和 N 沟道</strong>。<br>按栅极电压幅值可分为：</p>
+<ul>
+<li><strong>耗尽型</strong>：当栅极电压为零时漏源极之间就存在导电沟道，</li>
+<li><strong>增强型</strong>：对于 N（P）沟道器件，栅极电压大于（小于）零时才存在导电沟道。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619417028243-4fe145f4-6920-49d6-ac17-345281469643.png#height=247&id=RQX96&margin=%5Bobject%20Object%5D&name=image.png&originHeight=322&originWidth=819&originalType=binary&size=230075&status=done&style=none&width=629" alt="image.png"></p>
+<h3 id="工作原理（nMOS）"><a href="#工作原理（nMOS）" class="headerlink" title="工作原理（nMOS）"></a>工作原理（nMOS）</h3><ul>
+<li>电极D（Drain）：称为漏极，相当于双极性三极管的集电极。</li>
+<li>电极G（Gate）：称为栅极，相当于三极管中的基极。</li>
+<li>电极S（Source）：称为源极，相当于三极管中的发射极。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619417053537-c533d60a-deb6-480d-a565-aa57ca8e7a29.png#height=267&id=cOQEL&margin=%5Bobject%20Object%5D&name=image.png&originHeight=405&originWidth=1153&originalType=binary&size=348141&status=done&style=none&width=760" alt="image.png"></p>
+<ul>
+<li>VGS=0时，图a没有形成沟道，即使有VDS，ID≈0</li>
+<li>VGS&gt;0时，图b栅极和衬底被SiO2绝缘形成电场排斥空穴、留下受主，形成耗尽层。但是VGS数值较小没有沟道，在VGS&lt;Vth的时候管子一直处于截止状态。</li>
+<li>VGS&gt;Vth时，图c形成导电沟道，加上VDS，产生漏极电流。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619417075038-64dd2709-d45c-46b5-9ff3-65782306447a.png#height=286&id=yfO80&margin=%5Bobject%20Object%5D&name=image.png&originHeight=413&originWidth=1097&originalType=binary&size=391800&status=done&style=none&width=759" alt="image.png"></p>
+<ul>
+<li>图a当VGS&gt;Vth且为确定值，VDS变化会影响ID，类似于结型场效应管。此时VGD=VGS-VDS。（可变电阻区）</li>
+<li>图b随着VDS增大，漏端出现预夹断，此时VGD=VGS-VDS=Vth。</li>
+<li>图c再继续增大VDS，夹断点往源极移动，此时ID几乎VDS不受影响，管子进入饱和区，ID由VGS决定。（饱和区）</li>
+</ul>
+<h3 id="工作状态-1"><a href="#工作状态-1" class="headerlink" title="工作状态"></a>工作状态</h3><p>MOSFET有三个工作区：<strong>可变电阻区</strong>、<strong>饱和区（放大区</strong>）、<strong>截止区、击穿区（不常用）</strong>。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619417103617-c8acbc0a-1246-4388-bbcd-84c0beb57a1f.png#height=289&id=rYJwH&margin=%5Bobject%20Object%5D&name=image.png&originHeight=429&originWidth=900&originalType=binary&size=392716&status=done&style=none&width=606" alt="image.png"></p>
+<ul>
+<li>可变电阻区（也称非饱和区）：VGS&gt;Vth，且VDS&lt;VGS-Vth，当栅极电压VGS一定时，Id与Vds成线性关系，表现为电阻特性，因此称<strong>为欧姆区</strong>。该区域Vds值较小，沟道电阻基本上仅受VGS控制。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619412577554-210425e4-ae1d-4664-82c7-01c7427078b7.png#height=56&id=IANJS&margin=%5Bobject%20Object%5D&name=image.png&originHeight=56&originWidth=358&originalType=binary&size=5377&status=done&style=none&width=358" alt="image.png"></p>
+<ul>
+<li>饱和区（也称恒流区、放大区、有源区）：VGS&gt;Vth，且VDS&gt;(VGS-Vth)，此时处于夹断之后，当VGS一定时，漏极电流ID几乎不随漏源电压VDS变化（<strong>漏极电流Id饱和</strong>），电流主要由VGS控制。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619412590919-9c67123f-153c-48dd-a15a-cf1b2557a70f.png#height=54&id=BHFgX&margin=%5Bobject%20Object%5D&name=image.png&originHeight=54&originWidth=427&originalType=binary&size=6288&status=done&style=none&width=427" alt="image.png"></p>
+<ul>
+<li>截止区（也称夹断区）：VGS&lt;Vth，管子沟道被夹断，漏极电流ID≈0，管子不工作。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619412560496-2b31e3cf-afc6-468c-ac78-8ea6e349494e.png#height=51&id=r9FIU&margin=%5Bobject%20Object%5D&name=image.png&originHeight=51&originWidth=187&originalType=binary&size=2515&status=done&style=none&width=187" alt="image.png"></p>
+<h4 id="MOSFET和三极管导通区别"><a href="#MOSFET和三极管导通区别" class="headerlink" title="MOSFET和三极管导通区别"></a>MOSFET和三极管导通区别</h4><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619417123279-38fd2f52-a014-4c05-91b8-31ac5f9886ea.png#height=362&id=Ner7m&margin=%5Bobject%20Object%5D&name=image.png&originHeight=534&originWidth=858&originalType=binary&size=318872&status=done&style=none&width=581" alt="image.png"></p>
+<h4 id="MOSFET特性比较"><a href="#MOSFET特性比较" class="headerlink" title="MOSFET特性比较"></a>MOSFET特性比较</h4><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619417150544-f76e5b3e-c3df-4494-8615-789a414689d6.png#height=366&id=fYdUy&margin=%5Bobject%20Object%5D&name=image.png&originHeight=629&originWidth=1240&originalType=binary&size=451127&status=done&style=none&width=721" alt="image.png"></p>
+<h3 id="三种组态-1"><a href="#三种组态-1" class="headerlink" title="三种组态"></a>三种组态</h3><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619417179303-35470c7a-8584-4395-982a-cdcbf97b63b9.png#height=582&id=CeFS1&margin=%5Bobject%20Object%5D&name=image.png&originHeight=836&originWidth=948&originalType=binary&size=238687&status=done&style=none&width=660" alt="image.png"></p>
+<h2 id="IGBT"><a href="#IGBT" class="headerlink" title="IGBT"></a>IGBT</h2><p>IGBT(Insulated Gate Bipolar Transistor)，绝缘栅双极型晶体管是由BJT(双极型三极管)和MOS(绝缘栅型场效应管)组成的复合全控型电压驱动式功率半导体器件， 兼有MOSFET的高输入阻抗和GTR的低导通压降两方面的优点。GTR饱和压降低，载流密度大，但驱动电流较大；MOSFET驱动功率很小，开关速度快，但导通压降大，载流密度小，IGBT没有放大电压的功能，导通时可以看做导线，断开时当做开路。<br>IGBT综合了以上两种器件的优点，驱动功率小而饱和压降低。非常适合应用于直流电压为600V及以上的变流系统如交流电机、变频器、开关电源、照明电路、牵引传动等领域。</p>
+<h3 id="结构特点（n-IGBT）"><a href="#结构特点（n-IGBT）" class="headerlink" title="结构特点（n-IGBT）"></a>结构特点（n-IGBT）</h3><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619414678233-0f27ef54-0b35-4f68-bb67-08e5cf059ce8.png#height=337&id=qv0NI&margin=%5Bobject%20Object%5D&name=image.png&originHeight=439&originWidth=876&originalType=binary&size=93873&status=done&style=none&width=672" alt="image.png"></p>
+<h3 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h3><p>IGBT 的开关作用是通过加正向栅极电压形成沟道，给厚基区PNP 晶体管提供基极电流，使IGBT 导通。反之，加反向门极电压消除沟道，流过反向基极电流，使IGBT 关断。IGBT 的驱动方法和 MOSFET 基本相同，只需控制输入极N 沟道MOSFET，所以具有高输入阻抗特性。<br>当MOSFET 的沟道形成后，从P+基极注入到N 一层的空穴（少子），对N 一层进行电导调制，减小N一层的电阻，使IGBT 在高电压时，也具有低的通态电流。</p>
+<h3 id="工作状态-2"><a href="#工作状态-2" class="headerlink" title="工作状态"></a>工作状态</h3><p>IGBT常用的有两种状态：<strong>导通、截止</strong><br>按照等效电路图分析</p>
+<ul>
+<li>导通：IGBT的栅极及发射极加上正电压导通，晶体管两极(集电极、基极)会形成低阻状态，</li>
+<li>截止：当IGBT的两极无电压，则MOSFET就会停止导通，晶体管得不到电流供给则晶体管随之停止导通</li>
+</ul>
+<h3 id="极限参数-1"><a href="#极限参数-1" class="headerlink" title="极限参数"></a>极限参数</h3><p>IGBT 的安全可靠与否主要由以下因素决定：</p>
+<ul>
+<li>IGBT 栅极与发射极之间的电压;</li>
+<li>IGBT 集电极与发射极之间的电压;</li>
+<li>流过IGBT 集电极－发射极的电流;</li>
+<li>IGBT 的结温。</li>
+</ul>
+<p>如果IGBT 栅极与发射极之间的电压,即驱动电压过低,则IGBT<strong>不能稳定正常地工作。</strong><br>如果过高超过栅极－发射极之间的耐压则IGBT 可能永久性损坏;<br>如果加在IGBT 集电极与发射极允许的电压超过集电极—发射极之间的耐压,<br>流过IGBT 集电极—发射极的电流超过集电极—发射极允许的最大电流,<br>IGBT 的结温超其结温的允许值,IGBT 都可能会<strong>永久性损坏</strong>。</p>
+<h2 id="三者区别"><a href="#三者区别" class="headerlink" title="三者区别"></a>三者区别</h2><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>BJT</th>
+<th>MOSFET</th>
+<th>IGBT</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>驱动方法</td>
+<td>电流</td>
+<td>电压</td>
+<td>电压</td>
+</tr>
+<tr>
+<td>驱动电路</td>
+<td>复杂</td>
+<td>简单</td>
+<td>简单</td>
+</tr>
+<tr>
+<td>输入阻抗</td>
+<td>低</td>
+<td>高</td>
+<td>高</td>
+</tr>
+<tr>
+<td>驱动功率</td>
+<td>高</td>
+<td>低</td>
+<td>低</td>
+</tr>
+<tr>
+<td>开关速度</td>
+<td>慢（us）</td>
+<td>快（ns）</td>
+<td>中</td>
+</tr>
+<tr>
+<td>开关频率</td>
+<td>低</td>
+<td>快（小于1MHz）</td>
+<td>中</td>
+</tr>
+<tr>
+<td>安全工作区</td>
+<td>窄</td>
+<td>宽</td>
+<td>宽</td>
+</tr>
+<tr>
+<td>饱和电压</td>
+<td>低</td>
+<td>高</td>
+<td>低</td>
+</tr>
+</tbody></table>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/50486540">三极管，MOSFET, IGBT的区别？</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/46469449">深入理解三极管（BJT）的工作原理</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/248368565">《学习笔记》–MOSFET工作原理</a></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2020/11/26/%E4%B8%80%E6%96%87%E8%AF%A6%E8%A7%A3BJT%E3%80%81MOSFET%E3%80%81IGBT%E5%99%A8%E4%BB%B6%E7%9A%84%E5%8C%BA%E5%88%AB/" title="一文详解BJT、MOSFET、IGBT器件的区别">https://github.nanfeng.ink/2020/11/26/一文详解BJT、MOSFET、IGBT器件的区别/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag"><i class="fa fa-tag"></i> 器件</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/10/11/%E4%BD%BF%E7%94%A8Cadence%E8%AE%BE%E8%AE%A1%E5%8F%8D%E7%9B%B8%E5%99%A8/" rel="prev" title="使用Cadence设计反相器">
+      <i class="fa fa-chevron-left"></i> 使用Cadence设计反相器
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/12/06/%E6%B5%85%E8%B0%88%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" rel="next" title="浅谈卷积神经网络">
+      浅谈卷积神经网络 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E8%80%85%E5%85%B3%E7%B3%BB"><span class="nav-number">2.</span> <span class="nav-text">三者关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BJT"><span class="nav-number">3.</span> <span class="nav-text">BJT</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E7%89%B9%E7%82%B9"><span class="nav-number">3.1.</span> <span class="nav-text">结构特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%EF%BC%88NPN%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">工作原理（NPN）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E7%8A%B6%E6%80%81"><span class="nav-number">3.3.</span> <span class="nav-text">工作状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E7%A7%8D%E7%BB%84%E6%80%81"><span class="nav-number">3.4.</span> <span class="nav-text">三种组态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%BE%E5%A4%A7%E7%B3%BB%E6%95%B0"><span class="nav-number">3.5.</span> <span class="nav-text">放大系数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%81%E9%99%90%E5%8F%82%E6%95%B0"><span class="nav-number">3.6.</span> <span class="nav-text">极限参数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MOSFET"><span class="nav-number">4.</span> <span class="nav-text">MOSFET</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E7%89%B9%E7%82%B9-1"><span class="nav-number">4.1.</span> <span class="nav-text">结构特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%EF%BC%88nMOS%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">工作原理（nMOS）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E7%8A%B6%E6%80%81-1"><span class="nav-number">4.3.</span> <span class="nav-text">工作状态</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MOSFET%E5%92%8C%E4%B8%89%E6%9E%81%E7%AE%A1%E5%AF%BC%E9%80%9A%E5%8C%BA%E5%88%AB"><span class="nav-number">4.3.1.</span> <span class="nav-text">MOSFET和三极管导通区别</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MOSFET%E7%89%B9%E6%80%A7%E6%AF%94%E8%BE%83"><span class="nav-number">4.3.2.</span> <span class="nav-text">MOSFET特性比较</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E7%A7%8D%E7%BB%84%E6%80%81-1"><span class="nav-number">4.4.</span> <span class="nav-text">三种组态</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IGBT"><span class="nav-number">5.</span> <span class="nav-text">IGBT</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E7%89%B9%E7%82%B9%EF%BC%88n-IGBT%EF%BC%89"><span class="nav-number">5.1.</span> <span class="nav-text">结构特点（n-IGBT）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">5.2.</span> <span class="nav-text">工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E7%8A%B6%E6%80%81-2"><span class="nav-number">5.3.</span> <span class="nav-text">工作状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%81%E9%99%90%E5%8F%82%E6%95%B0-1"><span class="nav-number">5.4.</span> <span class="nav-text">极限参数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E8%80%85%E5%8C%BA%E5%88%AB"><span class="nav-number">6.</span> <span class="nav-text">三者区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="nav-number">7.</span> <span class="nav-text">参考文章</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

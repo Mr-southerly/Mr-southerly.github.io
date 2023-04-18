@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="设计特性 相对于Verilog面向可综合设计的优化：   * 添加接口（interface）从而将通信和协议检查进一步封装。  * 添加类似C语言的数据类型，例如int，byte添加用户自定义类型，枚举类型，结构体类型。  * 添加类型转换（$cast（T，S）或者 ‘( ) ），添加包（package）从而使得多个设计之间可以共享公共类型和方法。  * 添加方便的赋值操作符和运算操作符，例如++">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SV系统验证（3）——设计特性和接口">
+<meta property="og:url" content="https://github.nanfeng.ink/2021/03/24/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%883%EF%BC%89%E2%80%94%E2%80%94%E8%AE%BE%E8%AE%A1%E7%89%B9%E6%80%A7%E5%92%8C%E6%8E%A5%E5%8F%A3/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="设计特性 相对于Verilog面向可综合设计的优化：   * 添加接口（interface）从而将通信和协议检查进一步封装。  * 添加类似C语言的数据类型，例如int，byte添加用户自定义类型，枚举类型，结构体类型。  * 添加类型转换（$cast（T，S）或者 ‘( ) ），添加包（package）从而使得多个设计之间可以共享公共类型和方法。  * 添加方便的赋值操作符和运算操作符，例如++">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617098277671-4443936a-ef07-49e3-9b17-cbcc1210863c.png#align=left&display=inline&height=221&id=ys5J1&margin=%5Bobject%20Object%5D&name=image.png&originHeight=221&originWidth=621&size=77596&status=done&style=none&width=621">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617106469533-ce2d3d42-85a0-4a46-a99f-c820b8c8eab7.png#align=left&display=inline&height=128&id=w2DVW&margin=%5Bobject%20Object%5D&name=image.png&originHeight=128&originWidth=413&size=12606&status=done&style=none&width=413">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617107430996-e7202b7b-a425-4ad1-bb6e-f1c427704f5e.png#align=left&display=inline&height=553&id=lCfMO&margin=%5Bobject%20Object%5D&name=image.png&originHeight=812&originWidth=617&size=113097&status=done&style=none&width=420">
+<meta property="article:published_time" content="2021-03-24T11:58:58.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="SystemVerilog">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617098277671-4443936a-ef07-49e3-9b17-cbcc1210863c.png#align=left&display=inline&height=221&id=ys5J1&margin=%5Bobject%20Object%5D&name=image.png&originHeight=221&originWidth=621&size=77596&status=done&style=none&width=621">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2021/03/24/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%883%EF%BC%89%E2%80%94%E2%80%94%E8%AE%BE%E8%AE%A1%E7%89%B9%E6%80%A7%E5%92%8C%E6%8E%A5%E5%8F%A3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SV系统验证（3）——设计特性和接口 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2021/03/24/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%883%EF%BC%89%E2%80%94%E2%80%94%E8%AE%BE%E8%AE%A1%E7%89%B9%E6%80%A7%E5%92%8C%E6%8E%A5%E5%8F%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SV系统验证（3）——设计特性和接口
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-03-24 19:58:58" itemprop="dateCreated datePublished" datetime="2021-03-24T19:58:58+08:00">2021-03-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">笔记篇</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/%E6%95%B0%E5%AD%97%E9%AA%8C%E8%AF%81/" itemprop="url" rel="index"><span itemprop="name">数字验证</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="设计特性"><a href="#设计特性" class="headerlink" title="设计特性"></a>设计特性</h1><p><strong>相对于Verilog面向可综合设计的优化：</strong></p>
+<ul>
+<li>添加<strong>接口</strong>（interface）从而将通信和协议检查进一步封装。</li>
+<li>添加类似C语言的数据类型，例如int，byte添加用户<strong>自定义类型</strong>，<strong>枚举类型</strong>，<strong>结构体类型</strong>。</li>
+<li>添加<strong>类型转换</strong>（$cast（T，S）或者  ‘( ) ），添加<strong>包（package）</strong>从而使得多个设计之间可以共享公共类型和方法。</li>
+<li>添加方便的<strong>赋值操作符和运算操作符</strong>，例如++、+=、===，添加priority 和unique case 语句。</li>
+<li>添加**always_comb、always_latch 和 always_f **等过程语句块。</li>
+</ul>
+<h2 id="过程语句块的新特性"><a href="#过程语句块的新特性" class="headerlink" title="过程语句块的新特性"></a>过程语句块的新特性</h2><blockquote>
+<p>always语句块被细分为了：<strong>always_comb</strong>、<strong>always_latch</strong>、<strong>always_ff</strong></p>
+</blockquote>
+<h3 id="组合逻辑语句块always-comb"><a href="#组合逻辑语句块always-comb" class="headerlink" title="组合逻辑语句块always_comb"></a>组合逻辑语句块always_comb</h3><ul>
+<li><p>always_comb可以**自动嵌入敏感列表，而且对其中调用内部函数会自动展开并添加进去（@*并不会展开内部调用的函数，因此可能敏感列表不全,这样的后果是影响仿真，但不会影响综合）**。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">always</span> @* <span class="keyword">begin</span>               <span class="comment">// &lt;=  Infers @(data)</span></span><br><span class="line">  al=data&lt;&lt;<span class="number">1</span>;                 <span class="comment">//甚至可以不给敏感列表，只不过不会执行</span></span><br><span class="line">  b1=decode();</span><br><span class="line">  ...</span><br><span class="line"><span class="keyword">end</span> </span><br><span class="line"></span><br><span class="line"><span class="keyword">always_comb</span> <span class="keyword">begin</span>            <span class="comment">// &lt;=  Infers @(data, sel,c,d,e)</span></span><br><span class="line">  a2=data&lt;&lt;<span class="number">1</span>;</span><br><span class="line">  b2=decode();</span><br><span class="line">  ... </span><br><span class="line"><span class="keyword">end</span>                           <span class="comment">//两者在综合电路时功能一样，但仿真时由于上面的不会受sel、b、c等信号的影响</span></span><br><span class="line">                              <span class="comment">//导致仿真结果不相同</span></span><br><span class="line"><span class="keyword">function</span> decode;              <span class="comment">//function with no inputs </span></span><br><span class="line">  <span class="keyword">begin</span> </span><br><span class="line">    <span class="keyword">case</span>(sel)</span><br><span class="line">      <span class="number">2&#x27;b01</span>: decode=d | e;</span><br><span class="line">      <span class="number">2&#x27;b10</span>: decode=d &amp; e; </span><br><span class="line">      <span class="keyword">default</span>: decode=c; </span><br><span class="line">    <span class="keyword">endcase</span> </span><br><span class="line"><span class="keyword">end</span> <span class="keyword">endfunction</span></span><br></pre></td></tr></table></figure></li>
+<li><p>always_comb可以<strong>禁止共享变量</strong>，即赋值左侧的变量无法被另一个过程块所赋值。</p>
+</li>
+<li><p>软件工具<strong>会检查该过程块</strong>，如果其所表示的不是组合逻辑，那么会发出警告。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">always</span> @(a,en) <span class="keyword">if</span>(en) y=a;     <span class="comment">//Verilog、由于没有else变成锁存逻辑</span></span><br><span class="line">=&gt;</span><br><span class="line"><span class="keyword">always_comb</span> <span class="keyword">if</span>(en) y=a;        <span class="comment">//systemverilog 会发出警报</span></span><br></pre></td></tr></table></figure></li>
+<li><p>always_comb在<strong>仿真0时刻会自动触发一次</strong>，无论在0时刻是否有敏感信号列表中的信号发生变化。</p>
+</li>
+</ul>
+<h3 id="锁存逻辑语句块always-latch"><a href="#锁存逻辑语句块always-latch" class="headerlink" title="锁存逻辑语句块always_latch"></a>锁存逻辑语句块always_latch</h3><ul>
+<li><p>always_latch表示锁存逻辑，且<strong>自动插入敏感列表</strong>。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> register_reader</span><br><span class="line">	(<span class="keyword">input</span> clk,ready,resetN,</span><br><span class="line">   <span class="keyword">output</span> <span class="keyword">logic</span>[<span class="number">4</span>：<span class="number">0</span>] read_pointer);</span><br><span class="line"><span class="keyword">logic</span> enable;                  <span class="comment">//internal enable signal for the counte </span></span><br><span class="line"><span class="keyword">logic</span> overflow;                <span class="comment">//internal counter overflow flag</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">always_latch</span> <span class="keyword">begin</span>             <span class="comment">//latch the ready input </span></span><br><span class="line">	<span class="keyword">if</span>(!resetN)</span><br><span class="line">  	enable &lt;= <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">if</span>(ready)</span><br><span class="line">		enable &lt;= <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">if</span>(overflow)</span><br><span class="line">		enable&lt;=<span class="number">0</span>;</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line">    </span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk,<span class="keyword">negedge</span> resetN) <span class="keyword">begin</span>       <span class="comment">//5-bit counter </span></span><br><span class="line">	<span class="keyword">if</span>(!resetN)</span><br><span class="line">    &#123;overflow,read_pointer&#125; &lt;= <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span>(enable)</span><br><span class="line">    &#123;overflow,read_pointer&#125; &lt;= read_pointer + <span class="number">1</span>;</span><br><span class="line"><span class="keyword">end</span> </span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure></li>
+<li><p>always_latch  <code>if(enable)  g&lt;=d;</code>EDA工具会<strong>检查</strong>always_latch过程块是否真正实现了锁存逻辑。</p>
+</li>
+</ul>
+<h3 id="时序逻辑语句块always-ff"><a href="#时序逻辑语句块always-ff" class="headerlink" title="时序逻辑语句块always_ff"></a>时序逻辑语句块always_ff</h3><ul>
+<li><p>always_ff用来表示<strong>时序</strong>逻辑</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">alwaya_ff @(<span class="keyword">posedge</span> clock, <span class="keyword">negedge</span> resetN）</span><br><span class="line">  <span class="keyword">if</span>(!renetN) </span><br><span class="line">		q &lt;= <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		q &lt;= d;</span><br></pre></td></tr></table></figure></li>
+<li><p>敏感列表必须<strong>指明posedge 或者 negedge</strong>（综合要求），从而使得EDA工具实现同步或者异步的复位逻辑。</p>
+</li>
+<li><p>EDA工具也会<strong>验明</strong>always_ff过程块语句是否实现了时序逻辑。</p>
+</li>
+</ul>
+<h2 id="赋值操作符"><a href="#赋值操作符" class="headerlink" title="赋值操作符"></a>赋值操作符</h2><ul>
+<li><p>Verilog没有简单的方法可以对向量填充1，SV可以通过** ‘0，’1，’z 和 ‘x**来分别填充0，1，z和x，代码会根据向量的宽度自动填充，提高了代码的便捷性和复用性</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***********要求赋值64个1**********/</span></span><br><span class="line"># Verilog：</span><br><span class="line"><span class="keyword">parameter</span> N=<span class="number">64</span>;</span><br><span class="line"><span class="keyword">reg</span>[N-<span class="number">1</span>:<span class="number">0</span>] data_bus;</span><br><span class="line">data_bus=<span class="number">64&#x27;hFFFFFFFFFFFFFFF</span>;<span class="comment">//set all bits of data bus to 1</span></span><br><span class="line"></span><br><span class="line"># SystemVerilog：</span><br><span class="line">vecs[i]=&#x27;<span class="number">1</span>;              <span class="comment">//&#x27;hffffffffffffffff</span></span><br><span class="line">vecs[i]=<span class="number">64&#x27;b0</span>-<span class="number">1</span>;         <span class="comment">//&#x27;hffffffffffffffff</span></span><br><span class="line">vecs[i]=&#123;<span class="number">64</span>&#123;<span class="number">1&#x27;b1</span>&#125;&#125;;      <span class="comment">//&#x27;hffffffffffffffff</span></span><br><span class="line">vecs[i]=-<span class="number">64&#x27;b0</span>;          <span class="comment">//&#x27;hffffffffffffffff</span></span><br><span class="line">vecs[i]=<span class="number">&#x27;b1</span>;             <span class="comment">//&#x27;h0000000000000001</span></span><br><span class="line">vecs[i]=<span class="number">0</span>-<span class="number">1</span>;             <span class="comment">//&#x27;hffffffffffffffff  #32-bit隐式转换成64-bit</span></span><br><span class="line">vecs[i]=&#123;<span class="number">64</span>&#123;<span class="number">1</span>&#125;&#125;;         <span class="comment">//&#x27;h0000000100000001  #64个32-bit的1，前面被截掉</span></span><br><span class="line">vecs[i]=~<span class="number">0</span>;              <span class="comment">//&#x27;hffffffffffffffff</span></span><br></pre></td></tr></table></figure></li>
+<li><p>SV在比较数据时，可以通过**==?**来进行通配比较</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">logic</span> [<span class="number">7</span>:<span class="number">0</span>] opcode; </span><br><span class="line"><span class="keyword">if</span> (opcode==?<span class="number">8&#x27;b11011</span>???)       <span class="comment">// 比较时不考虑低三位</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617098277671-4443936a-ef07-49e3-9b17-cbcc1210863c.png#align=left&display=inline&height=221&id=ys5J1&margin=%5Bobject%20Object%5D&name=image.png&originHeight=221&originWidth=621&size=77596&status=done&style=none&width=621" alt="image.png"></p>
+</li>
+<li><p>SV添加了<strong>inside操作符</strong>，用来检查数值是否在一系列值的集合中</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">logic</span> [<span class="number">2</span>:<span class="number">0</span>]a; </span><br><span class="line"><span class="keyword">if</span> (a <span class="keyword">inside</span> &#123;<span class="number">3&#x27;b001</span>,<span class="number">3&#x27;b010</span>,<span class="number">3&#x27;b100</span>&#125;)    <span class="comment">//检查a是否在&#123;&#125;中</span></span><br><span class="line"><span class="comment">//等同于</span></span><br><span class="line"><span class="keyword">logic</span> [<span class="number">2</span>:<span class="number">0</span>] a; <span class="keyword">if</span>((a==<span class="number">3&#x27;b001</span>) || (a==<span class="number">3&#x27;b010</span>) || (a==<span class="number">3&#x27;b100</span>))</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="增强的case语句"><a href="#增强的case语句" class="headerlink" title="增强的case语句"></a>增强的case语句</h2><blockquote>
+<p>仿真和综合可以会将case语句做不同的翻译，Verilog定义case语句在执行时<strong>按照优先级</strong>，而综合编译器则会<strong>优化case语句中多余的逻辑</strong>。</p>
+<p>SV提供了unique和priority的声明，结合<strong>case，casex</strong>和<strong>casez</strong>来进一步实现case对应的硬件电路，保持仿真与综合的一致性</p>
+</blockquote>
+<h3 id="unique-case语句"><a href="#unique-case语句" class="headerlink" title="unique case语句"></a>unique case语句</h3><ul>
+<li>unique case要求每次case选择必须<strong>只能满足一条</strong>case选项。</li>
+<li>unique case<strong>不能有重叠的选项</strong>，即多个满足条件的选项。</li>
+<li>unique case可以<strong>并行执行</strong>，并且case选项必须完备。</li>
+</ul>
+<h3 id="priority-case语句"><a href="#priority-case语句" class="headerlink" title="priority case语句"></a>priority case语句</h3><ul>
+<li>priority case则表示必须<strong>至少有一个</strong>case选项满足要求，如果有多个case选项满足时，<strong>第一个</strong>满足的分支将会被执行。</li>
+<li>priority case的逻辑同 if..else 的逻辑一致。</li>
+<li>unique 和 <strong>priority</strong> 的声明也可以结合 if..else 条件语句使用。</li>
+<li>unique 和 priority 使得仿真行为同设计者希望实现的综合电路保持一致。</li>
+</ul>
+<h1 id="接口"><a href="#接口" class="headerlink" title="接口"></a>接口</h1><h2 id="接口的概述"><a href="#接口的概述" class="headerlink" title="接口的概述"></a>接口的概述</h2><ul>
+<li>SV在Verilog语言基础上扩展了接口（interface）。</li>
+<li>接口提供了一种新型的对抽象级建模的方式，可以简化建模和验证大型复杂的设计。</li>
+<li>Verilog是通过模块之间进行端口连接来完成模块间通信的。对于大型的设计通过端口进行连接将会让硬件集成变得非常乏味和容易出错。</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617106469533-ce2d3d42-85a0-4a46-a99f-c820b8c8eab7.png#align=left&display=inline&height=128&id=w2DVW&margin=%5Bobject%20Object%5D&name=image.png&originHeight=128&originWidth=413&size=12606&status=done&style=none&width=413" alt="image.png"></p>
+<h2 id="接口的优势"><a href="#接口的优势" class="headerlink" title="接口的优势"></a>接口的优势</h2><ul>
+<li>一个设计发生了变化，不会影响太多的端口声明和连接</li>
+<li>interface允许多个信号被整合到一起用来表示一个单一的抽象端口。</li>
+<li>多个模块因此可以使用同一个interface，继而避免分散的多个端口信号连接。</li>
+<li>避免许多不必要的重复定义，特别是对于常用总线端口</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1617107430996-e7202b7b-a425-4ad1-bb6e-f1c427704f5e.png#align=left&display=inline&height=553&id=lCfMO&margin=%5Bobject%20Object%5D&name=image.png&originHeight=812&originWidth=617&size=113097&status=done&style=none&width=420" alt="image.png"></p>
+<h2 id="接口的内容"><a href="#接口的内容" class="headerlink" title="接口的内容"></a>接口的内容</h2><ul>
+<li>接口不单单可以包含<strong>变量</strong>或者<strong>线网</strong>，它还可以封装模块之间<strong>通信的协议</strong>。</li>
+<li>此外接口中还可以嵌入与协议有关的<strong>断言检查</strong>、功能覆盖率收集等模块。</li>
+<li>接口不同于模块（module）的地方在于，<strong>接口不允许包含设计层次</strong>（接口无法例化module）但是接口可以例化接口。接口中可以进步<strong>声明modport来约束不同模块连接时的信号方向</strong>。</li>
+</ul>
+<h2 id="接口的声明和例化"><a href="#接口的声明和例化" class="headerlink" title="接口的声明和例化"></a>接口的声明和例化</h2><ul>
+<li>接口的定义、例化方式同模块定义以及例化方式<strong>类似</strong>。</li>
+<li>接口也<strong>可以有端口</strong>，例如外部接入的时钟或者复位信号。</li>
+<li>接口内部可以声明所有的<strong>变量</strong>或者<strong>线网</strong>类型。</li>
+<li>模块的端口如果声明方向（input、output、inout），则例化的时候可以不连接（悬空），若声明interface，则例化的时候必须连接接口实例，或另一个接口端口。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> main_bus (<span class="keyword">input</span> <span class="keyword">logic</span> clock,resetN,test_mode); </span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">15</span>:<span class="number">0</span>] data; </span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">15</span>:<span class="number">0</span>] address;</span><br><span class="line">  <span class="keyword">logic</span> [<span class="number">7</span>:<span class="number">0</span>] slave_instruction;</span><br><span class="line">	<span class="keyword">logic</span> slave_request; </span><br><span class="line">	<span class="keyword">logic</span> bus_grant; </span><br><span class="line">	<span class="keyword">logic</span> bus_request; </span><br><span class="line">	<span class="keyword">logic</span> slave_ready;</span><br><span class="line">	<span class="keyword">logic</span> data_ready; </span><br><span class="line">	<span class="keyword">logic</span> mem_read;</span><br><span class="line">	<span class="keyword">logic</span> mem_write; </span><br><span class="line"><span class="keyword">endinterface</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> top (<span class="keyword">input</span> <span class="keyword">logic</span> clock, resetN, test_mode); </span><br><span class="line"><span class="keyword">logic</span> [<span class="number">15</span>:<span class="number">0</span>] <span class="keyword">program</span> address, jump address; </span><br><span class="line"><span class="keyword">logic</span> [<span class="number">7</span>:<span class="number">0</span>] instruction, next_instruction; </span><br><span class="line"></span><br><span class="line">main_bus bus              <span class="comment">//例化一个接口</span></span><br><span class="line">(  <span class="variable">.c1ock</span>(clock), </span><br><span class="line">   ·resetN(resetN),</span><br><span class="line">	 <span class="variable">.test_mode</span>(test_mode)</span><br><span class="line">);</span><br><span class="line"><span class="keyword">assign</span> bus<span class="variable">.address</span>=mem_select? slave_address:&#x27;z; </span><br><span class="line"><span class="keyword">assign</span> bus<span class="variable">.data</span>=bus<span class="variable">.slave_ready</span>? slave_data:&#x27;z;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*************索引接口中的单个信号***********/</span></span><br><span class="line">&lt;port name&gt;.&lt;internal <span class="keyword">interface</span> signal name&gt;</span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> bus<span class="variable">.clock</span>, <span class="keyword">negedge</span> bus<span class="variable">.resetN</span>)</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="采样和数据驱动"><a href="#采样和数据驱动" class="headerlink" title="采样和数据驱动"></a>采样和数据驱动</h2><h3 id="竞争问题"><a href="#竞争问题" class="headerlink" title="竞争问题"></a>竞争问题</h3><ul>
+<li>在仿真行为中，为了尽量避免<strong>时序电路中时钟和驱动信号的时序竞争</strong>问题，我们需要给出尽量明确的驱动时序和采样时序。</li>
+<li>默认情况下，<strong>时钟对于组合电路的驱动会添加一个无限最小时间（delta-cycle）的延迟</strong>，而该延迟无法用绝对时间单位衡量，它要比最小时间单位精度还小。</li>
+<li>在一个时间片（time-slot）中可以发生很多事情，例如在仿真器中敲入命令”run 0”，即是让仿真器运行一个delta-cycle的时间。</li>
+<li>由于各种可能性，clk与被采样数据之间如果只存在<strong>若干个（0..N）delta-cycle的延迟</strong>，因此采样数据中的竞争问题会成为潜在困扰仿真采样准确性的问题。</li>
+</ul>
+<h3 id="避免采样的竞争问题"><a href="#避免采样的竞争问题" class="headerlink" title="避免采样的竞争问题"></a>避免采样的竞争问题</h3><ul>
+<li>在驱动时，<strong>添加相应的人为延迟</strong>，模拟真实的延迟行为，同时加大clk与变量之间的延迟，以此提高DUT使用信号时的准确度和TB采样信号时的可靠性。</li>
+<li>对于一些采样时依然存在delta-cycle延迟的信号，我们还可以依靠在<strong>采样事件前的某段时刻中进行采样</strong>，来模拟建立时间的采样要求，确保采样的可靠性。</li>
+</ul>
+<h3 id="时钟块的使用"><a href="#时钟块的使用" class="headerlink" title="时钟块的使用"></a>时钟块的使用</h3><ul>
+<li>clocking块可以定义在interface、module、program中</li>
+<li>clocking中列举的信号应该由interface或者其它声明clocking的模块定义的</li>
+<li>clocking在声明完名字之后，应该伴随着定义默认的采样事件，即”default input/output event”</li>
+<li>clocking默认采样事件前的<strong>1step</strong>对输入进行采样，在采样事件后的**#0**对输出进行驱动</li>
+<li>也可以在定义信号方向时，用<strong>新的采样事件可以对默认事件做覆盖</strong></li>
+<li>接口中可以<strong>多个</strong>添加时钟块，且同一信号在不同时钟块中<strong>方向可以不同</strong></li>
+<li>时钟块采样和时钟直接采样，<strong>被测值的变化均在上升沿</strong>，仅仅是采样点不同</li>
+<li>输入数据要求在<strong>设定的时间之前</strong>就要满足数值的建立<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">clocking</span> bus @(<span class="keyword">posedge</span> clock1);   <span class="comment">//定义时钟块上升沿驱动、采样</span></span><br><span class="line">  <span class="keyword">default</span> <span class="keyword">input</span> #<span class="number">10</span>ns             <span class="comment">//默认上升沿之前10ns采样</span></span><br><span class="line">          <span class="keyword">output</span> #<span class="number">2</span>ns;            <span class="comment">//默认上升沿之后2ns驱动</span></span><br><span class="line">  <span class="keyword">input</span> data,ready,enable;        <span class="comment">//对三个输入信号采样（前10ns）</span></span><br><span class="line">  <span class="keyword">output</span> <span class="keyword">negedge</span> ack;             <span class="comment">//clock1下降沿驱动ack（后2ns）</span></span><br><span class="line">  <span class="keyword">input</span> #l step_addr;             <span class="comment">//clock1上升沿前1时间片采样</span></span><br><span class="line"><span class="keyword">endclocking</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="接口规定方向"><a href="#接口规定方向" class="headerlink" title="接口规定方向"></a>接口规定方向</h2><ul>
+<li>接口中的变量或者线网信号，对于连接到该接口的不同模块则可能具备这<strong>不同的连接方向</strong>。</li>
+<li>引入了modport来作为module port的缩写，表示<strong>不同的模块看到同一组信号时的视角</strong>（连接方向）。</li>
+<li>在接口中声明modport，需要指明modport中各个信号的方向，<strong>不需要声明宽度</strong>。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> chip_bus (<span class="keyword">input</span> <span class="keyword">logic</span> clock,restN);</span><br><span class="line">	<span class="keyword">modport</span> master(...); </span><br><span class="line">	<span class="keyword">modport</span> slave (...); </span><br><span class="line"><span class="keyword">endinterface</span> </span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> primary (<span class="keyword">interface</span> pins);    <span class="comment">//一般接口例化 </span></span><br><span class="line">...</span><br><span class="line"><span class="keyword">endmodule</span> </span><br><span class="line"></span><br><span class="line">  <span class="keyword">module</span> secondary (chip_bus pins); <span class="comment">//指定接口例化 </span></span><br><span class="line">...</span><br><span class="line"><span class="keyword">endmodule</span> </span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> chip(<span class="keyword">input</span> <span class="keyword">logic</span> clock, resetN); </span><br><span class="line">  chip bus bus (clock, resetN);  <span class="comment">//例化接口 </span></span><br><span class="line">  primary il (bus. master);      <span class="comment">//例化模块1 具体到哪一根线减少意外驱动</span></span><br><span class="line">  secondary i2 (bus. slave);     <span class="comment">//例化模块2</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="接口总结"><a href="#接口总结" class="headerlink" title="接口总结"></a>接口总结</h2><ul>
+<li>接口对于设计<strong>复用</strong>非常有利，如果要添加新的信号，只需要在接口中声明，而不必在模块中声明。</li>
+<li>接口<strong>减少</strong>了模块之间错误连接的可能性。</li>
+<li>由于接口将有关信号都集合在一起，因此在使用这些信号时需要多添加一个层次（接口实例名）。</li>
+<li>接口往往会将有关的信号集合在一起，这意味着对于拥有多组不相关信号的设计而言，它可能需要有多个接口实例才能完成与其它模块的连接。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2021/03/24/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%883%EF%BC%89%E2%80%94%E2%80%94%E8%AE%BE%E8%AE%A1%E7%89%B9%E6%80%A7%E5%92%8C%E6%8E%A5%E5%8F%A3/" title="SV系统验证（3）——设计特性和接口">https://github.nanfeng.ink/2021/03/24/SV系统验证（3）——设计特性和接口/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SystemVerilog/" rel="tag"><i class="fa fa-tag"></i> SystemVerilog</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/22/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%882%EF%BC%89%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%92%8C%E5%AD%97%E7%AC%A6%E4%B8%B2/" rel="prev" title="SV系统验证（2）——数据类型和字符串">
+      <i class="fa fa-chevron-left"></i> SV系统验证（2）——数据类型和字符串
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/03/30/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%884%EF%BC%89%E2%80%94%E2%80%94%E9%AA%8C%E8%AF%81%E7%8E%AF%E5%A2%83%E7%BB%93%E6%9E%84%E5%92%8C%E7%BB%84%E4%BB%B6/" rel="next" title="SV系统验证（4）——验证环境结构和组件">
+      SV系统验证（4）——验证环境结构和组件 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E7%89%B9%E6%80%A7"><span class="nav-number">1.</span> <span class="nav-text">设计特性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%87%E7%A8%8B%E8%AF%AD%E5%8F%A5%E5%9D%97%E7%9A%84%E6%96%B0%E7%89%B9%E6%80%A7"><span class="nav-number">1.1.</span> <span class="nav-text">过程语句块的新特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%84%E5%90%88%E9%80%BB%E8%BE%91%E8%AF%AD%E5%8F%A5%E5%9D%97always-comb"><span class="nav-number">1.1.1.</span> <span class="nav-text">组合逻辑语句块always_comb</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%81%E5%AD%98%E9%80%BB%E8%BE%91%E8%AF%AD%E5%8F%A5%E5%9D%97always-latch"><span class="nav-number">1.1.2.</span> <span class="nav-text">锁存逻辑语句块always_latch</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E5%BA%8F%E9%80%BB%E8%BE%91%E8%AF%AD%E5%8F%A5%E5%9D%97always-ff"><span class="nav-number">1.1.3.</span> <span class="nav-text">时序逻辑语句块always_ff</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%8B%E5%80%BC%E6%93%8D%E4%BD%9C%E7%AC%A6"><span class="nav-number">1.2.</span> <span class="nav-text">赋值操作符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A2%9E%E5%BC%BA%E7%9A%84case%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.3.</span> <span class="nav-text">增强的case语句</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#unique-case%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.3.1.</span> <span class="nav-text">unique case语句</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#priority-case%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.3.2.</span> <span class="nav-text">priority case语句</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3"><span class="nav-number">2.</span> <span class="nav-text">接口</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E7%9A%84%E6%A6%82%E8%BF%B0"><span class="nav-number">2.1.</span> <span class="nav-text">接口的概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E7%9A%84%E4%BC%98%E5%8A%BF"><span class="nav-number">2.2.</span> <span class="nav-text">接口的优势</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E7%9A%84%E5%86%85%E5%AE%B9"><span class="nav-number">2.3.</span> <span class="nav-text">接口的内容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E7%9A%84%E5%A3%B0%E6%98%8E%E5%92%8C%E4%BE%8B%E5%8C%96"><span class="nav-number">2.4.</span> <span class="nav-text">接口的声明和例化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%87%E6%A0%B7%E5%92%8C%E6%95%B0%E6%8D%AE%E9%A9%B1%E5%8A%A8"><span class="nav-number">2.5.</span> <span class="nav-text">采样和数据驱动</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AB%9E%E4%BA%89%E9%97%AE%E9%A2%98"><span class="nav-number">2.5.1.</span> <span class="nav-text">竞争问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%BF%E5%85%8D%E9%87%87%E6%A0%B7%E7%9A%84%E7%AB%9E%E4%BA%89%E9%97%AE%E9%A2%98"><span class="nav-number">2.5.2.</span> <span class="nav-text">避免采样的竞争问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E9%92%9F%E5%9D%97%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">2.5.3.</span> <span class="nav-text">时钟块的使用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E8%A7%84%E5%AE%9A%E6%96%B9%E5%90%91"><span class="nav-number">2.6.</span> <span class="nav-text">接口规定方向</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E6%80%BB%E7%BB%93"><span class="nav-number">2.7.</span> <span class="nav-text">接口总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

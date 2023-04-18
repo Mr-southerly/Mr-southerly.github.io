@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Verilog中的数据类型 Verilog中有两种基本数据类型：变量类型（variables）、线网类型（wire） 两种类型均为四值逻辑(1、0、X、Z) 真实电路中不存在X，高阻态Z表示引脚悬空  变量类型（variables） 用来储存组合逻辑或者时序逻辑的值  变量类型特点：   * 变量保存在initial、always、task、function内赋值          * 变量只能用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SV系统验证（2）——数据类型和字符串">
+<meta property="og:url" content="https://github.nanfeng.ink/2021/03/22/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%882%EF%BC%89%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%92%8C%E5%AD%97%E7%AC%A6%E4%B8%B2/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="Verilog中的数据类型 Verilog中有两种基本数据类型：变量类型（variables）、线网类型（wire） 两种类型均为四值逻辑(1、0、X、Z) 真实电路中不存在X，高阻态Z表示引脚悬空  变量类型（variables） 用来储存组合逻辑或者时序逻辑的值  变量类型特点：   * 变量保存在initial、always、task、function内赋值          * 变量只能用">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.nanfeng.ink/2021/03/22/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%882%EF%BC%89%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%92%8C%E5%AD%97%E7%AC%A6%E4%B8%B2/01.png#id=jo8oQ&originalType=binary&status=done&style=none">
+<meta property="article:published_time" content="2021-03-22T01:58:58.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="SystemVerilog">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.nanfeng.ink/2021/03/22/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%882%EF%BC%89%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%92%8C%E5%AD%97%E7%AC%A6%E4%B8%B2/01.png#id=jo8oQ&originalType=binary&status=done&style=none">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2021/03/22/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%882%EF%BC%89%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%92%8C%E5%AD%97%E7%AC%A6%E4%B8%B2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SV系统验证（2）——数据类型和字符串 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2021/03/22/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%882%EF%BC%89%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%92%8C%E5%AD%97%E7%AC%A6%E4%B8%B2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SV系统验证（2）——数据类型和字符串
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-03-22 09:58:58" itemprop="dateCreated datePublished" datetime="2021-03-22T09:58:58+08:00">2021-03-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">笔记篇</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/%E6%95%B0%E5%AD%97%E9%AA%8C%E8%AF%81/" itemprop="url" rel="index"><span itemprop="name">数字验证</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Verilog中的数据类型"><a href="#Verilog中的数据类型" class="headerlink" title="Verilog中的数据类型"></a>Verilog中的数据类型</h2><blockquote>
+<p>Verilog中有两种基本数据类型：变量类型（variables）、线网类型（wire）<br><strong>两种类型均为四值逻辑(1、0、X、Z)</strong><br><strong>真实电路中不存在X，高阻态Z表示引脚悬空</strong></p>
+</blockquote>
+<h3 id="变量类型（variables）"><a href="#变量类型（variables）" class="headerlink" title="变量类型（variables）"></a>变量类型（variables）</h3><blockquote>
+<p><strong>用来储存组合逻辑或者时序逻辑的值</strong></p>
+</blockquote>
+<p><strong>变量类型特点：</strong></p>
+<ul>
+<li><p>变量保存在initial、always、task、function内赋值</p>
+</li>
+<li><p><strong>变量只能用过程赋值（initial、always）来赋值</strong></p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">reg</span>            描述逻辑</span><br><span class="line"><span class="keyword">integer</span>        描述循环变量和计算 </span><br><span class="line"><span class="keyword">real</span>           在系统模型中使用 </span><br><span class="line"><span class="keyword">time</span>和<span class="keyword">realtime</span> 保存测试装置的仿真时间</span><br></pre></td></tr></table></figure></li>
+<li><p>intger或time的变量一般有相同位数的reg一样运转</p>
+</li>
+</ul>
+<blockquote>
+<p>其中变量类型包括：reg、integer、time、real等<br><strong>reg可以被综合成寄存器、锁存器（寄存器是时序逻辑，锁存器是组合逻辑）</strong></p>
+</blockquote>
+<h3 id="线网类型（nets）"><a href="#线网类型（nets）" class="headerlink" title="线网类型（nets）"></a>线网类型（nets）</h3><blockquote>
+<p><strong>用来连接硬件模块，以提供特殊的线网逻辑解决方案</strong></p>
+</blockquote>
+<ul>
+<li>线网在建模结构化描述中连接线路、且总线线网的值由线网的驱动器决定</li>
+<li>驱动器可以是门，模块的实例或者<strong>连续赋值</strong>的输出</li>
+<li><strong>只能用连续赋值语句（assign）</strong></li>
+</ul>
+<blockquote>
+<p>其中线网类型包括：wire、wor、wand等</p>
+</blockquote>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">##在SystemVerilog中任何一个变量要看三部分：##</span><br><span class="line"></span><br><span class="line">* 类型（变量、线网）</span><br><span class="line">* 数据类型（四值逻辑、二值逻辑）</span><br><span class="line">* 符号（有符号、无符号）</span><br></pre></td></tr></table></figure>
+<h2 id="SyestemVerilog的类型"><a href="#SyestemVerilog的类型" class="headerlink" title="SyestemVerilog的类型"></a>SyestemVerilog的类型</h2><h3 id="变量（variables）"><a href="#变量（variables）" class="headerlink" title="变量（variables）"></a>变量（variables）</h3><ul>
+<li>可以使用连续赋值（assign）、过程赋值(always)<blockquote>
+<p>logic a ：默认变量（var）类型、无符号<br>bit a：默认变量（var）类型、无符号<br>var logic [63:0] a ;  也可以对其类型声明</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="线网类型（nets）-1"><a href="#线网类型（nets）-1" class="headerlink" title="线网类型（nets）"></a>线网类型（nets）</h3><ul>
+<li>只能用连续赋值语句（assign）<blockquote>
+<p>Testbench中一般大量使用<strong>logic</strong>，只有在<strong>多个驱动源</strong>或者<strong>设计模块端口是双向（inout）</strong>的时候才用wire</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="SystemVerilog的数据类型"><a href="#SystemVerilog的数据类型" class="headerlink" title="SystemVerilog的数据类型"></a>SystemVerilog的数据类型</h2><h3 id="四值逻辑（Logic）"><a href="#四值逻辑（Logic）" class="headerlink" title="四值逻辑（Logic）"></a>四值逻辑（Logic）</h3><ul>
+<li>在Verilog中reg常用来表示储存组合逻辑或者时序逻辑的变量，不过初学者容易混淆其综合后的硬件单元，<strong>实际它只和线网相对，用来表示储存数据的变量</strong></li>
+<li>在SV中我们可以直接使用logic来通用储存硬件数据</li>
+</ul>
+<blockquote>
+<p>四值逻辑包括：integer、logic、reg、net-type（wire、tri）</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">什么时候用四值逻辑？</span><br><span class="line">  - 在表示硬件时，必须用四值逻辑</span><br><span class="line">  - X值用来捕捉设计错误（如寄存器未初始化）</span><br><span class="line">  - Z值用来表示未连接或者三态的设计逻辑（但很少出现在系统级或者事务级）</span><br></pre></td></tr></table></figure>
+<h3 id="二值逻辑（bit）"><a href="#二值逻辑（bit）" class="headerlink" title="二值逻辑（bit）"></a>二值逻辑（bit）</h3><ul>
+<li>bit类型可以综合，但综合的电路有失真的可能，无法正确表示电路，因此在RTL中很少用到</li>
+</ul>
+<blockquote>
+<p>二值逻辑包括：bit、byte、shortint、int、longint</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">什么时候用到二值逻辑？</span><br><span class="line">  - 在构建验证环境总线功能模型（BFM）时，无须关注底层逻辑，可使用二值逻辑</span><br><span class="line">  - SV在和C语言交互时，也可使用二值逻辑简化数据传输</span><br></pre></td></tr></table></figure>
+<h3 id="仿真初值和转换"><a href="#仿真初值和转换" class="headerlink" title="仿真初值和转换"></a>仿真初值和转换</h3><ul>
+<li>四值逻辑变至例如reg、logic或者integer等，在仿真开始时的初值为X</li>
+<li>二值逻辑变量例如bit等，在仿真开始时的初值为0</li>
+<li>四值逻辑 =&gt; 二值逻辑（默认转换），那么Z、X =&gt; 0</li>
+</ul>
+<h2 id="SystemVerilog数据的符号"><a href="#SystemVerilog数据的符号" class="headerlink" title="SystemVerilog数据的符号"></a>SystemVerilog数据的符号</h2><h3 id="有符号"><a href="#有符号" class="headerlink" title="有符号"></a>有符号</h3><ul>
+<li>integer</li>
+<li>byte</li>
+<li>shortint</li>
+<li>int</li>
+<li>longint</li>
+</ul>
+<h3 id="无符号"><a href="#无符号" class="headerlink" title="无符号"></a>无符号</h3><ul>
+<li>logic、bit、reg、net-type（wire、tri）构成的向量</li>
+<li>在有符号类型后面加unsigned（如byte unsigned）</li>
+</ul>
+<h3 id="空类型（void）"><a href="#空类型（void）" class="headerlink" title="空类型（void）"></a>空类型（void）</h3><ul>
+<li>SV添加void类型来表示空类型，表示不会返回数值，同C语言的void使用方法</li>
+<li>SV添加shortreal表示32位单精度浮点类型，同C语言的loat；而Verilog的real类型表示双精度浮点类型，同C语言的double</li>
+</ul>
+<h2 id="自定义类型（typedef）"><a href="#自定义类型（typedef）" class="headerlink" title="自定义类型（typedef）"></a>自定义类型（typedef）</h2><blockquote>
+<p><strong>为了代码更加易读和维护，通常在加上“_t”后缀表示自定义类型</strong></p>
+</blockquote>
+<h3 id="枚举类型（enum）"><a href="#枚举类型（enum）" class="headerlink" title="枚举类型（enum）"></a>枚举类型（enum）</h3><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> &#123;red,green,blue&#125;  RGB;</span><br><span class="line">RGB枚举类型拥有三个值，其中初始值为red</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>Verilog没有枚举类型，因此采用define 和parameter 来定义，提高易读性</p>
+</blockquote>
+<ul>
+<li><p>枚举值<strong>默认为int类型</strong>，32-bit的二值逻辑</p>
+</li>
+<li><p>SV允许指定枚举的数据类型</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="keyword">bit</span> &#123;ture,false&#125; ck_t;</span><br><span class="line"><span class="keyword">enum</span> <span class="keyword">logic</span>[<span class="number">1</span>:<span class="number">0</span>] &#123;waite,load,ready&#125; state_e;</span><br></pre></td></tr></table></figure></li>
+<li><p>如果一个枚举类型的数值被赋值，那么赋值应该符合其数值类型</p>
+</li>
+<li><p>枚举类型可以转换成整型（隐式），但整型不能转化成枚举类型</p>
+</li>
+</ul>
+<h4 id="自定义枚举类型"><a href="#自定义枚举类型" class="headerlink" title="自定义枚举类型"></a>自定义枚举类型</h4><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">enum</span> &#123;waite,load,ready&#125; state_t; </span><br><span class="line">state_t state_now,state_next</span><br></pre></td></tr></table></figure>
+<h4 id="枚举类型赋值"><a href="#枚举类型赋值" class="headerlink" title="枚举类型赋值"></a>枚举类型赋值</h4><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">enum</span> &#123;waite,load,ready&#125; state_t;</span><br><span class="line">	state_t state, next_state</span><br><span class="line"><span class="keyword">int</span> foo;</span><br><span class="line">state=next_state;      <span class="comment">//legal operation </span></span><br><span class="line">foo = state + <span class="number">1</span>;       <span class="comment">//legal operation </span></span><br><span class="line">state = foo + <span class="number">1</span>;       <span class="comment">//**ERROR:illegal assignment** </span></span><br><span class="line">state = state + <span class="number">1</span>;     <span class="comment">//**illegal operation **</span></span><br><span class="line">state++;               <span class="comment">//**illegal operation next **</span></span><br><span class="line">next_state += state;   <span class="comment">//**illegal operation**</span></span><br></pre></td></tr></table></figure>
+<h3 id="结构体类型（struct）"><a href="#结构体类型（struct）" class="headerlink" title="结构体类型（struct）"></a>结构体类型（struct）</h3><ul>
+<li>SV中添加了C一样的结构体struct，其成员可以为自定义类型或其他常量类型<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span>&#123;</span><br><span class="line">  <span class="keyword">int</span> [<span class="number">31</span>:<span class="number">0</span>] a,b;           <span class="comment">//32-bit variables </span></span><br><span class="line">  <span class="keyword">logic</span> [<span class="number">7</span>:<span class="number">0</span>] opcode;       <span class="comment">//user-defined type </span></span><br><span class="line">  <span class="keyword">logic</span> [<span class="number">23</span>:<span class="number">0</span>] address;	    <span class="comment">//24-bit variable </span></span><br><span class="line">  <span class="keyword">bit</span> error;				        <span class="comment">//1-bit 2-state var.</span></span><br><span class="line">&#125; Instruction_Word;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<blockquote>
+<p><strong>结构体默认是一个 <em>变量</em> ，用户可以将其声明为var或者wire类型</strong></p>
+</blockquote>
+<h4 id="自定义结构体类型"><a href="#自定义结构体类型" class="headerlink" title="自定义结构体类型"></a>自定义结构体类型</h4><ul>
+<li>类似于枚举类型，结构体类型也可以使用typedef来定义<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> &#123;<span class="comment">// structure definition </span></span><br><span class="line">  <span class="keyword">logic</span> [<span class="number">31</span>:<span class="number">0</span>] a,b; </span><br><span class="line">  <span class="keyword">logic</span> [<span class="number">7</span>:<span class="number">0</span>] opcode; </span><br><span class="line">  <span class="keyword">logic</span> [<span class="number">23</span>:<span class="number">0</span>] address;</span><br><span class="line">&#125; instruction_word_t; </span><br><span class="line"></span><br><span class="line">instruction_word_t IW;<span class="comment">// structure allocation</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="结构体类型赋值"><a href="#结构体类型赋值" class="headerlink" title="结构体类型赋值"></a>结构体类型赋值</h4><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">结构体变量可以通过索引其各个成员做依次的成员赋值：</span><br><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clock, <span class="keyword">negedge</span> resetN)</span><br><span class="line">  <span class="keyword">if</span>(!resetN)<span class="keyword">begin</span> </span><br><span class="line">		IW<span class="variable">.a</span>=<span class="number">100</span>;       <span class="comment">//reference structure member </span></span><br><span class="line"> 		IW<span class="variable">.b</span>=<span class="number">5</span>;</span><br><span class="line">    IW<span class="variable">.opcode</span>=<span class="number">8&#x27;hFF</span>;</span><br><span class="line">	 	IW<span class="variable">.address</span>=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">end</span> </span><br><span class="line"></span><br><span class="line">也可以通过单分号`和花括号&#123;&#125;来实现整体赋初值：</span><br><span class="line">IW=&#x27;&#123;<span class="number">100</span>, <span class="number">3</span>, <span class="number">8&#x27;hFF</span>, <span class="number">0</span>&#125;;</span><br><span class="line">IW=&#x27;&#123;address:<span class="number">0</span>, opcode:<span class="number">8&#x27;hFF</span>, a:<span class="number">100</span>, b:<span class="number">5</span>&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="字符串类型"><a href="#字符串类型" class="headerlink" title="字符串类型"></a>字符串类型</h2><ul>
+<li>Verilog语言对于字符串的处理手段非常有限。</li>
+<li>SV引入了string类型用来容纳<strong>可变长度</strong>的字符串。</li>
+<li>字符串类型变量的<strong>存储单元为byte类型</strong>。</li>
+<li>字符串类型变量长度为N时，其字符成员索引值为从0到N-1.</li>
+<li>不同于C函数，字符串结尾**没有“空字符“即null字符“\0”**。</li>
+<li>字符串的内存是<strong>动态分配</strong>的，用户无需担心内存空间管理。</li>
+</ul>
+<h3 id="字符串常见使用方式"><a href="#字符串常见使用方式" class="headerlink" title="字符串常见使用方式"></a>字符串常见使用方式</h3><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">logic</span>[<span class="number">15</span>：<span class="number">0</span>] r_t;</span><br><span class="line">r_tr;</span><br><span class="line"><span class="keyword">integer</span> i=<span class="number">1</span>;</span><br><span class="line"><span class="keyword">string</span> b=<span class="string">&quot;&quot;</span>;</span><br><span class="line"><span class="keyword">string</span> a=&#123;<span class="string">&quot;Hi&quot;</span>，b&#125;;		<span class="comment">//字符串拼接</span></span><br><span class="line">r=r_t&#x27;(a);		   	<span class="comment">//将字符串a内容*显式*转化成字节赋值给r </span></span><br><span class="line">b=<span class="keyword">string</span>&#x27;(r);			<span class="comment">//ok </span></span><br><span class="line">b=<span class="string">&quot;Hi&quot;</span>;				  	<span class="comment">//oK </span></span><br><span class="line">b=&#123;<span class="number">5</span>&#123;<span class="string">&quot;Hi&quot;</span>&#125;&#125;;			<span class="comment">//oK </span></span><br><span class="line">a=&#123;i&#123;<span class="string">&quot;Hi&quot;</span>&#125;&#125;;			<span class="comment">//oK（non-constant replication）</span></span><br><span class="line">a=&#123;i&#123;b&#125;&#125;;		    	<span class="comment">//oK </span></span><br><span class="line">a=&#123;a,b&#125;;			  	<span class="comment">//ok </span></span><br><span class="line">a=&#123;<span class="string">&quot;Hi&quot;</span>,b&#125;;		  	<span class="comment">//oK </span></span><br><span class="line">b=&#123;<span class="string">&quot;H&quot;</span>,<span class="string">&quot;&quot;</span>&#125;;		   	<span class="comment">//yields&quot;H&quot;.&quot;&quot;is the empty string </span></span><br><span class="line">a[<span class="number">0</span>]=<span class="string">&quot;h&quot;</span>;				  <span class="comment">//oK，将字符串第0位赋值为h</span></span><br><span class="line">a[<span class="number">0</span>]=<span class="string">&quot;cough&quot;</span>;			<span class="comment">//字符串赋值给某一位时，取最后一个即h</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>字符串的索引是从左到右0 =&gt;N-1</strong><br><strong>logic [15:0] 索引最右端是0</strong></p>
+</blockquote>
+<h3 id="字符串内建方式"><a href="#字符串内建方式" class="headerlink" title="字符串内建方式"></a>字符串内建方式</h3><ul>
+<li>str.len()：返回字符串的长度</li>
+<li>str.putc(i,c)：将第i个字符替换成字符c，等同于str[i]=c</li>
+<li>str.getc(i)：返回第i个字符</li>
+<li>str.substr(i,j)：返回从第i个字符到第j个字符</li>
+<li>str.{atoi(), atohex(), atooct(), atobin}：将字符串转化成十进制，十六进制，八进制，或者二进制</li>
+</ul>
+<h2 id="附录：数据类型和字符串思维导图"><a href="#附录：数据类型和字符串思维导图" class="headerlink" title="附录：数据类型和字符串思维导图"></a>附录：数据类型和字符串思维导图</h2><p><img src="01.png#id=jo8oQ&originalType=binary&status=done&style=none"></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2021/03/22/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%882%EF%BC%89%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%92%8C%E5%AD%97%E7%AC%A6%E4%B8%B2/" title="SV系统验证（2）——数据类型和字符串">https://github.nanfeng.ink/2021/03/22/SV系统验证（2）——数据类型和字符串/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SystemVerilog/" rel="tag"><i class="fa fa-tag"></i> SystemVerilog</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/21/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%881%EF%BC%89%E2%80%94%E2%80%94%E8%8A%AF%E7%89%87%E5%BC%80%E5%8F%91%E5%8F%8A%E9%AA%8C%E8%AF%81%E6%A6%82%E8%BF%B0/" rel="prev" title="SV系统验证（1）——芯片开发及验证概述">
+      <i class="fa fa-chevron-left"></i> SV系统验证（1）——芯片开发及验证概述
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/03/24/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%883%EF%BC%89%E2%80%94%E2%80%94%E8%AE%BE%E8%AE%A1%E7%89%B9%E6%80%A7%E5%92%8C%E6%8E%A5%E5%8F%A3/" rel="next" title="SV系统验证（3）——设计特性和接口">
+      SV系统验证（3）——设计特性和接口 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Verilog%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">Verilog中的数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B%EF%BC%88variables%EF%BC%89"><span class="nav-number">1.1.</span> <span class="nav-text">变量类型（variables）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%BD%91%E7%B1%BB%E5%9E%8B%EF%BC%88nets%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">线网类型（nets）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SyestemVerilog%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">SyestemVerilog的类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E9%87%8F%EF%BC%88variables%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">变量（variables）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%BD%91%E7%B1%BB%E5%9E%8B%EF%BC%88nets%EF%BC%89-1"><span class="nav-number">2.2.</span> <span class="nav-text">线网类型（nets）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SystemVerilog%E7%9A%84%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">SystemVerilog的数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E5%80%BC%E9%80%BB%E8%BE%91%EF%BC%88Logic%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">四值逻辑（Logic）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E5%80%BC%E9%80%BB%E8%BE%91%EF%BC%88bit%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">二值逻辑（bit）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%BF%E7%9C%9F%E5%88%9D%E5%80%BC%E5%92%8C%E8%BD%AC%E6%8D%A2"><span class="nav-number">3.3.</span> <span class="nav-text">仿真初值和转换</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SystemVerilog%E6%95%B0%E6%8D%AE%E7%9A%84%E7%AC%A6%E5%8F%B7"><span class="nav-number">4.</span> <span class="nav-text">SystemVerilog数据的符号</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%89%E7%AC%A6%E5%8F%B7"><span class="nav-number">4.1.</span> <span class="nav-text">有符号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A0%E7%AC%A6%E5%8F%B7"><span class="nav-number">4.2.</span> <span class="nav-text">无符号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A9%BA%E7%B1%BB%E5%9E%8B%EF%BC%88void%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">空类型（void）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E7%B1%BB%E5%9E%8B%EF%BC%88typedef%EF%BC%89"><span class="nav-number">5.</span> <span class="nav-text">自定义类型（typedef）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%9A%E4%B8%BE%E7%B1%BB%E5%9E%8B%EF%BC%88enum%EF%BC%89"><span class="nav-number">5.1.</span> <span class="nav-text">枚举类型（enum）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%9E%9A%E4%B8%BE%E7%B1%BB%E5%9E%8B"><span class="nav-number">5.1.1.</span> <span class="nav-text">自定义枚举类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%9A%E4%B8%BE%E7%B1%BB%E5%9E%8B%E8%B5%8B%E5%80%BC"><span class="nav-number">5.1.2.</span> <span class="nav-text">枚举类型赋值</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E4%BD%93%E7%B1%BB%E5%9E%8B%EF%BC%88struct%EF%BC%89"><span class="nav-number">5.2.</span> <span class="nav-text">结构体类型（struct）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BB%93%E6%9E%84%E4%BD%93%E7%B1%BB%E5%9E%8B"><span class="nav-number">5.2.1.</span> <span class="nav-text">自定义结构体类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E4%BD%93%E7%B1%BB%E5%9E%8B%E8%B5%8B%E5%80%BC"><span class="nav-number">5.2.2.</span> <span class="nav-text">结构体类型赋值</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B1%BB%E5%9E%8B"><span class="nav-number">6.</span> <span class="nav-text">字符串类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%B8%B8%E8%A7%81%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">6.1.</span> <span class="nav-text">字符串常见使用方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%86%85%E5%BB%BA%E6%96%B9%E5%BC%8F"><span class="nav-number">6.2.</span> <span class="nav-text">字符串内建方式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%92%8C%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE"><span class="nav-number">7.</span> <span class="nav-text">附录：数据类型和字符串思维导图</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

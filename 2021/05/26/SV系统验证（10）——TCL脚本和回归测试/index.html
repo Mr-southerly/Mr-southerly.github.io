@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="TCL基础入门 引言  * TCL（Tool Command Language）是一种解释执行的脚本语言（Scripting Language）。它提供了通用的编程能力：支持变量、过程和控制结构；同时TCL还拥有一个功能强大的固有的核心命令集。  * 由于TCL的解释器是用一个C\C++语言的过程库实现的，因此在某种意义上我们又可以把TCL看作一个C库，这个库中有丰富的用于扩展TCL命令的C\C+">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SV系统验证（10）——TCL脚本和回归测试">
+<meta property="og:url" content="https://github.nanfeng.ink/2021/05/26/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%8810%EF%BC%89%E2%80%94%E2%80%94TCL%E8%84%9A%E6%9C%AC%E5%92%8C%E5%9B%9E%E5%BD%92%E6%B5%8B%E8%AF%95/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="TCL基础入门 引言  * TCL（Tool Command Language）是一种解释执行的脚本语言（Scripting Language）。它提供了通用的编程能力：支持变量、过程和控制结构；同时TCL还拥有一个功能强大的固有的核心命令集。  * 由于TCL的解释器是用一个C\C++语言的过程库实现的，因此在某种意义上我们又可以把TCL看作一个C库，这个库中有丰富的用于扩展TCL命令的C\C+">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622083013238-b947aa23-b4c7-4ef1-81cd-81ce72c43ea5.png#align=left&display=inline&height=190&margin=%5Bobject%20Object%5D&name=image.png&originHeight=243&originWidth=558&size=55038&status=done&style=none&width=437">
+<meta property="article:published_time" content="2021-05-26T03:04:58.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="SystemVerilog">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622083013238-b947aa23-b4c7-4ef1-81cd-81ce72c43ea5.png#align=left&display=inline&height=190&margin=%5Bobject%20Object%5D&name=image.png&originHeight=243&originWidth=558&size=55038&status=done&style=none&width=437">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2021/05/26/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%8810%EF%BC%89%E2%80%94%E2%80%94TCL%E8%84%9A%E6%9C%AC%E5%92%8C%E5%9B%9E%E5%BD%92%E6%B5%8B%E8%AF%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SV系统验证（10）——TCL脚本和回归测试 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2021/05/26/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%8810%EF%BC%89%E2%80%94%E2%80%94TCL%E8%84%9A%E6%9C%AC%E5%92%8C%E5%9B%9E%E5%BD%92%E6%B5%8B%E8%AF%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SV系统验证（10）——TCL脚本和回归测试
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-05-26 11:04:58" itemprop="dateCreated datePublished" datetime="2021-05-26T11:04:58+08:00">2021-05-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">笔记篇</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0%E7%AF%87/%E6%95%B0%E5%AD%97%E9%AA%8C%E8%AF%81/" itemprop="url" rel="index"><span itemprop="name">数字验证</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="TCL基础入门"><a href="#TCL基础入门" class="headerlink" title="TCL基础入门"></a>TCL基础入门</h2><h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><ul>
+<li>TCL（Tool Command Language）是一种解释执行的脚本语言（Scripting Language）。它提供了通用的编程能力：支持变量、过程和控制结构；同时TCL还拥有一个功能强大的固有的核心命令集。</li>
+<li>由于TCL的解释器是用一个C\C++语言的过程库实现的，因此在某种意义上我们又可以把TCL看作一个C库，这个库中有丰富的用于扩展TCL命令的C\C++过程和函数，每个应用程序都可以根据自己的需要对TCL语言进行扩展。</li>
+<li>扩展后的TCL语言将可以继承TCL核心部分的所有功能，包括核心命令、控制结构、数据类型、对过程的支持等；TCL良好的可扩展性使得它能很好地适应产品测试的需要，目前已成为自动测试中事实上的标准。</li>
+</ul>
+<h3 id="脚本学习核心"><a href="#脚本学习核心" class="headerlink" title="脚本学习核心"></a>脚本学习核心</h3><ul>
+<li>TCL脚本执行依赖于解释器（逐行执行）。</li>
+<li>TCL有效命令行以命令+字符串（结合空格间隔符）形成。</li>
+<li>明白置换（$、[]、\）和引用（””，{}）的差别和联系。</li>
+<li>理解命令eval、expr、source、exec的差别。</li>
+<li>掌握{*}配合glob等返回list后的操作</li>
+</ul>
+<h2 id="基础语法"><a href="#基础语法" class="headerlink" title="基础语法"></a>基础语法</h2><ul>
+<li><p>一个TCL脚本可以包含一个或多个命令。命令之间必须用换行符或分号隔开，下面的两个脚本都是合法的：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">set a <span class="number">1</span></span><br><span class="line">set b <span class="number">2</span></span><br><span class="line">或set a <span class="number">1</span>; set b <span class="number">2</span></span><br></pre></td></tr></table></figure></li>
+<li><p>TCL的每一个命令包含一个或几个单词，第一个单词代表命令名，另外的单词则是这个命令的参数，单词之间必须用空格或TAB键隔开。</p>
+</li>
+</ul>
+<h3 id="置换"><a href="#置换" class="headerlink" title="置换"></a>置换</h3><ul>
+<li><p>TCL解释器在分析命令时，把所有的命令参数都当作<strong>字符串</strong>看待，例如</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">%set x <span class="number">10</span>        <span class="comment">//定义变量x，并把x的值赋为10 </span></span><br><span class="line"><span class="number">10</span></span><br><span class="line">%set y x+<span class="number">100</span>  <span class="comment">//y的值是x+100，而不是我们期望的110</span></span><br><span class="line">x+<span class="number">100</span></span><br></pre></td></tr></table></figure></li>
+<li><p>上例的第二个命令中，x被看作字符串x+100的一部分，如果我们想用x的值’10’，就必须告诉TCL解释器：我们在这里期望的是变量x的值，而非字符x’。怎么告诉TCL解释器呢，这就要用到TCL语言中提供的置换功能。</p>
+</li>
+<li><p>TCL提供三种形式的置换：<strong>变量置换</strong>、<strong>命令置换</strong>和<strong>反斜杠置换</strong>。</p>
+</li>
+</ul>
+<h3 id="变量置换"><a href="#变量置换" class="headerlink" title="变量置换"></a>变量置换</h3><ul>
+<li><p>变量置换由一个$符号标记，变量置换会导致变量的值插入一个单词中。例如：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%set y $x+<span class="number">100</span></span><br><span class="line"><span class="comment">// y的值是10+100，这里x被置换成它的值10+100</span></span><br></pre></td></tr></table></figure></li>
+<li><p>这时，y的值还不是我们想要的值110，而是10+100，因TCL解释器把10+100看成是一个字符串而不是表达式，y要得到值110，还必须用命令置换，使得TCL会把10+100看成个表达式并求值。</p>
+</li>
+</ul>
+<h3 id="命令置换"><a href="#命令置换" class="headerlink" title="命令置换"></a>命令置换</h3><ul>
+<li><p>命令置换是由[]括起来的TCL命令及其参数，命令置换会导致某一个命令的所有或部分单词被另一个命令的结果所代替。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%set y [expr $x+<span class="number">100</span>]</span><br><span class="line"><span class="number">110</span></span><br></pre></td></tr></table></figure></li>
+<li><p>y的值是110，这里当TCL解释器遇到字符’[‘时，它就会把随后的expr作为一个命令名，从而激活与expr对应的C/C++过程，并把’expr’和变量置换后得到的’10+110’传递给该命令过程进行处理。</p>
+</li>
+<li><p>如果在上例中我们去掉’[]’，那么TCL会报错。因为在正常情况下，TCL解释器<strong>只把命令行中的第一个单词作为看作命令</strong>，其他的单司都作为普通字符串处理，看作是命令的参数。</p>
+</li>
+</ul>
+<h3 id="反斜杠置换"><a href="#反斜杠置换" class="headerlink" title="反斜杠置换"></a>反斜杠置换</h3><ul>
+<li><p>TCL语言中的反斜杠置换类似于C语言中反斜杠的用法，主要用于在单词符号中插入诸如换行符、空格、[、$等被TCL解释器当作特殊符号对待的字符。例如：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%set msg multiple\ space           <span class="comment">//msg的值为multiple space.</span></span><br><span class="line">multiple space</span><br></pre></td></tr></table></figure></li>
+<li><p>如果没有\的话，TCL会报错，因为解释器会把这里最后两个单词之间的空格认为是分隔符，于是发现set命令有多于两个参数，从而报错。加入了”后，空格不被当作分隔符，’multiple space’被认为是一个单词（word）</p>
+</li>
+</ul>
+<h3 id="双引号和花括号"><a href="#双引号和花括号" class="headerlink" title="双引号和花括号"></a>双引号和花括号</h3><ul>
+<li><p>除了使用反斜杠外，TCL提供另外两种方法来使得<strong>解释器把分隔符和置换符等特殊字符当作普通字符，而不作特殊处理</strong>，这就要使用双引号和花括号（}）。</p>
+</li>
+<li><p>TCL解释器对双引号中的<strong>各种分隔符将不作处理，但是对换行符及$和[]两种置换符会照常处理</strong>。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%set y <span class="string">&quot;$x ddd&quot;</span></span><br><span class="line"><span class="number">100</span> ddd </span><br></pre></td></tr></table></figure></li>
+<li><p>**TCL中的注释符是”#”**，”#”和直到所在行结尾的所有字符都被TCL看作注释，TCL解释器对注释将不作任何处理。</p>
+</li>
+</ul>
+<h3 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h3><ul>
+<li><p>一个TCL的简单变量包含两个部分：<strong>名字和值（都可以是任意字符）</strong>。</p>
+</li>
+<li><p>TCL解释器在分析一个变量置换时，只<strong>把从$符号往后直到第一个不是字母、数字或下划线的字符之间的单词符号</strong>作为要被置换的变量的名字。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">%set a <span class="number">2</span>     <span class="comment">//2</span></span><br><span class="line">%set a<span class="variable">.1</span> <span class="number">4</span>   <span class="comment">//4</span></span><br><span class="line">%set b $a<span class="variable">.1</span>  <span class="comment">//2.1</span></span><br><span class="line">%set b $&#123;a<span class="variable">.1</span>&#125; <span class="comment">//4</span></span><br><span class="line">%set a &#123;kdfj kjdf&#125;  <span class="comment">//kdfj kjdf</span></span><br><span class="line">%set a              <span class="comment">//kdfj kjdf 读取变量</span></span><br></pre></td></tr></table></figure></li>
+<li><p>在最后一个命令行，我们希望把变量a.1的值付给b，但是TCL解释器在分析时只把符号之后直到第一个不是字母、数字或下划线的字符（这里是.）之间的单词符号（这里是’a）当作要被置换的变量的名字，所以TCL解释器把a置换成2，然后把字符串“2.1”付给变量b。这显然与我们的初衷不同。</p>
+</li>
+<li><p>如果变量名中有<strong>不是字母、数字或下划线的字符</strong>，又要用置换，可以用<strong>花括号把变量名括起来</strong>。</p>
+</li>
+<li><p>TCL中的set命令<strong>能生成一个变量、也能读取或改变一个变量的。</strong></p>
+</li>
+</ul>
+<h3 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h3><ul>
+<li>数组是一些元素的集合。TCL的数组和普通计算机语言中的数组有很大的区别。在TCL中，<strong>不能单独声明一个数组，数组只能和数组元素一起声明</strong>。数组中，数组元素的名字包含两部分：<strong>数组名和数组中元素的名字</strong>，TCL中数组元素的名字（下<strong>标）可以为任何字符串</strong>。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%set day(monday) <span class="number">1</span>     <span class="comment">//第一个命令生成一个名为day的数组，同时在数组中生成一个名为monday的数组元素，并把值置为1</span></span><br><span class="line">%set day(tuesday) <span class="number">2</span>    <span class="comment">//第二个命令生成一个名为tuesday的数组元素，并把值置为2</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="相关命令"><a href="#相关命令" class="headerlink" title="相关命令"></a>相关命令</h3><ul>
+<li><p>unset这个命令从解释器中删除变量，它后面可以有任意多个参数，每个参数是一个变量名，可以是简单变量，也可以是数组或数组元素。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%unset a b day(monday)</span><br></pre></td></tr></table></figure></li>
+<li><p>append命令把文本加到一个变量的后面</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%set txt hello                   <span class="comment">//Hello</span></span><br><span class="line">%append txt <span class="string">&quot;！How are you&quot;</span>      <span class="comment">//hello！How are you</span></span><br></pre></td></tr></table></figure></li>
+<li><p> incr命令把一个变量值加上一个整数。incr要求变量原来的值和新加的值都必须是整数。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%set b <span class="number">2</span> </span><br><span class="line">incr b <span class="number">3</span>     <span class="comment">//结果为5</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="表达式"><a href="#表达式" class="headerlink" title="表达式"></a>表达式</h3><ul>
+<li><p>TCL支持常用的数学函数，表达式中数学函数的写法类似于C\C++语言的写法，数学函数的参数可以是任意表达式，<strong>多个参数之间用逗号隔开</strong>。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%set x <span class="number">2</span>    <span class="comment">//2</span></span><br><span class="line">%expr <span class="number">2</span>*sin($x&lt;<span class="number">3</span>)   <span class="comment">//1.68294196962</span></span><br></pre></td></tr></table></figure></li>
+<li><p>其中<strong>expr是TCL的一个命令</strong>，语法为：expr arg  ？arg…？，两个？之间的参数表示可省，后面介绍命令时对于可省参数都使用这种表示形式。</p>
+</li>
+<li><p>需要注意的一点是，数学函数并不是命令，只在表达式中出现才有意义，即<strong>出现在expr之后才有意义。</strong></p>
+</li>
+</ul>
+<h3 id="List"><a href="#List" class="headerlink" title="List"></a>List</h3><ul>
+<li>TCL中list是由一堆元素组成的有序集合，list可以嵌套定义，<strong>list每个元素可以是任意字符串，也可以是list。</strong><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#125;  <span class="comment">//空list</span></span><br><span class="line">&#123;a b c d&#125;</span><br><span class="line">&#123;a &#123;b c&#125; d&#125;<span class="comment">//list可以嵌套</span></span><br><span class="line"></span><br><span class="line">语法：list ？value value...？  <span class="comment">//这个命令生成1个list，list的元素就是所有的value</span></span><br><span class="line">%list <span class="number">1</span> <span class="number">2</span> &#123;<span class="number">3</span> <span class="number">4</span>&#125;</span><br><span class="line"><span class="number">1</span> <span class="number">2</span> &#123;<span class="number">3</span> <span class="number">4</span>&#125;</span><br><span class="line"></span><br><span class="line">语法：concat list ？list..？  <span class="comment">//整合两个list</span></span><br><span class="line">%concat &#123;<span class="number">123</span>&#125; &#123;<span class="number">456</span>&#125;</span><br><span class="line">&#123;<span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span>&#125;</span><br><span class="line"></span><br><span class="line">语法：lindex list index       <span class="comment">//返回list的第index个元素</span></span><br><span class="line">%lindex &#123;<span class="number">12</span>&#123;<span class="number">3</span> <span class="number">4</span>&#125;&#125; <span class="number">2</span> </span><br><span class="line"><span class="number">3</span> <span class="number">4</span></span><br><span class="line"></span><br><span class="line">语法：llength list            <span class="comment">//返回list的元素个数</span></span><br><span class="line">%llength &#123;<span class="number">1</span> <span class="number">2</span> &#123;<span class="number">3</span> <span class="number">4</span>&#125;&#125;</span><br><span class="line"><span class="number">3</span></span><br><span class="line">语法：linsert list index value ？value...？    <span class="comment">//list插入元素</span></span><br><span class="line">%linsert &#123;<span class="number">1</span> <span class="number">2</span> <span class="number">5</span> <span class="number">6</span>&#125; <span class="number">1</span> <span class="number">7</span> <span class="number">8</span></span><br><span class="line"><span class="number">1</span> <span class="number">7</span> <span class="number">8</span> <span class="number">2</span> <span class="number">5</span> <span class="number">6</span></span><br><span class="line"></span><br><span class="line">语法：lappend varname value ？value...？       <span class="comment">//把每个value的值作为一个元素附加到变量varname后面</span></span><br><span class="line">%lappend a <span class="number">1</span> <span class="number">2</span> <span class="number">3</span></span><br><span class="line"><span class="number">1</span> <span class="number">2</span> <span class="number">3</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="控制命令"><a href="#控制命令" class="headerlink" title="控制命令"></a>控制命令</h2><h3 id="控制流：-if命令"><a href="#控制流：-if命令" class="headerlink" title="控制流： if命令"></a>控制流： if命令</h3><ul>
+<li>语法：if test1 body1  ？else bodyn？</li>
+<li>TCL先把test1当作一个表达式求值，如果值非0，则把body1当作一个脚本执行并返回所得值，否则把test2当作一个表达式求值，如果值非0，则把body2当作一个脚本执行并返回所得值。<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> &#123;$x&gt;<span class="number">0</span>&#125;&#123;                  <span class="comment">//注意&#123;一定要写在上一行，因为不这样，TCL解释器会认为if命令在换行符已经结束了；</span></span><br><span class="line">.....&#125;elseif &#123;$x==<span class="number">1</span>&#125;&#123;       <span class="comment">//同时if和&#123;之间应该有一个空格，否则TCL解释器会会把&#x27;if&#123;&#x27;作为一个整体命令导致出错</span></span><br><span class="line">.....&#125;elseif &#123;$x==<span class="number">2</span>&#125;&#123;</span><br><span class="line">.....&#125;<span class="keyword">else</span> &#123;</span><br><span class="line">.....&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="循环：while命令"><a href="#循环：while命令" class="headerlink" title="循环：while命令"></a>循环：while命令</h3><ul>
+<li>语法：while test body</li>
+<li>参数test是一个表达式，body是一个脚本，如果表达式的值非0，就运行脚本，直到表达式为0才停止循环，此时while命令中断并返回一个空字符串。此处是一个脚本：<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">set b <span class="string">&quot;&quot;</span></span><br><span class="line">set i [expr [llength $a]-<span class="number">1</span>]</span><br><span class="line"><span class="keyword">while</span> &#123;$i&gt;=<span class="number">0</span>&#125;&#123;</span><br><span class="line">  lappend b [lindex $a $i]</span><br><span class="line">  incr i-<span class="number">1</span> &#125;               <span class="comment">//变量a是一个链表，脚本把a的值复制到b</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="循环：for命令"><a href="#循环：for命令" class="headerlink" title="循环：for命令"></a>循环：for命令</h3><ul>
+<li>语法：for init test reinit body</li>
+<li>参数init是一个初始化脚本，第二个参数test是一个表达式，用来决定循环什么时候中断，第三个参数reinit是一个重新初始化的脚本，第四个参数body也是脚本，代表循环体；<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//假设变量a是一个链表，下面的脚本把a的值复制到b：</span></span><br><span class="line">set b <span class="string">&quot;&quot;</span> </span><br><span class="line"><span class="keyword">for</span>&#123;set i [expr [llength $a]-<span class="number">1</span>]&#125;&#123;$i&gt;=<span class="number">0</span>&#125;&#123;incr i-<span class="number">1</span>&#125;&#123;</span><br><span class="line">  lappend b[lindex $a $i]&#125;</span><br><span class="line"><span class="comment">//作用和上面的例子是相同的</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="循环：foreach命令"><a href="#循环：foreach命令" class="headerlink" title="循环：foreach命令"></a>循环：foreach命令</h3><p>语法：foreach varName list body<br>第一个参数varName是一个变量，第二个参数list是一个表（有序集合），第三个参数body是循环体。每次取得链表的一个元素，都会执行循环体一次。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">set b <span class="string">&quot;&quot;</span></span><br><span class="line"><span class="keyword">foreach</span> i $a&#123;</span><br><span class="line">  set b [linsert $b <span class="number">0</span> $i]</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//变量a是一个链表，脚本把a的值复制到b,顺序刚好相反</span></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="控制：switch命令"><a href="#控制：switch命令" class="headerlink" title="控制：switch命令"></a>控制：switch命令</h3><ul>
+<li>语法：switch ？options？ string { pattern body ？pattern body…？}</li>
+<li>第一个是可选参数options，表示进行匹配的方式。TCL支持三种匹配方式：**-exact方式，-glob方式，-regexp方式**，缺省情况表示-glob方式。-exact方式表示的是精确匹配，-glob方式的匹配方式和string match命令的匹配方式相同，-regexp方式是正规表达式的匹配方式。第二个参数string是要被用来作测试的值，第三个参数是括起来的一个或多个元素对<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">%switch $x&#123;         <span class="comment">//一旦switch命令找到一个模式匹配</span></span><br><span class="line">  b&#123;incr t1&#125;        <span class="comment">//就执行相应的脚本，并返回脚本的</span></span><br><span class="line">  c&#123;incr t2&#125;&#125;       <span class="comment">//值，作为switch命令的返回值。</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="跳出循环"><a href="#跳出循环" class="headerlink" title="跳出循环"></a>跳出循环</h3><ul>
+<li>在循环体中，可以用break和continue命令中断循环。其中break命令结束整个循环过程，并从循环中跳出，continue只是结束本次循环。</li>
+<li>source命令读一个文件并把这个文件的内容作为一个脚本进行求值``</li>
+<li><code>%source e:/tcl&amp;c/hello.tcl </code></li>
+<li>eval命令是一个用来构造和执行TCL脚本的命令，其语法为：<code>eval arg ？arg...？</code><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%eval set a <span class="number">2</span>;</span><br><span class="line">set b <span class="number">4</span> <span class="number">4</span>   <span class="comment">//它可以接收一个或多个参数，然后把所有的参数以空格隔开组合到一起成为一个脚本，然后对这个脚本进行求值。</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h3><ul>
+<li><p>TCL支持过程的定义和调用，在TCL中，过程可以看作是用TCL脚本实现的命令，效果与TCL的固有命令相似。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%proc add &#123;x y&#125; &#123;expr $x+$y&#125;   <span class="comment">//TCL中过程是由proc命令产生的：</span></span><br><span class="line">%add <span class="number">1</span> <span class="number">2</span>           <span class="number">3</span>           <span class="comment">//proc生成一个新的命令，可以象固有命令一样调用</span></span><br></pre></td></tr></table></figure></li>
+<li><p>TCL中过程是由proc命令产生的：proc命令的第一个参数是你要定义的过程的名字，第二个参数是过程的参数列表，参数之间用空格隔开，第三个参数是一个TCL脚本，代表过程体。</p>
+</li>
+<li><p>在定义过程时，你可以利用return命令在任何地方返回你想要的值。return命令迅速中断过程，并把它的参数作为过程的结果</p>
+</li>
+</ul>
+<h3 id="局部变量和全局变量"><a href="#局部变量和全局变量" class="headerlink" title="局部变量和全局变量"></a>局部变量和全局变量</h3><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">%set a <span class="number">4</span></span><br><span class="line"><span class="number">4</span></span><br><span class="line">%proc sample&#123;x&#125;&#123;</span><br><span class="line">  <span class="keyword">global</span> a       <span class="comment">//全局变量声明</span></span><br><span class="line">  incr a         <span class="comment">//a+1 默认＋1</span></span><br><span class="line">  <span class="keyword">return</span>[expr $a+$x&#125;</span><br><span class="line">%sample <span class="number">3</span></span><br><span class="line"><span class="number">8</span></span><br><span class="line">%set a</span><br><span class="line"><span class="number">5</span></span><br></pre></td></tr></table></figure>
+<h3 id="字符串操作"><a href="#字符串操作" class="headerlink" title="字符串操作"></a>字符串操作</h3><ul>
+<li><p>因为TCL把所有的输入都当作字符串看待，所以TCL提供了较强的字符串操作功能。</p>
+</li>
+<li><p>语法：<strong>format</strong> formatstring  ？vlue value…？</p>
+</li>
+<li><p>format命令类似于ANSIC中的sprintf函数，按formatstring提供的格式，把各个value的值组合到formatstring中形成一个新字符串返回。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">%set name john            <span class="comment">//John</span></span><br><span class="line">%set age <span class="number">20</span>               <span class="comment">//20</span></span><br><span class="line">%set msg[format <span class="string">&quot;%s is %d years old&quot;</span> $name $age]     <span class="comment">//john is 20 years old</span></span><br></pre></td></tr></table></figure></li>
+<li><p>语法：<strong>scan</strong> string format varName  ？varName…？</p>
+</li>
+<li><p>scan命令可以认为<strong>是format命令的逆</strong>，其功能类似于ANSIC中的sscanf函数。它按format提供的格式分析string字符串，然后把结果存到变量varName中，<strong>注意除了空格和TAB键之外，string和format中的字符和’%’必须匹配</strong>。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">%scan<span class="string">&quot;some 26 34&quot;</span><span class="string">&quot;some %d %d&quot;</span> a b     <span class="comment">//2</span></span><br><span class="line">%set a                                <span class="comment">//26</span></span><br><span class="line">%set b                                <span class="comment">//34 </span></span><br></pre></td></tr></table></figure></li>
+<li><p>语法：regexp  ？switchs？ ？–？ Exp string  ?matchVar？\  ?subMatchVar subMatchVar…？</p>
+</li>
+<li><p>regexp命令用于判断正规表达式exp是否全部或部分匹配字符串string，匹配返回1，否则0</p>
+</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1622083013238-b947aa23-b4c7-4ef1-81cd-81ce72c43ea5.png#align=left&display=inline&height=190&margin=%5Bobject%20Object%5D&name=image.png&originHeight=243&originWidth=558&size=55038&status=done&style=none&width=437" alt="image.png"></p>
+<h3 id="文件访问"><a href="#文件访问" class="headerlink" title="文件访问"></a>文件访问</h3><ul>
+<li><p>TCL提供了丰富的文件操作的命令。通过这些命令你可以对文件名进行操作（查找匹配某一模式的文件）、以顺序或随机方式读写文件、检索系统保留的文件信息（如最后访问时间）</p>
+</li>
+<li><p>TCL中文件名和我们熟悉的windows表示文件的方法有一些区别：<code>在表示文件的目录结构时它使用&#39;/&#39;，而不是&#39;\&#39;</code>。</p>
+</li>
+<li><p>语法：open name  ?access？</p>
+</li>
+<li><p>open命令以access方式打开文件name，返回供其他命令（gets，close等）使用的文件标识。</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">文件的打开方式和我们熟悉的C语言类似，有以下方式：</span><br><span class="line">r  只读方式打开。文件必须已经存在。这是默认方式。</span><br><span class="line">r+ 读写方式打开，文件必须已经存在。</span><br><span class="line">w  只写方式打开文件，如果文件存在则清空文件内容，否则创建一新的空文件。</span><br><span class="line">w+ 读写方式打开文件，如文件存在则清空文件内容，否则创建新的空文件。</span><br><span class="line">a  只写方式打开文件，文件必须存在，并把指针指向文件尾。</span><br><span class="line">a+ 读写方式打开文件，并把指针指向文件尾。如文件不存在，创建新的空文件</span><br></pre></td></tr></table></figure></li>
+<li><p>open命令返回一个字符串用于表识打开的文件。当调用别的命令（如：gets，puts，close）]对打开的文件进行操作时，就可以使用这个文件标识符。TCL有三个特定的文件标识：<strong>stdin，stdout和stderr</strong>，分别对应标准输入、标准输出和错误通道，任何时候你都可以使用这三个文件标识。</p>
+</li>
+<li><p>gets fileld  ?varName?读fileld标识的文件的下一行，忽略换行符。如果命令中有varName就把该行赋给它，并返回该行的字符数（文件尾返回-1），如果没有varName参数，返回文件的下一行作为命令结果（如果到了文件尾，就返回空字符串）</p>
+</li>
+<li><p>put  ?-nonewline？?fileld？string puts命令把string写到fileld中，如果没有nonewline开关的话，添加换行符。fileld默认是stdout，命令返回值为一空字符串。</p>
+</li>
+<li><p>flush fileld把缓冲区内容写到fileld标识的文件中，命令返回值为空字符串。</p>
+</li>
+<li><p>flush命令迫使缓冲区数据写到文件中。flush直到数据被写完才返回。当文件关闭时缓冲区数据会首动flush.</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">proc tgrep &#123;pattern filename&#125;&#123;     </span><br><span class="line">  set f [open $filename r]               </span><br><span class="line">  <span class="keyword">while</span> &#123;[gets $f line]&#125;&#123; </span><br><span class="line">    <span class="keyword">if</span> &#123;regexp $pattern $line]&#125;&#123; </span><br><span class="line">        puts stdout $line  </span><br><span class="line">    &#125; </span><br><span class="line">close $f </span><br><span class="line">&#125;<span class="comment">//TCL文件I/O的基本特点示例</span></span><br></pre></td></tr></table></figure></li>
+<li><p>TCL提供两个命令来管理当前工作目录：pwd和cd.</p>
+<blockquote>
+<p>pwd和UNIX下的pwd命令完全一样，没有参数，返回当前目录的完整路径。<br>cd命令也和UNIX命令也一样，使用一个参数，可以把工作目录改变为参数提供的目录。如果cd没使用参数，UNIX下，会把工作目录变为启动TCL脚本的用户的工作目录。</p>
+</blockquote>
+</li>
+<li><p>TCL提供了两个命令进行文件名操作：glob和file，用来操作文件或获取文件信息。</p>
+<blockquote>
+<p>glob命令采用一种或多种模式作为参数，并返回匹配这个（些）模式的所有文件的列表</p>
+</blockquote>
+</li>
+<li><p>语法为：glob  ?switches？  pattern  ?pattern…？</p>
+</li>
+<li><p>glob命令的模式采用string match命令的匹配规则。例如：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">%glob *<span class="variable">.c</span> *<span class="variable">.h</span> </span><br><span class="line">main<span class="variable">.c</span> hash<span class="variable">.c</span> hash<span class="variable">.h</span> </span><br><span class="line">file delete *<span class="variable">.tmp</span>             <span class="comment">//不生效不执行通配符展开</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//先使用glob命令返回文件列表，在使用参数展开语法&#123;*&#125;把列表元素作为独立参数提供给指令。</span></span><br><span class="line">file delete &#123;*&#125;[glob*<span class="variable">.tmp</span>]    <span class="comment">//必须加&#123;&#125;，否则不同元组之间的空格会将所有元素合为一个</span></span><br><span class="line"><span class="comment">//也可以选择使用eval </span></span><br><span class="line">eval file delete [glob*<span class="variable">.tmp</span>]</span><br></pre></td></tr></table></figure></li>
+<li><p>file是有许多选项的常用命令，可以用来进行文件操作也可以检索文件信息</p>
+<blockquote>
+<p>file atime name返回一个十进制的字符串，表示文件name最后被访问的时间。时间是以秒为单位从1970年1月1日12：00AM开始计算。如果文件name不存在或查询不到访问时间就返回错误。例：<code>%file atime license.txt         975945600</code></p>
+</blockquote>
+</li>
+<li><p>语法：file copy  ?-force？  ?–？source target</p>
+<blockquote>
+<p>这个命令把source中指明的文件或目录递归的拷贝到目的地址targetDir，只有当存在-force选项时，已经存在的文件才会被覆盖。试图覆盖一个非空的目录或以一个文件覆盖一个目录或以一个目录覆盖一个文件都会导致错误。</p>
+</blockquote>
+</li>
+</ul>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">file mkdir dir  ？dir..？        <span class="comment">//创建dir中指明的目录</span></span><br><span class="line">file owned name                  <span class="comment">//如果name被当前用户拥有，返回1，否则返回0</span></span><br><span class="line">file executable name             <span class="comment">//如果name对当前用户是可以执行的，就返回1，否则返回0。</span></span><br></pre></td></tr></table></figure>
+
+
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2021/05/26/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%8810%EF%BC%89%E2%80%94%E2%80%94TCL%E8%84%9A%E6%9C%AC%E5%92%8C%E5%9B%9E%E5%BD%92%E6%B5%8B%E8%AF%95/" title="SV系统验证（10）——TCL脚本和回归测试">https://github.nanfeng.ink/2021/05/26/SV系统验证（10）——TCL脚本和回归测试/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SystemVerilog/" rel="tag"><i class="fa fa-tag"></i> SystemVerilog</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/05/19/SV%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%EF%BC%889%EF%BC%89%E2%80%94%E2%80%94%E9%AA%8C%E8%AF%81%E9%87%8F%E5%8C%96%E5%92%8C%E8%A6%86%E7%9B%96%E7%8E%87/" rel="prev" title="SV系统验证（9）——验证量化和覆盖率">
+      <i class="fa fa-chevron-left"></i> SV系统验证（9）——验证量化和覆盖率
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/06/02/iphone%E5%BF%AB%E6%8D%B7%E5%91%BD%E4%BB%A4%E5%AE%9E%E7%8E%B0%E8%BD%BB%E6%95%B2%E4%B8%A4%E4%B8%8B%E6%89%93%E5%BC%80%E5%BE%AE%E4%BF%A1%E7%B2%A4%E5%BA%B7%E7%A0%81/" rel="next" title="iphone快捷命令实现轻敲两下打开微信粤康码">
+      iphone快捷命令实现轻敲两下打开微信粤康码 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#TCL%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A8"><span class="nav-number">1.</span> <span class="nav-text">TCL基础入门</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E8%A8%80"><span class="nav-number">1.1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%84%9A%E6%9C%AC%E5%AD%A6%E4%B9%A0%E6%A0%B8%E5%BF%83"><span class="nav-number">1.2.</span> <span class="nav-text">脚本学习核心</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">基础语法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%AE%E6%8D%A2"><span class="nav-number">2.1.</span> <span class="nav-text">置换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E9%87%8F%E7%BD%AE%E6%8D%A2"><span class="nav-number">2.2.</span> <span class="nav-text">变量置换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4%E7%BD%AE%E6%8D%A2"><span class="nav-number">2.3.</span> <span class="nav-text">命令置换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E6%96%9C%E6%9D%A0%E7%BD%AE%E6%8D%A2"><span class="nav-number">2.4.</span> <span class="nav-text">反斜杠置换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8C%E5%BC%95%E5%8F%B7%E5%92%8C%E8%8A%B1%E6%8B%AC%E5%8F%B7"><span class="nav-number">2.5.</span> <span class="nav-text">双引号和花括号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E9%87%8F"><span class="nav-number">2.6.</span> <span class="nav-text">变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E7%BB%84"><span class="nav-number">2.7.</span> <span class="nav-text">数组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4"><span class="nav-number">2.8.</span> <span class="nav-text">相关命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">2.9.</span> <span class="nav-text">表达式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#List"><span class="nav-number">2.10.</span> <span class="nav-text">List</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E5%91%BD%E4%BB%A4"><span class="nav-number">3.</span> <span class="nav-text">控制命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E6%B5%81%EF%BC%9A-if%E5%91%BD%E4%BB%A4"><span class="nav-number">3.1.</span> <span class="nav-text">控制流： if命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%EF%BC%9Awhile%E5%91%BD%E4%BB%A4"><span class="nav-number">3.2.</span> <span class="nav-text">循环：while命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%EF%BC%9Afor%E5%91%BD%E4%BB%A4"><span class="nav-number">3.3.</span> <span class="nav-text">循环：for命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%EF%BC%9Aforeach%E5%91%BD%E4%BB%A4"><span class="nav-number">3.4.</span> <span class="nav-text">循环：foreach命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%EF%BC%9Aswitch%E5%91%BD%E4%BB%A4"><span class="nav-number">3.5.</span> <span class="nav-text">控制：switch命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%B3%E5%87%BA%E5%BE%AA%E7%8E%AF"><span class="nav-number">3.6.</span> <span class="nav-text">跳出循环</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%87%E7%A8%8B"><span class="nav-number">3.7.</span> <span class="nav-text">过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%80%E9%83%A8%E5%8F%98%E9%87%8F%E5%92%8C%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F"><span class="nav-number">3.8.</span> <span class="nav-text">局部变量和全局变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%93%8D%E4%BD%9C"><span class="nav-number">3.9.</span> <span class="nav-text">字符串操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E8%AE%BF%E9%97%AE"><span class="nav-number">3.10.</span> <span class="nav-text">文件访问</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

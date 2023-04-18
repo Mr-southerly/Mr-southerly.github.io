@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言 这个设计是我参加2019年电赛的H题，把这写下来，留着以后看，虽然设计在现在看来也是极为青涩的，但是还我觉得这也是一种成长，总归是要慢慢进步的。  比赛要求   摘要 本参赛小组设计并制作了模拟电磁曲射炮，实现在不同方向自动或手动搜索目标并且发射弹丸的功能。该系统主要由机械部分和控制部分组成，其中机械部分包括底座、云台以及炮筒等；控制部分主要由单片机、舵机、摄像头以及电磁炮控制电路组成。系统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="模拟曲射电磁炮设计">
+<meta property="og:url" content="https://github.nanfeng.ink/2020/08/20/%E6%A8%A1%E6%8B%9F%E6%9B%B2%E5%B0%84%E7%94%B5%E7%A3%81%E7%82%AE%E8%AE%BE%E8%AE%A1/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="前言 这个设计是我参加2019年电赛的H题，把这写下来，留着以后看，虽然设计在现在看来也是极为青涩的，但是还我觉得这也是一种成长，总归是要慢慢进步的。  比赛要求   摘要 本参赛小组设计并制作了模拟电磁曲射炮，实现在不同方向自动或手动搜索目标并且发射弹丸的功能。该系统主要由机械部分和控制部分组成，其中机械部分包括底座、云台以及炮筒等；控制部分主要由单片机、舵机、摄像头以及电磁炮控制电路组成。系统">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009320013-341bcdeb-6b79-441e-93aa-b0e8bccf1206.png#clientId=uca370bc3-e29e-4&from=paste&height=792&id=u32259fb9&margin=%5Bobject%20Object%5D&name=image.png&originHeight=792&originWidth=683&originalType=binary&size=118281&status=done&style=none&taskId=u805ee355-7759-47cf-b6e6-ffc0b36297c&width=683">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009513151-8c8c93b7-00db-4111-a651-d836bb3a3287.png#clientId=uca370bc3-e29e-4&from=paste&height=215&id=u5c7fcda0&margin=%5Bobject%20Object%5D&name=image.png&originHeight=215&originWidth=613&originalType=binary&size=88087&status=done&style=none&taskId=uf5de6604-1b70-4018-9921-bdbc1a2069e&width=613">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009529701-9b493bed-ecd6-4131-9a26-53726d01ad0b.png#clientId=uca370bc3-e29e-4&from=paste&height=286&id=ucec27315&margin=%5Bobject%20Object%5D&name=image.png&originHeight=286&originWidth=627&originalType=binary&size=108163&status=done&style=none&taskId=u076aa8cf-9e71-4e3e-8ebe-e730a66e0aa&width=627">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009558030-5b287ff7-2e3a-4cd1-963b-b744adb32065.png#clientId=uca370bc3-e29e-4&from=paste&height=236&id=ub95c22af&margin=%5Bobject%20Object%5D&name=image.png&originHeight=236&originWidth=496&originalType=binary&size=30574&status=done&style=none&taskId=u37d23b84-06c9-43d5-b6e3-a2c56b370f9&width=496">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009738513-ba1c1aef-4aac-4e91-bb9b-40705dad24e8.png#clientId=uca370bc3-e29e-4&from=paste&height=430&id=u7af37e03&margin=%5Bobject%20Object%5D&name=image.png&originHeight=430&originWidth=568&originalType=binary&size=67496&status=done&style=none&taskId=u606650f0-34fc-4e34-a7a9-79e219e902a&width=568">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009770980-8ac39ac4-992d-43d6-be9e-40befdd2afe6.png#clientId=uca370bc3-e29e-4&from=paste&height=292&id=u89ea5cfc&margin=%5Bobject%20Object%5D&name=image.png&originHeight=292&originWidth=342&originalType=binary&size=51185&status=done&style=none&taskId=u2e9125b7-305b-45ab-8fcd-9d2c21c24c3&width=342">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009782694-490da864-e650-4778-b832-da19a185349c.png#clientId=uca370bc3-e29e-4&from=paste&height=324&id=u33ef80c6&margin=%5Bobject%20Object%5D&name=image.png&originHeight=324&originWidth=449&originalType=binary&size=55097&status=done&style=none&taskId=u3796916b-e1fd-4abb-be19-ed5001b2f6b&width=449">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009874033-053eb2bd-e32c-4729-8b01-10408d8390fa.png#clientId=uca370bc3-e29e-4&from=paste&height=130&id=uebbd7c15&margin=%5Bobject%20Object%5D&name=image.png&originHeight=130&originWidth=630&originalType=binary&size=51478&status=done&style=none&taskId=ufa24f3dc-b62b-4220-b19d-92c763fb030&width=630">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009989566-e3da51e4-d168-41b2-bcd0-daf999d5bcf4.png#clientId=uca370bc3-e29e-4&from=paste&height=467&id=u94bb5329&margin=%5Bobject%20Object%5D&name=image.png&originHeight=467&originWidth=232&originalType=binary&size=39482&status=done&style=none&taskId=ufbd439ab-a646-44e2-af94-6e0589d1b3b&width=232">
+<meta property="article:published_time" content="2020-08-20T05:16:05.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.024Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="模拟">
+<meta property="article:tag" content="STM32">
+<meta property="article:tag" content="C语言">
+<meta property="article:tag" content="PID">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009320013-341bcdeb-6b79-441e-93aa-b0e8bccf1206.png#clientId=uca370bc3-e29e-4&from=paste&height=792&id=u32259fb9&margin=%5Bobject%20Object%5D&name=image.png&originHeight=792&originWidth=683&originalType=binary&size=118281&status=done&style=none&taskId=u805ee355-7759-47cf-b6e6-ffc0b36297c&width=683">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2020/08/20/%E6%A8%A1%E6%8B%9F%E6%9B%B2%E5%B0%84%E7%94%B5%E7%A3%81%E7%82%AE%E8%AE%BE%E8%AE%A1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>模拟曲射电磁炮设计 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2020/08/20/%E6%A8%A1%E6%8B%9F%E6%9B%B2%E5%B0%84%E7%94%B5%E7%A3%81%E7%82%AE%E8%AE%BE%E8%AE%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          模拟曲射电磁炮设计
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-08-20 13:16:05" itemprop="dateCreated datePublished" datetime="2020-08-20T13:16:05+08:00">2020-08-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E9%A1%B9%E7%9B%AE%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">项目篇</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这个设计是我参加2019年电赛的H题，把这写下来，留着以后看，虽然设计在现在看来也是极为青涩的，但是还我觉得这也是一种成长，总归是要慢慢进步的。</p>
+<h2 id="比赛要求"><a href="#比赛要求" class="headerlink" title="比赛要求"></a>比赛要求</h2><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009320013-341bcdeb-6b79-441e-93aa-b0e8bccf1206.png#clientId=uca370bc3-e29e-4&from=paste&height=792&id=u32259fb9&margin=%5Bobject%20Object%5D&name=image.png&originHeight=792&originWidth=683&originalType=binary&size=118281&status=done&style=none&taskId=u805ee355-7759-47cf-b6e6-ffc0b36297c&width=683" alt="image.png"></p>
+<h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>本参赛小组设计并制作了模拟电磁曲射炮，实现在不同方向自动或手动搜索目标并且发射弹丸的功能。该系统主要由机械部分和控制部分组成，其中机械部分包括底座、云台以及炮筒等；控制部分主要由单片机、舵机、摄像头以及电磁炮控制电路组成。系统选用 STM32F103ZET6 为控制核心，通过晶闸管和继电器控制电磁炮发射，通过舵机控制<br>电磁炮发射方向，通过摄像头 OpenMV 图像信息分析目标位置并反馈，采用 PID 算法实现自动控制。该系统具有结构稳定、控制方便、抗干扰能力强等优点。<br><strong>关键词</strong>：电磁炮、STM32F103ZET6、继电器、舵机、OpenMV、PID 算法</p>
+<h2 id="系统方案"><a href="#系统方案" class="headerlink" title="系统方案"></a>系统方案</h2><p>本系统主要由 OpenMV 图像采集模块、单片机控制模块、舵机控制模块、电磁炮控制模块、电源模块组成。</p>
+<h3 id="单片机的论证与选择"><a href="#单片机的论证与选择" class="headerlink" title="单片机的论证与选择"></a>单片机的论证与选择</h3><ul>
+<li>方案一：MSP430。</li>
+</ul>
+<p>采用 TI 的 MSP430 系列单片机做主控制器，该系列单片机资源 较丰富，易控制， 低功耗。但由是于单片机本身主频较低，因而处理速度一般。</p>
+<ul>
+<li>方案二：STM32F103。</li>
+</ul>
+<p>采用 STM32F103  系列单片机做主控芯片，该单片机控制较为复杂，且内部定时器，<br>IIC，SPI 等资源丰富，运算处理速度快，十分适合控制系统的实时控制。<br>综合以上两种方案，选择方案二。</p>
+<h3 id="距离测量模块的选择"><a href="#距离测量模块的选择" class="headerlink" title="距离测量模块的选择"></a>距离测量模块的选择</h3><ul>
+<li>方案一：超声波测距模块</li>
+</ul>
+<p>超声波指向性强，在介质中传播的距离较远，因而超声波经常用于距离的测量，如测距仪和物位测量仪等都可以通过超声波来实现。利用超声波检测往往比较迅速、方便、计算简单、易于做到实时控制。</p>
+<ul>
+<li>方案二：摄像头 OpenMV</li>
+</ul>
+<p>OpenMV 测距有两种方法，第一种是利用 apriltag，Apriltag 可以进行 3D 定位。第二种是选参照物，利用参照物的大小比例来计算距离。<br>综合以上两种方案，选择方案二。</p>
+<h3 id="控制系统的论证与选择"><a href="#控制系统的论证与选择" class="headerlink" title="控制系统的论证与选择"></a>控制系统的论证与选择</h3><ul>
+<li>方案一：采用模糊控制算法</li>
+</ul>
+<p>模糊控制算法有许多优良的特性，它不需要事先知道对象的数学模型。具有系统响应快、超调小、过渡过程时间短等优点。但是它的编程复杂，数据处理量大。</p>
+<ul>
+<li>方案二：采用 PID 算法</li>
+</ul>
+<p>按比例、积分、微分的函数关系进行运算，然后将其运算结果用以输出控制。优点是控制精度高且算法简单明了。对于本系统的控制已足够精确，节约了单片机的资源与运算时间。<br>综合以上两种方案，选择方案二。</p>
+<h2 id="系统理论分析与计算"><a href="#系统理论分析与计算" class="headerlink" title="系统理论分析与计算"></a>系统理论分析与计算</h2><h2 id="系统结构的分析"><a href="#系统结构的分析" class="headerlink" title="系统结构的分析"></a>系统结构的分析</h2><p>通过对题目要求的分析，需要制作电磁炮并控制电磁炮旋转角度，而电磁炮的旋转角度则是通过控制舵机的旋转角度控制的。旋转云台下方舵机改变偏航角使得电磁炮正对环形靶，旋转云台上方舵机改变俯仰角使得电磁炮射出一定距离。摄像头 OpenMV 识别引导标识的方向与距离并反馈，采用 PID 算法自动控制舵机的旋转角度，从而实现电磁炮瞄准环形靶。</p>
+<h3 id="电磁炮控制分析"><a href="#电磁炮控制分析" class="headerlink" title="电磁炮控制分析"></a>电磁炮控制分析</h3><p>电磁炮电路由逆变电路、升压电路、整流电路、保护电路、泄放电路四部分组成， 采用单管自激振荡电路作为逆变电路，将直流电逆变为交流电，以便于后面用互感线圈进行升压，升压后可达到一百余伏，然后通过整流二极管将交流电整形成直流脉冲，然后给电容充电，其中稳压管起保护作用，将电压稳定在 200v 左右，防止过高的电压击穿电容器，最后的泄放电路将电容内部的高压直流电瞬间释放，已到达瞬间电压电流都很高的目的，同时获得强大的电磁力，将铁质子弹发射出去。</p>
+<h3 id="舵机旋转角度的计算"><a href="#舵机旋转角度的计算" class="headerlink" title="舵机旋转角度的计算"></a>舵机旋转角度的计算</h3><h4 id="俯仰角的计算"><a href="#俯仰角的计算" class="headerlink" title="俯仰角的计算"></a>俯仰角的计算</h4><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009513151-8c8c93b7-00db-4111-a651-d836bb3a3287.png#clientId=uca370bc3-e29e-4&from=paste&height=215&id=u5c7fcda0&margin=%5Bobject%20Object%5D&name=image.png&originHeight=215&originWidth=613&originalType=binary&size=88087&status=done&style=none&taskId=uf5de6604-1b70-4018-9921-bdbc1a2069e&width=613" alt="image.png"><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009529701-9b493bed-ecd6-4131-9a26-53726d01ad0b.png#clientId=uca370bc3-e29e-4&from=paste&height=286&id=ucec27315&margin=%5Bobject%20Object%5D&name=image.png&originHeight=286&originWidth=627&originalType=binary&size=108163&status=done&style=none&taskId=u076aa8cf-9e71-4e3e-8ebe-e730a66e0aa&width=627" alt="image.png"><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009558030-5b287ff7-2e3a-4cd1-963b-b744adb32065.png#clientId=uca370bc3-e29e-4&from=paste&height=236&id=ub95c22af&margin=%5Bobject%20Object%5D&name=image.png&originHeight=236&originWidth=496&originalType=binary&size=30574&status=done&style=none&taskId=u37d23b84-06c9-43d5-b6e3-a2c56b370f9&width=496" alt="image.png"></p>
+<h4 id="偏航角的计算"><a href="#偏航角的计算" class="headerlink" title="偏航角的计算"></a>偏航角的计算</h4><p>偏航角即在水平方向上的偏离角度，在基础要求中，偏航角要求输入，因此就可以将偏航角转换成控制舵机的 PWM 波的值，然后进行控制，输出不同脉冲宽度的方波， 其中    脉宽波= 50 + 偏航角* 100/90.0。通过对脉宽的逐渐增加来达到舵机不同的运转方向以及速度。</p>
+<h2 id="电路与程序设计"><a href="#电路与程序设计" class="headerlink" title="电路与程序设计"></a>电路与程序设计</h2><h3 id="电路的设计"><a href="#电路的设计" class="headerlink" title="电路的设计"></a>电路的设计</h3><h4 id="系统总体框图"><a href="#系统总体框图" class="headerlink" title="系统总体框图"></a>系统总体框图</h4><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009738513-ba1c1aef-4aac-4e91-bb9b-40705dad24e8.png#clientId=uca370bc3-e29e-4&from=paste&height=430&id=u7af37e03&margin=%5Bobject%20Object%5D&name=image.png&originHeight=430&originWidth=568&originalType=binary&size=67496&status=done&style=none&taskId=u606650f0-34fc-4e34-a7a9-79e219e902a&width=568" alt="image.png"></p>
+<h4 id="电磁炮子系统框图"><a href="#电磁炮子系统框图" class="headerlink" title="电磁炮子系统框图"></a>电磁炮子系统框图</h4><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009770980-8ac39ac4-992d-43d6-be9e-40befdd2afe6.png#clientId=uca370bc3-e29e-4&from=paste&height=292&id=u89ea5cfc&margin=%5Bobject%20Object%5D&name=image.png&originHeight=292&originWidth=342&originalType=binary&size=51185&status=done&style=none&taskId=u2e9125b7-305b-45ab-8fcd-9d2c21c24c3&width=342" alt="image.png"></p>
+<h4 id="电磁炮子系统电路原理图"><a href="#电磁炮子系统电路原理图" class="headerlink" title="电磁炮子系统电路原理图"></a>电磁炮子系统电路原理图</h4><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009782694-490da864-e650-4778-b832-da19a185349c.png#clientId=uca370bc3-e29e-4&from=paste&height=324&id=u33ef80c6&margin=%5Bobject%20Object%5D&name=image.png&originHeight=324&originWidth=449&originalType=binary&size=55097&status=done&style=none&taskId=u3796916b-e1fd-4abb-be19-ed5001b2f6b&width=449" alt="image.png"></p>
+<h4 id="舵机子系统框图"><a href="#舵机子系统框图" class="headerlink" title="舵机子系统框图"></a>舵机子系统框图</h4><p><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009874033-053eb2bd-e32c-4729-8b01-10408d8390fa.png#clientId=uca370bc3-e29e-4&from=paste&height=130&id=uebbd7c15&margin=%5Bobject%20Object%5D&name=image.png&originHeight=130&originWidth=630&originalType=binary&size=51478&status=done&style=none&taskId=ufa24f3dc-b62b-4220-b19d-92c763fb030&width=630" alt="image.png"></p>
+<h3 id="程序的设计"><a href="#程序的设计" class="headerlink" title="程序的设计"></a>程序的设计</h3><h4 id="程序功能描述与设计思路"><a href="#程序功能描述与设计思路" class="headerlink" title="程序功能描述与设计思路"></a>程序功能描述与设计思路</h4><p>根据题目要求，软件部分实现摄像头模块的采集、电磁炮自动发射、舵机的自动旋转、无线遥控的功能设置和显示功能。</p>
+<ol>
+<li>摄像头图像的采集：使用摄像头 OpenMV 对图像进行处理，将引导标识中心点坐标及位置反馈至 STM32。</li>
+<li>电磁炮自动发射：当舵机旋转至正确位置后，STM32 控制电容蓄能时间，一定时间后发射电磁炮。</li>
+<li>舵机自动旋转：STM32 对 OpenMV 返回值进行处理，控制舵机旋转。旋转云台下方舵机改变偏航角使得电磁炮正对环形靶，旋转云台上方舵机改变俯仰角使得电磁炮射出一定距离。</li>
+<li>无线遥控的功能设置：使用红外遥控通过按键控制模式选择，实现基本部分和发挥部分的要求；</li>
+<li>显示：显示距离、角度、模式等必要参数，方便记录观察。<h4 id="程序流程图"><a href="#程序流程图" class="headerlink" title="程序流程图"></a>程序流程图</h4><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1619009989566-e3da51e4-d168-41b2-bcd0-daf999d5bcf4.png#clientId=uca370bc3-e29e-4&from=paste&height=467&id=u94bb5329&margin=%5Bobject%20Object%5D&name=image.png&originHeight=467&originWidth=232&originalType=binary&size=39482&status=done&style=none&taskId=ufbd439ab-a646-44e2-af94-6e0589d1b3b&width=232" alt="image.png"></li>
+</ol>
+<p>本次设计程序较为简单，只需要按键输入数值然后在进行，模式的选择，控制舵机旋转瞄准，然后控制电压的大小，以到达不同的电源充能然后通过晶闸管对电容的能量进行瞬间泄放。从而将电能转换成子弹的动能，并发射出去。</p>
+<h2 id="测试方案与测试结果"><a href="#测试方案与测试结果" class="headerlink" title="测试方案与测试结果"></a>测试方案与测试结果</h2><h3 id="测试方案"><a href="#测试方案" class="headerlink" title="测试方案"></a>测试方案</h3><h4 id="硬件测试"><a href="#硬件测试" class="headerlink" title="硬件测试"></a>硬件测试</h4><p>电路焊接完成后，用万用表检测是否有断路、断路等各种故障。检测无误后，进行整体安装，将电路安装在支架适当位置。同时检测各个元器件的好坏，例如，红外探头、舵机、电磁炮控制电路等等。</p>
+<h4 id="软件仿真测试"><a href="#软件仿真测试" class="headerlink" title="软件仿真测试"></a>软件仿真测试</h4><p>根据要求，由于电磁炮的瞬间电压较大，因此在控制之前要进行软件仿真模拟，通过对单片机程序的烧录，然后通过示波器检测引脚的波形图，验证信号输出的正确性， 因此在不断的输出后 不断的验证，达到软件的仿真验证。</p>
+<h4 id="硬件软件联调"><a href="#硬件软件联调" class="headerlink" title="硬件软件联调"></a>硬件软件联调</h4><p>根据比赛的要求，自己制作类似的靶子以及标志物，然后进行比赛仿真模拟练习。硬件部分安装完成以后，将程序完全下载到单片机中，在场地上试运行，观察电磁<br>炮的发射状况，以及显示屏的显示情况。然后根据实际落炮点偏差情况，对程序进行改正优化。使其运行显示逐步精确。</p>
+<h3 id="测试条件与仪器"><a href="#测试条件与仪器" class="headerlink" title="测试条件与仪器"></a>测试条件与仪器</h3><p>测试条件：检查多次，仿真电路和硬件电路必须与系统原理图完全相同，并且检查无误，硬件电路保证无虚焊。<br>测试仪器：高精度的数字毫伏表，模拟示波器，数字示波器，数字万用表。</p>
+<h3 id="测试结果及分析"><a href="#测试结果及分析" class="headerlink" title="测试结果及分析"></a>测试结果及分析</h3><h4 id="测试结果-数据"><a href="#测试结果-数据" class="headerlink" title="测试结果(数据)"></a>测试结果(数据)</h4><table>
+<thead>
+<tr>
+<th>实验次数</th>
+<th>蓄能时间（ms）</th>
+<th>电压值</th>
+<th>射程</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>5000</td>
+<td>71.8</td>
+<td>85</td>
+</tr>
+<tr>
+<td>2</td>
+<td>5500</td>
+<td>75</td>
+<td>160</td>
+</tr>
+<tr>
+<td>3</td>
+<td>5750</td>
+<td>78</td>
+<td>200</td>
+</tr>
+<tr>
+<td>4</td>
+<td>6000</td>
+<td>80.6</td>
+<td>220</td>
+</tr>
+<tr>
+<td>5</td>
+<td>7500</td>
+<td>89</td>
+<td>260</td>
+</tr>
+</tbody></table>
+<h4 id="测试分析与结论"><a href="#测试分析与结论" class="headerlink" title="测试分析与结论"></a>测试分析与结论</h4><p>根据反复调整测试，由此可以得出以下结论：</p>
+<ul>
+<li>电磁炮一键发射，通过定时器控制定时时间的长度，来达到蓄能的目的，然后，单片机关闭蓄电的继电器，然后，控制晶闸管来释放电能，达到发炮的效果。</li>
+<li>当炮台检测到红色的标志物之后，可以调整舵机的转向，瞄准目标，通过摄像头测量距离，计算蓄能时间，然后自动的完成开炮的行动。</li>
+<li>自动寻找目标，自动识别距离角度等参数，自行计算发炮的角度和蓄能电压。</li>
+<li>通过添加外加电路，在测距和颜色识别基础上实现，通过液晶屏对结果进行显示，使炮台运动情况一目了然。</li>
+</ul>
+<p>综上所述，本设计达到设计要求。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2020/08/20/%E6%A8%A1%E6%8B%9F%E6%9B%B2%E5%B0%84%E7%94%B5%E7%A3%81%E7%82%AE%E8%AE%BE%E8%AE%A1/" title="模拟曲射电磁炮设计">https://github.nanfeng.ink/2020/08/20/模拟曲射电磁炮设计/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag"><i class="fa fa-tag"></i> 模拟</a>
+              <a href="/tags/STM32/" rel="tag"><i class="fa fa-tag"></i> STM32</a>
+              <a href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag"><i class="fa fa-tag"></i> C语言</a>
+              <a href="/tags/PID/" rel="tag"><i class="fa fa-tag"></i> PID</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/15/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="prev" title="正则表达式">
+      <i class="fa fa-chevron-left"></i> 正则表达式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/09/21/Spice%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A8/" rel="next" title="Spice语法基础入门">
+      Spice语法基础入门 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AF%94%E8%B5%9B%E8%A6%81%E6%B1%82"><span class="nav-number">2.</span> <span class="nav-text">比赛要求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%91%98%E8%A6%81"><span class="nav-number">3.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%96%B9%E6%A1%88"><span class="nav-number">4.</span> <span class="nav-text">系统方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E7%89%87%E6%9C%BA%E7%9A%84%E8%AE%BA%E8%AF%81%E4%B8%8E%E9%80%89%E6%8B%A9"><span class="nav-number">4.1.</span> <span class="nav-text">单片机的论证与选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%9D%E7%A6%BB%E6%B5%8B%E9%87%8F%E6%A8%A1%E5%9D%97%E7%9A%84%E9%80%89%E6%8B%A9"><span class="nav-number">4.2.</span> <span class="nav-text">距离测量模块的选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%AE%BA%E8%AF%81%E4%B8%8E%E9%80%89%E6%8B%A9"><span class="nav-number">4.3.</span> <span class="nav-text">控制系统的论证与选择</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E7%90%86%E8%AE%BA%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%A1%E7%AE%97"><span class="nav-number">5.</span> <span class="nav-text">系统理论分析与计算</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84%E7%9A%84%E5%88%86%E6%9E%90"><span class="nav-number">6.</span> <span class="nav-text">系统结构的分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%B5%E7%A3%81%E7%82%AE%E6%8E%A7%E5%88%B6%E5%88%86%E6%9E%90"><span class="nav-number">6.1.</span> <span class="nav-text">电磁炮控制分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%88%B5%E6%9C%BA%E6%97%8B%E8%BD%AC%E8%A7%92%E5%BA%A6%E7%9A%84%E8%AE%A1%E7%AE%97"><span class="nav-number">6.2.</span> <span class="nav-text">舵机旋转角度的计算</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AF%E4%BB%B0%E8%A7%92%E7%9A%84%E8%AE%A1%E7%AE%97"><span class="nav-number">6.2.1.</span> <span class="nav-text">俯仰角的计算</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%81%8F%E8%88%AA%E8%A7%92%E7%9A%84%E8%AE%A1%E7%AE%97"><span class="nav-number">6.2.2.</span> <span class="nav-text">偏航角的计算</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%B5%E8%B7%AF%E4%B8%8E%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1"><span class="nav-number">7.</span> <span class="nav-text">电路与程序设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%B5%E8%B7%AF%E7%9A%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">7.1.</span> <span class="nav-text">电路的设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%80%BB%E4%BD%93%E6%A1%86%E5%9B%BE"><span class="nav-number">7.1.1.</span> <span class="nav-text">系统总体框图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%B5%E7%A3%81%E7%82%AE%E5%AD%90%E7%B3%BB%E7%BB%9F%E6%A1%86%E5%9B%BE"><span class="nav-number">7.1.2.</span> <span class="nav-text">电磁炮子系统框图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%B5%E7%A3%81%E7%82%AE%E5%AD%90%E7%B3%BB%E7%BB%9F%E7%94%B5%E8%B7%AF%E5%8E%9F%E7%90%86%E5%9B%BE"><span class="nav-number">7.1.3.</span> <span class="nav-text">电磁炮子系统电路原理图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%88%B5%E6%9C%BA%E5%AD%90%E7%B3%BB%E7%BB%9F%E6%A1%86%E5%9B%BE"><span class="nav-number">7.1.4.</span> <span class="nav-text">舵机子系统框图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E7%9A%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">7.2.</span> <span class="nav-text">程序的设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E5%8A%9F%E8%83%BD%E6%8F%8F%E8%BF%B0%E4%B8%8E%E8%AE%BE%E8%AE%A1%E6%80%9D%E8%B7%AF"><span class="nav-number">7.2.1.</span> <span class="nav-text">程序功能描述与设计思路</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="nav-number">7.2.2.</span> <span class="nav-text">程序流程图</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E6%96%B9%E6%A1%88%E4%B8%8E%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="nav-number">8.</span> <span class="nav-text">测试方案与测试结果</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E6%96%B9%E6%A1%88"><span class="nav-number">8.1.</span> <span class="nav-text">测试方案</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E6%B5%8B%E8%AF%95"><span class="nav-number">8.1.1.</span> <span class="nav-text">硬件测试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E4%BB%BF%E7%9C%9F%E6%B5%8B%E8%AF%95"><span class="nav-number">8.1.2.</span> <span class="nav-text">软件仿真测试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E8%BD%AF%E4%BB%B6%E8%81%94%E8%B0%83"><span class="nav-number">8.1.3.</span> <span class="nav-text">硬件软件联调</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E6%9D%A1%E4%BB%B6%E4%B8%8E%E4%BB%AA%E5%99%A8"><span class="nav-number">8.2.</span> <span class="nav-text">测试条件与仪器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C%E5%8F%8A%E5%88%86%E6%9E%90"><span class="nav-number">8.3.</span> <span class="nav-text">测试结果及分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C-%E6%95%B0%E6%8D%AE"><span class="nav-number">8.3.1.</span> <span class="nav-text">测试结果(数据)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E5%88%86%E6%9E%90%E4%B8%8E%E7%BB%93%E8%AE%BA"><span class="nav-number">8.3.2.</span> <span class="nav-text">测试分析与结论</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+

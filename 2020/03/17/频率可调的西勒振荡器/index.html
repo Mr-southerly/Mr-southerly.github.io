@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-flash.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.nanfeng.ink","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":"ture"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言 由于研究生又回到电路的方向上了，最近在搞一些模电的相关资料，突然在百度云发现了以前的一个实验，想着看看实验报告，顺便整理一下一个振荡器设计，也是一个参考，实验是大三做的应该，过了几年猛一看还有点忘了呢，也提醒了下自己，有啥东西抓紧整理，省的以后都忘了。  实验要求  * 实验目的及实验内容要求  进一步熟悉高频电子线路仿真方法。 理解振荡电路的工作原理，熟悉交流分析法。 熟悉振荡器满足振荡的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="频率可调的西勒振荡器">
+<meta property="og:url" content="https://github.nanfeng.ink/2020/03/17/%E9%A2%91%E7%8E%87%E5%8F%AF%E8%B0%83%E7%9A%84%E8%A5%BF%E5%8B%92%E6%8C%AF%E8%8D%A1%E5%99%A8/index.html">
+<meta property="og:site_name" content="西洲渡">
+<meta property="og:description" content="前言 由于研究生又回到电路的方向上了，最近在搞一些模电的相关资料，突然在百度云发现了以前的一个实验，想着看看实验报告，顺便整理一下一个振荡器设计，也是一个参考，实验是大三做的应该，过了几年猛一看还有点忘了呢，也提醒了下自己，有啥东西抓紧整理，省的以后都忘了。  实验要求  * 实验目的及实验内容要求  进一步熟悉高频电子线路仿真方法。 理解振荡电路的工作原理，熟悉交流分析法。 熟悉振荡器满足振荡的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895184639-dd78fbfa-ed00-4b1e-afb9-2e1ffa8ee094.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=265&id=ub75737ea&margin=%5Bobject%20Object%5D&name=image.png&originHeight=265&originWidth=584&originalType=binary&size=84277&status=done&style=none&taskId=u4a58162f-9cdb-4bc8-8974-4a1af4961a9&width=584">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895200907-f1f618f9-53a9-4986-b5d4-72556b4072e8.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=91&id=ua44e513c&margin=%5Bobject%20Object%5D&name=image.png&originHeight=91&originWidth=297&originalType=binary&size=6145&status=done&style=none&taskId=u95ac4e95-655a-4e33-89ba-35045ed7be5&width=297">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895237683-3550da22-a468-460b-a3fd-e4fb0874ce00.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=60&id=u0b9c058c&margin=%5Bobject%20Object%5D&name=image.png&originHeight=60&originWidth=159&originalType=binary&size=1389&status=done&style=none&taskId=u981b8570-f72c-4f35-8773-43b7ce28eee&width=159">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895269521-a263fe55-bd60-46e2-a51e-7d385bf0b6e8.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=410&id=u05737568&margin=%5Bobject%20Object%5D&name=image.png&originHeight=410&originWidth=652&originalType=binary&size=74644&status=done&style=none&taskId=u07912d72-efe9-4c91-9241-32fdd07f456&width=652">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895278440-31988ab4-92ab-4de2-91b8-d8de42aaea59.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=542&id=u63181e35&margin=%5Bobject%20Object%5D&name=image.png&originHeight=542&originWidth=526&originalType=binary&size=72936&status=done&style=none&taskId=u47438e56-1209-4ccb-af4c-a1cb9d438d7&width=526">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895303557-ac7bc965-ace6-4542-bbfe-8177f94ad21e.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=62&id=u66ecc2d9&margin=%5Bobject%20Object%5D&name=image.png&originHeight=62&originWidth=95&originalType=binary&size=794&status=done&style=none&taskId=uf88f4835-2bce-4120-96e0-24f0414f817&width=95">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895330295-04b7a5f0-6a69-4e54-b7b6-ea2947810b03.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=67&id=uc9a6b899&margin=%5Bobject%20Object%5D&name=image.png&originHeight=67&originWidth=136&originalType=binary&size=1212&status=done&style=none&taskId=uee508417-2306-45b2-b4c0-f5ccf8f4b92&width=136">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895424747-d0ccaf70-9833-4024-bf1f-b6d26bad9251.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=420&id=u7e0a37f9&margin=%5Bobject%20Object%5D&name=image.png&originHeight=420&originWidth=557&originalType=binary&size=88641&status=done&style=none&taskId=ufd0dd887-4cb7-4709-9a73-f6c8d513612&width=557">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895432911-01ad3f5f-2ea3-46c6-b158-4823116558e0.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=301&id=ub9adbda9&margin=%5Bobject%20Object%5D&name=image.png&originHeight=301&originWidth=438&originalType=binary&size=36544&status=done&style=none&taskId=u72fdcb57-d590-4642-b407-ebf6acccdce&width=438">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895450194-2832246c-bfce-41df-966e-26753f763bf6.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=231&id=u5b67a2ef&margin=%5Bobject%20Object%5D&name=image.png&originHeight=231&originWidth=306&originalType=binary&size=37534&status=done&style=none&taskId=u12ef7a2d-3bef-4c32-a77c-ed50f709820&width=306">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895469753-138f8c0b-6f12-41fa-a6bc-cf87418bc5ce.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=225&id=u131d8e8d&margin=%5Bobject%20Object%5D&name=image.png&originHeight=225&originWidth=298&originalType=binary&size=37524&status=done&style=none&taskId=u9780c22f-9f23-4afc-bc57-05824fc65ef&width=298">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895474908-28733152-f5de-44d9-8827-0dd3e1821a4f.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=231&id=u3e967b2b&margin=%5Bobject%20Object%5D&name=image.png&originHeight=231&originWidth=306&originalType=binary&size=44402&status=done&style=none&taskId=udd98f3d0-fce6-44ad-88ea-1ce198395d1&width=306">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895480084-f5ab7223-8ebb-4096-b2e3-6bfe93617128.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=230&id=u2528ac2c&margin=%5Bobject%20Object%5D&name=image.png&originHeight=230&originWidth=305&originalType=binary&size=45479&status=done&style=none&taskId=uc0dea257-7fcb-4ae0-acf9-1232fa0610a&width=305">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895556677-70ab6961-0893-43b8-9daf-6e0fa3c4eb01.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=56&id=ue89c4295&margin=%5Bobject%20Object%5D&name=image.png&originHeight=56&originWidth=130&originalType=binary&size=1124&status=done&style=none&taskId=ua258b7c3-0fd4-4a0b-9c5b-eb76206e077&width=130">
+<meta property="article:published_time" content="2020-03-17T05:16:05.000Z">
+<meta property="article:modified_time" content="2023-04-18T05:14:06.028Z">
+<meta property="article:author" content="南风">
+<meta property="article:tag" content="模拟">
+<meta property="article:tag" content="Multisim">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895184639-dd78fbfa-ed00-4b1e-afb9-2e1ffa8ee094.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=265&id=ub75737ea&margin=%5Bobject%20Object%5D&name=image.png&originHeight=265&originWidth=584&originalType=binary&size=84277&status=done&style=none&taskId=u4a58162f-9cdb-4bc8-8974-4a1af4961a9&width=584">
+
+<link rel="canonical" href="https://github.nanfeng.ink/2020/03/17/%E9%A2%91%E7%8E%87%E5%8F%AF%E8%B0%83%E7%9A%84%E8%A5%BF%E5%8B%92%E6%8C%AF%E8%8D%A1%E5%99%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>频率可调的西勒振荡器 | 西洲渡</title>
+  
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1ecc71e997f35d4936f80db0f307d20a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">西洲渡</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一只还没迈入IC领域的小菜鸡</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">31</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">44</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.nanfeng.ink/2020/03/17/%E9%A2%91%E7%8E%87%E5%8F%AF%E8%B0%83%E7%9A%84%E8%A5%BF%E5%8B%92%E6%8C%AF%E8%8D%A1%E5%99%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="南风">
+      <meta itemprop="description" content="陌上人如玉，公子世无双">
+    </span>
+	<meta name="referrer" content="no-referrer" />
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="西洲渡">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          频率可调的西勒振荡器
+        </h1>
+
+        <div class="post-meta">
+
+
+
+			
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-17 13:16:05" itemprop="dateCreated datePublished" datetime="2020-03-17T13:16:05+08:00">2020-03-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E9%A1%B9%E7%9B%AE%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">项目篇</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>由于研究生又回到电路的方向上了，最近在搞一些模电的相关资料，突然在百度云发现了以前的一个实验，想着看看实验报告，顺便整理一下一个振荡器设计，也是一个参考，实验是大三做的应该，过了几年猛一看还有点忘了呢，也提醒了下自己，有啥东西抓紧整理，省的以后都忘了。</p>
+<h2 id="实验要求"><a href="#实验要求" class="headerlink" title="实验要求"></a>实验要求</h2><ul>
+<li><strong>实验目的及实验内容要求</strong></li>
+</ul>
+<p>进一步熟悉高频电子线路仿真方法。<br>理解振荡电路的工作原理，熟悉交流分析法。<br>熟悉振荡器满足振荡的三个条件，并在试验中运用。<br>了解西勒振荡器的原理和改进的优势。</p>
+<ul>
+<li><strong>实验设备或运行软件平台</strong></li>
+</ul>
+<p>硬件：PC机<br>软件：Multisim</p>
+<h2 id="实验内容及过程"><a href="#实验内容及过程" class="headerlink" title="实验内容及过程"></a>实验内容及过程</h2><h3 id="实验原理"><a href="#实验原理" class="headerlink" title="实验原理"></a>实验原理</h3><p>西勒振荡器为并联改进型电容反馈三点式振荡电路，其采用共基极的三极管，在克拉泼电路的L两端并联一个电容得到，有效的改善了克拉泼电路的可调范围小的缺点，西勒振荡器输出特性平坦，振荡频率较高。西勒振荡器电路简单，易起振，与电容式三点式振荡器比较具有更高的稳定度、更好的振荡频率，改变C调节频率时不影响反馈系数的优点，因此西勒式振荡器更广泛的应用于在宽频段，频率可调的场合。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895184639-dd78fbfa-ed00-4b1e-afb9-2e1ffa8ee094.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=265&id=ub75737ea&margin=%5Bobject%20Object%5D&name=image.png&originHeight=265&originWidth=584&originalType=binary&size=84277&status=done&style=none&taskId=u4a58162f-9cdb-4bc8-8974-4a1af4961a9&width=584" alt="image.png"><br>其中电路的特点是振荡频率稳定度高，调整范围大，电路的总电容是<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895200907-f1f618f9-53a9-4986-b5d4-72556b4072e8.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=91&id=ua44e513c&margin=%5Bobject%20Object%5D&name=image.png&originHeight=91&originWidth=297&originalType=binary&size=6145&status=done&style=none&taskId=u95ac4e95-655a-4e33-89ba-35045ed7be5&width=297" alt="image.png"><br>因此，振荡频率是<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895237683-3550da22-a468-460b-a3fd-e4fb0874ce00.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=60&id=u0b9c058c&margin=%5Bobject%20Object%5D&name=image.png&originHeight=60&originWidth=159&originalType=binary&size=1389&status=done&style=none&taskId=u981b8570-f72c-4f35-8773-43b7ce28eee&width=159" alt="image.png"><br>其中 C3为粗调，C4为细调，两者相互调整使电路的调频范围扩大。</p>
+<h3 id="设计电路仿真系统"><a href="#设计电路仿真系统" class="headerlink" title="设计电路仿真系统"></a>设计电路仿真系统</h3><p>根据实验原理，设计西勒振荡器原理图如下图所示，在Multisim中找到相应的器件并连接起来，构成如下的电路图。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895269521-a263fe55-bd60-46e2-a51e-7d385bf0b6e8.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=410&id=u05737568&margin=%5Bobject%20Object%5D&name=image.png&originHeight=410&originWidth=652&originalType=binary&size=74644&status=done&style=none&taskId=u07912d72-efe9-4c91-9241-32fdd07f456&width=652" alt="image.png"><br><strong>参数设置</strong></p>
+<ul>
+<li><strong>静态工作点设置</strong></li>
+</ul>
+<p>合理的选择振荡器的静态工作点，对振荡器的起振难度，工作的稳定性，波形质量的好坏又十分密切的关系。振荡器的静态工作点选择在靠近截止区的地方。根据此原则，计算参数如下<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895278440-31988ab4-92ab-4de2-91b8-d8de42aaea59.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=542&id=u63181e35&margin=%5Bobject%20Object%5D&name=image.png&originHeight=542&originWidth=526&originalType=binary&size=72936&status=done&style=none&taskId=u47438e56-1209-4ccb-af4c-a1cb9d438d7&width=526" alt="image.png"></p>
+<ul>
+<li><strong>振荡回路的元件参数运算</strong></li>
+</ul>
+<p>回路中既有电感元件，又有电容元件，因为电感元件占少数，因此，先确定电感元件的数值，取L=10uH，再根据电感元件计算电容元件的参数值，振荡器频率为<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895303557-ac7bc965-ace6-4542-bbfe-8177f94ad21e.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=62&id=u66ecc2d9&margin=%5Bobject%20Object%5D&name=image.png&originHeight=62&originWidth=95&originalType=binary&size=794&status=done&style=none&taskId=uf88f4835-2bce-4120-96e0-24f0414f817&width=95" alt="image.png"><br>因为宽频带可调振荡器，可令振荡频率在5Mhz&lt;f&lt;15Mhz区间内振荡<br>由于在本电路中<img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895330295-04b7a5f0-6a69-4e54-b7b6-ea2947810b03.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=67&id=uc9a6b899&margin=%5Bobject%20Object%5D&name=image.png&originHeight=67&originWidth=136&originalType=binary&size=1212&status=done&style=none&taskId=uee508417-2306-45b2-b4c0-f5ccf8f4b92&width=136" alt="image.png">根据公式计算得 11pF&lt;C4+C5&lt;101pF<br>因此取可变电容C4=30pF ，C5=100pF同时，在保证总电容近似等于C4+C5那么要求C2、C3&gt;&gt;C4、C5 ，因此取C2=470pF，C3=1000pF。</p>
+<h3 id="实验步骤及实验数据记录"><a href="#实验步骤及实验数据记录" class="headerlink" title="实验步骤及实验数据记录"></a>实验步骤及实验数据记录</h3><p>1．按照以上电路连接，开启仿真，调节电容和基级偏置电阻R1，使示波器出现振荡正弦波形，并用频率计测量振荡频率并记录。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895424747-d0ccaf70-9833-4024-bf1f-b6d26bad9251.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=420&id=u7e0a37f9&margin=%5Bobject%20Object%5D&name=image.png&originHeight=420&originWidth=557&originalType=binary&size=88641&status=done&style=none&taskId=ufd0dd887-4cb7-4709-9a73-f6c8d513612&width=557" alt="image.png"><br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895432911-01ad3f5f-2ea3-46c6-b158-4823116558e0.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=301&id=ub9adbda9&margin=%5Bobject%20Object%5D&name=image.png&originHeight=301&originWidth=438&originalType=binary&size=36544&status=done&style=none&taskId=u72fdcb57-d590-4642-b407-ebf6acccdce&width=438" alt="image.png"><br>2．调节偏置电阻R1观察稳定后波形的变化并记录。<br>R1=70kΩ<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895450194-2832246c-bfce-41df-966e-26753f763bf6.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=231&id=u5b67a2ef&margin=%5Bobject%20Object%5D&name=image.png&originHeight=231&originWidth=306&originalType=binary&size=37534&status=done&style=none&taskId=u12ef7a2d-3bef-4c32-a77c-ed50f709820&width=306" alt="image.png"><br>R1=60kΩ<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895469753-138f8c0b-6f12-41fa-a6bc-cf87418bc5ce.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=225&id=u131d8e8d&margin=%5Bobject%20Object%5D&name=image.png&originHeight=225&originWidth=298&originalType=binary&size=37524&status=done&style=none&taskId=u9780c22f-9f23-4afc-bc57-05824fc65ef&width=298" alt="image.png"><br>R1=50kΩ<br> <img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895474908-28733152-f5de-44d9-8827-0dd3e1821a4f.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=231&id=u3e967b2b&margin=%5Bobject%20Object%5D&name=image.png&originHeight=231&originWidth=306&originalType=binary&size=44402&status=done&style=none&taskId=udd98f3d0-fce6-44ad-88ea-1ce198395d1&width=306" alt="image.png"><br>R1=30kΩ<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895480084-f5ab7223-8ebb-4096-b2e3-6bfe93617128.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=230&id=u2528ac2c&margin=%5Bobject%20Object%5D&name=image.png&originHeight=230&originWidth=305&originalType=binary&size=45479&status=done&style=none&taskId=uc0dea257-7fcb-4ae0-acf9-1232fa0610a&width=305" alt="image.png"><br>3．调节电容C4、C5，并记录当频率在5Mhz~15Mhz时C4+C5的数值</p>
+<table>
+<thead>
+<tr>
+<th>频率（Mhz）</th>
+<th>5</th>
+<th>7</th>
+<th>9</th>
+<th>11</th>
+<th>13</th>
+<th>15</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>C4（pF）</td>
+<td>83</td>
+<td>36</td>
+<td>14</td>
+<td>10</td>
+<td>10</td>
+<td>8</td>
+</tr>
+<tr>
+<td>C5（pF）</td>
+<td>26.4</td>
+<td>14.7</td>
+<td>14.7</td>
+<td>8.4</td>
+<td>3.9</td>
+<td>2.4</td>
+</tr>
+<tr>
+<td>电容值（pF）</td>
+<td>109.4</td>
+<td>50..7</td>
+<td>28.7</td>
+<td>18.4</td>
+<td>13.9</td>
+<td>10.4</td>
+</tr>
+<tr>
+<td>理论值（pF）</td>
+<td>101.3</td>
+<td>51.7</td>
+<td>31.3</td>
+<td>20.9</td>
+<td>15.0</td>
+<td>11.3</td>
+</tr>
+</tbody></table>
+<h3 id="实验数据分析"><a href="#实验数据分析" class="headerlink" title="实验数据分析"></a>实验数据分析</h3><p>在第一步实验中，通过调节基级偏置电阻，电路很容易自激形成高频正弦波，前提是必须满足振荡器震荡的三个条件，即起振条件，平衡条件和稳定条件，这点在设计电路的时候就已经完成，再者就是要满足三点式电路三个极两两之间的关系，对于此电路来说基级集电极中间的应为感性电抗，因此C4和C5的电容和不宜过小，否则，将使得基级和发射极之间的电抗成容性。<br>第二步实验中通过调整R1可以使振荡起来的正弦波幅值发生改变，R1增大，电压幅值减小，其原因是，增大R1基级的偏置电压减小， 从而导致之路负载特性曲线变缓，在交流因此放大后的的幅值也减小。<br>第三步实验，是使振荡器生成不同频率的正弦波，并和理论的值相比较，通过调节C4、C5的数值可以改变谐振网络的电抗阻值，但是始终要保持感性电抗，因此，根据公式<img src="https://cdn.nlark.com/yuque/0/2021/png/12924220/1618895556677-70ab6961-0893-43b8-9daf-6e0fa3c4eb01.png#clientId=uf2a10ab7-e8ec-4&from=paste&height=56&id=ue89c4295&margin=%5Bobject%20Object%5D&name=image.png&originHeight=56&originWidth=130&originalType=binary&size=1124&status=done&style=none&taskId=ua258b7c3-0fd4-4a0b-9c5b-eb76206e077&width=130" alt="image.png">算得C4+C5的数值，并在实验中调节两个电容，经过比较，在较低频率下实验值和理论值相差无几，但是随着频率的增高，实验数值小于理论值，分析其原因是因为，在分析交流电路时，因为C2和C3数值较大，在计算总电容时，将其忽略，但是在高频时，由于C2、C3的电抗减小，因此变得不可忽略，将C2、C3的数值考虑进去才使得C4、C5的数值小于理论值，再有就是由于三极管极间电容的影响，但是因为影响较小，因此在此忽略不加考虑。</p>
+<h2 id="总结与体会"><a href="#总结与体会" class="headerlink" title="总结与体会"></a>总结与体会</h2><h3 id="实验任务完成情况"><a href="#实验任务完成情况" class="headerlink" title="实验任务完成情况"></a>实验任务完成情况</h3><p>本次实验是自主设计实验，通过以前对三点式振荡电路、克拉泼振荡电路的了解，从而衍生出西勒振荡电路，西勒振荡电路就是在克拉泼的基础上增加一个电容，在本次试验中我将其换成了可变电容以便于探究电容的作用和影响。<br>本次实验可以说是十分成功，西勒振荡器的模型通过查阅资料所得，其中的各元件参数值均是由手算得出，详细的计算过程如上面的原理所示，设计完电路后，在进行仿真的时候稍加修改就成功，虽然有的时候不能直接起振，但是在修改基级偏置之后由于给了个硬激励电路很容易既可以完美的起振，且仿真出的正弦波形基本可以接受，由于谐振不好导致的正弦波顶部的部分失真可以忽略，在探究电容的作用时，理论计算出来的数值，基本和实验得出的数值相似，误差在可接受的范围内，在分析误差时也通过查阅资料将误差产生的原因一五一十的解释清楚。</p>
+<h3 id="实验体会、收获、建议回答问题"><a href="#实验体会、收获、建议回答问题" class="headerlink" title="实验体会、收获、建议回答问题"></a>实验体会、收获、建议回答问题</h3><p>本次试验获益匪浅，通过设计LC西勒振荡电路，将所学习的高频知识和以前的低频基础联系起来，并在此基础上，实际出的电容反馈振荡器加深我对振荡电路的理解，在实验过程中，也熟悉三点式振荡电路，克拉泼振荡电路的工作原理，并在实验中将三种振荡电路进行比较。让我对三种电路的优缺点有了更深的认识，三点式振荡电路是基础，后面两者都是在此基础上进行的修改，克拉泼电路的振荡频率较高，但是频率的覆盖率较小，而西勒振荡器在保持高频震荡的基础上，拓宽了频带宽度，使频率的覆盖率增大，且震荡的幅值比较稳定。<br>在本次实验中也让我体验到理论计算的重要性，通过理论的设计然后在进行实验的验证，知行合一，从而得到更加充分的学习和认识，实验中不起振，振幅小的等问题通过理论分析然后在对电路元件的参数值进行修改，来达到一个上下对称尽可能不失真的正弦振荡波形。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="南风 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="南风 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>南风
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://github.nanfeng.ink/2020/03/17/%E9%A2%91%E7%8E%87%E5%8F%AF%E8%B0%83%E7%9A%84%E8%A5%BF%E5%8B%92%E6%8C%AF%E8%8D%A1%E5%99%A8/" title="频率可调的西勒振荡器">https://github.nanfeng.ink/2020/03/17/频率可调的西勒振荡器/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag"><i class="fa fa-tag"></i> 模拟</a>
+              <a href="/tags/Multisim/" rel="tag"><i class="fa fa-tag"></i> Multisim</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/15/%E4%BA%8C%E7%BA%A7%E6%9C%89%E6%BA%90%E8%B4%9F%E8%BD%BD%E5%B7%AE%E5%88%86%E6%94%BE%E5%A4%A7%E5%99%A8%E8%AE%BE%E8%AE%A1/" rel="prev" title="二级有源负载差分放大器设计">
+      <i class="fa fa-chevron-left"></i> 二级有源负载差分放大器设计
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/11/AGV%E6%99%BA%E8%83%BD%E6%90%AC%E8%BF%90%E6%9C%BA%E5%99%A8%E4%BA%BA/" rel="next" title="AGV智能搬运机器人">
+      AGV智能搬运机器人 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MzA0Ny8yOTUyMw=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E8%A6%81%E6%B1%82"><span class="nav-number">2.</span> <span class="nav-text">实验要求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E5%86%85%E5%AE%B9%E5%8F%8A%E8%BF%87%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">实验内容及过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E5%8E%9F%E7%90%86"><span class="nav-number">3.1.</span> <span class="nav-text">实验原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E7%94%B5%E8%B7%AF%E4%BB%BF%E7%9C%9F%E7%B3%BB%E7%BB%9F"><span class="nav-number">3.2.</span> <span class="nav-text">设计电路仿真系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E6%AD%A5%E9%AA%A4%E5%8F%8A%E5%AE%9E%E9%AA%8C%E6%95%B0%E6%8D%AE%E8%AE%B0%E5%BD%95"><span class="nav-number">3.3.</span> <span class="nav-text">实验步骤及实验数据记录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90"><span class="nav-number">3.4.</span> <span class="nav-text">实验数据分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%E4%B8%8E%E4%BD%93%E4%BC%9A"><span class="nav-number">4.</span> <span class="nav-text">总结与体会</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E4%BB%BB%E5%8A%A1%E5%AE%8C%E6%88%90%E6%83%85%E5%86%B5"><span class="nav-number">4.1.</span> <span class="nav-text">实验任务完成情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E4%BD%93%E4%BC%9A%E3%80%81%E6%94%B6%E8%8E%B7%E3%80%81%E5%BB%BA%E8%AE%AE%E5%9B%9E%E7%AD%94%E9%97%AE%E9%A2%98"><span class="nav-number">4.2.</span> <span class="nav-text">实验体会、收获、建议回答问题</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="南风"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">南风</p>
+  <div class="site-description" itemprop="description">陌上人如玉，公子世无双</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Mr-southerly" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Mr-southerly" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:Mr.southerly@qq.com" title="E-Mail → mailto:Mr.southerly@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/5784412625" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;5784412625" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/Zhanfei_Han" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;Zhanfei_Han" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://scholar.google.com.hk/citations?user=C3j6MiYAAAAJ&hl=zh-CN" title="Scholar → https:&#x2F;&#x2F;scholar.google.com.hk&#x2F;citations?user&#x3D;C3j6MiYAAAAJ&amp;hl&#x3D;zh-CN" rel="noopener" target="_blank"><i class="fab fa-google-plus fa-fw"></i>Scholar</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.researchgate.net/profile/Zhanfei-Han" title="Research → https:&#x2F;&#x2F;www.researchgate.net&#x2F;profile&#x2F;Zhanfei-Han" rel="noopener" target="_blank"><i class="fab fa-researchgate fa-fw"></i>Research</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+
+		
+		<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+		<div class="widget-wrap">
+			<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="220" height="250" id="resCanvas" style="width=100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/3D%E6%89%93%E5%8D%B0/" rel="tag">3D打印</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AD/" rel="tag">AD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Aria2/" rel="tag">Aria2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CNN/" rel="tag">CNN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cadence/" rel="tag">Cadence</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Frp/" rel="tag">Frp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML-CSS/" rel="tag">HTML+CSS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOS/" rel="tag">IOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Multisim/" rel="tag">Multisim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PID/" rel="tag">PID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/STM32/" rel="tag">STM32</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spice/" rel="tag">Spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SystemVerilog/" rel="tag">SystemVerilog</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VCS/" rel="tag">VCS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Verilog/" rel="tag">Verilog</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vim/" rel="tag">Vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%A0%E5%8D%9C/" rel="tag">占卜</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%99%A8%E4%BB%B6/" rel="tag">器件</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E8%89%BA/" rel="tag">工艺</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E5%AD%97/" rel="tag">数字</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E6%8B%9F/" rel="tag">模拟</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%89%88%E5%9B%BE/" rel="tag">版图</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag">破解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%84%9A%E6%9C%AC/" rel="tag">脚本</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" rel="tag">虚拟机</a><span class="tag-list-count">3</span></li></ul>
+			</canvas>
+			</div>
+		</div>
+		
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">南风</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank"> &nbsp;&nbsp;津ICP备19004841号</a> 
+</div>
+
+
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("04/18/2019 15:54:40");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "你终于来了，我已经在这里等了你 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒了";
+    }
+setInterval("createtime()",250);
+</script>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+  
+  
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+
+  <script type="text/javascript" color="0,0,0" opacity='0.5' zIndex="-1" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+  <!-- require APlayer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <!-- require MetingJS -->
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2.0/dist/Meting.min.js"></script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+<div class="aplayer" 
+	data-id="4941857491" 
+	data-server="netease" 
+	data-type="playlist" 
+	data-fixed="true"	
+	data-order="random"
+	data-volume="0.18"
+	data-list-folded="false"
+	data-autoplay="true"
+	data-lrc-type="0"
+	data-preload="auto"
+	data-theme="#cc543a" >
+     </div>
+
+
+</html>
+
+
+
+
